@@ -1,7 +1,17 @@
 .1
 .2
 .3
-.DS_Store
 .swp
 .rkt~
 .rkt#*
+
+# DrRacket autosave files
+*~
+\#*
+.\#*
+
+# OS X specific directory information
+.DS_Store
+
+# Compiled racket bytecode
+compiled
