@@ -41,8 +41,8 @@ S) Thursday 15:00-16:00 - 10
 T) Thursday 18:00-19:00 - 5
 U) Thursday 19:00-20:00 - 5
 
-V) Friday 15:00-16:00 - 5
-W) Friday 15:30-16:30 - 5
+V) Friday 15:00-16:00 - 0
+W) Friday 15:30-16:30 - 0
 X) Friday 16:00-17:00 - 0
 Y) Friday 17:00-18:00 - 0
 Z) Friday 18:00-19:00 - 0
