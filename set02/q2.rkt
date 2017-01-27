@@ -112,7 +112,7 @@
 ;; GIVEN: a number
 ;; RETURNS: a representation of the initial state of your machine.  The given number is ignored.
 (define (initial-state st)
-  st)
+  state-0)
  
 ;; next-state : State LegalInput -> State
 ;; GIVEN: a state of the machine and a machine input
@@ -132,72 +132,79 @@
 ;; RETURNS: The state machine should enter if given input is passed to state 0
 ;; STRATEGY: Break into cases based on LegalInput
 (define (state-0-next-state input)
-  ((cond
-    [(string=? input legal-input-d) state-2])
-    [(string=? input legal-input-e) state-err])
-    [(string=? input legal-input-p) state-3])
-    [(string=? input legal-input-s) state-1])))
+  (cond
+    [(string=? input legal-input-d) state-2]
+    [(string=? input legal-input-e) state-err]
+    [(string=? input legal-input-p) state-3]
+    [(string=? input legal-input-s) state-1]))
 
 ;; GIVEN: A machine input
 ;; RETURNS: The state machine should enter if given input is passed to state 1
 ;; STRATEGY: Break into cases based on LegalInput
 (define (state-1-next-state input)
-  ((cond
-    [(string=? input legal-input-d) state-2])
-    [(string=? input legal-input-e) state-err])
-    [(string=? input legal-input-p) state-3])
-    [(string=? input legal-input-s) state-err])))
+  (cond
+    [(string=? input legal-input-d) state-2]
+    [(string=? input legal-input-e) state-err]
+    [(string=? input legal-input-p) state-3]
+    [(string=? input legal-input-s) state-err]))
 
 ;; GIVEN: A machine input
 ;; RETURNS: The state machine should enter if given input is passed to state 2
 ;; STRATEGY: Break into cases based on LegalInput
 (define (state-2-next-state input)
-  ((cond
-    [(string=? input legal-input-d) state-2])
-    [(string=? input legal-input-e) state-4])
-    [(string=? input legal-input-p) state-3])
-    [(string=? input legal-input-s) state-err])))
+  (cond
+    [(string=? input legal-input-d) state-2]
+    [(string=? input legal-input-e) state-4]
+    [(string=? input legal-input-p) state-3]
+    [(string=? input legal-input-s) state-err]))
 
 ;; GIVEN: A machine input
 ;; RETURNS: The state machine should enter if given input is passed to state 3
 ;; STRATEGY: Break into cases based on LegalInput
 (define (state-3-next-state input)
-  ((cond
-    [(string=? input legal-input-d) state-5])
-    [(string=? input legal-input-e) state-err])
-    [(string=? input legal-input-p) state-err])
-    [(string=? input legal-input-s) state-err)))
+  (cond
+    [(string=? input legal-input-d) state-5]
+    [(string=? input legal-input-e) state-err]
+    [(string=? input legal-input-p) state-err]
+    [(string=? input legal-input-s) state-err]))
 
 ;; GIVEN: A machine input
 ;; RETURNS: The state machine should enter if given input is passed to state 4
 ;; STRATEGY: Break into cases based on LegalInput
 (define (state-4-next-state input)
-  ((cond
-    [(string=? input legal-input-d) state-err])
-    [(string=? input legal-input-e) state-err])
-    [(string=? input legal-input-p) state-err])
-    [(string=? input legal-input-s) state-err])))
+  (cond
+    [(string=? input legal-input-d) state-err]
+    [(string=? input legal-input-e) state-err]
+    [(string=? input legal-input-p) state-err]
+    [(string=? input legal-input-s) state-err]))
 
 ;; GIVEN: A machine input
 ;; RETURNS: The state machine should enter if given input is passed to state 5
 ;; STRATEGY: Break into cases based on LegalInput
 (define (state-5-next-state input)
-  ((cond
-    [(string=? input legal-input-d) state-5])
-    [(string=? input legal-input-e) state-4])
-    [(string=? input legal-input-p) state-err])
-    [(string=? input legal-input-s) state-err])))
+  (cond
+    [(string=? input legal-input-d) state-5]
+    [(string=? input legal-input-e) state-4]
+    [(string=? input legal-input-p) state-err]
+    [(string=? input legal-input-s) state-err]))
 
 ;; accepting-state? : State -> Boolean
 ;; GIVEN: a state of the machine
 ;; RETURNS: true iff the given state is a final (accepting) state
-
 (define (accepting-state? st)
-  ((= (state-id st) 2 4 5)))
+  (or (= st state-2 )
+  (= state-4)
+  (= state-5)))
 
 ;; rejecting-state? : State -> Boolean
 ;; GIVEN: a state of the machine
-;; RETURNS: true iff there is no path (empty or non-empty) from the given state to an accepting state
-        
+;; RETURNS: true iff there is no path (empty or non-empty) from the given state to an accepting state      
 (define (rejecting-state? st)
-  ())     
+  (= st state-4))
+
+(accepting-state? (next-state (next-state (initial-state 42) "s") "d"))
+
+;(initial-state 42)
+;(next-state 0 "s")
+;(next-state 1 "d")
+;(accepting-state? 2)
