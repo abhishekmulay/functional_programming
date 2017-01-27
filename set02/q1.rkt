@@ -54,7 +54,7 @@
     [(key=? ke "\b") (delete-char ed)]
     [(key=? ke "left") (move-caret-left ed)]
     [(key=? ke "right") (move-caret-right ed)]
-    [(or (key=? ke "\t") (key=? ke "\r")) (ignore ed)]
+    [(or (key=? ke "\t") (key=? ke "\r") (key=? ke "up") (key=? ke "down")) (ignore ed)]
     [else (insert-at-caret ed ke)]))
 
 ;; delete-char : Editor -> Editor
@@ -123,6 +123,8 @@
   
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "\t") (make-editor "Abhishek" "Mulay") "'\t' should be ignored")
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "\r") (make-editor "Abhishek" "Mulay") "'\r' should be ignored")
+  (check-equal? (edit (make-editor "Abhishek" "Mulay") "up") (make-editor "Abhishek" "Mulay") "'up' should be ignored")
+  (check-equal? (edit (make-editor "Abhishek" "Mulay") "down") (make-editor "Abhishek" "Mulay") "'down' should be ignored")
   
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "left") (make-editor "Abhishe" "kMulay") "For 'left' caret should move one character towards left")
   (check-equal? (edit (make-editor "A" "Mulay") "left") (make-editor "" "AMulay") "For 'left' caret should move one character towards left")
