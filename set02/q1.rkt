@@ -60,16 +60,8 @@
 ;; delete-char : Editor -> Editor
 ;; GIVEN: An Editor with two string members "pre" and "post"
 ;; RETURNS: Editor where last character from its "pre" member is removed
-
 (define (delete-char ed)
   (make-editor(remove-last-char(editor-pre ed)) (editor-post ed)))
-
-;; remove-last-char : String -> String
-;; GIVEN: String
-;; RETURNS: String with last character removed from given string
-
-(define (remove-last-char string)
-  (substring string 0 (- (string-length string) 1) ) )
 
 ;; insert-at-caret: Editor + KeyEvent -> Editor
 (define (insert-at-caret ed char)
@@ -80,31 +72,66 @@
 (define (ignore ed)
   ed)
 
+;; GIVEN: Editor with two string members "pre" and "post"
+;; RETURNS: Editor with the last character of "pre" field added to that start of "post" filed
 (define (move-caret-right ed)
   (make-editor
    (string-append (editor-pre ed) (get-first-char (editor-post ed)))
    (remove-first-char (editor-post ed)) ))
 
+;; GIVEN: Editor with two string members "pre" and "post"
+;; RETURNS: Editor with first character of "post" field added to start of "pre" field
 (define (move-caret-left ed)
   (make-editor
    (string-append (remove-last-char (editor-pre ed)))
    (string-append (get-last-char (editor-pre ed)) (editor-post ed) )))
 
+;; get-last-char: String -> String
+;; GIVEN: String
+;; RETURNS: Last character of string
 (define (get-last-char string)
-  (substring string (- (string-length string) 1) (string-length string)) )
+  (if (= (string-length string) 0) ""
+      (substring string (- (string-length string) 1) (string-length string)) ))
 
+;; get-first-char: String -> String
+;; GIVEN: String
+;; RETURNS: First character of string
 (define (get-first-char string)
-  (substring string 0 1))
+  (if (= (string-length string) 0) ""
+      (substring string 0 1)))
 
+;: remove-first-char: String -> String
+;; GIVEN: String
+;; RETURNS: String with first character removed
 (define (remove-first-char string)
-  (substring string 1 (string-length string) ))
+  (if (= (string-length string) 0) ""
+      (substring string 1 (string-length string) )))
+
+;; remove-last-char : String -> String
+;; GIVEN: String
+;; RETURNS: String with last character removed from given string
+
+(define (remove-last-char string)
+  (if (= (string-length string) 0) ""
+      (substring string 0 (- (string-length string) 1) ) ))
 
 ;; TESTS:
 (begin-for-test
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "\b") (make-editor "Abhishe" "Mulay") " '\b' should delete last char in pre field of editor")
+  (check-equal? (edit (make-editor "A" "Mulay") "\b") (make-editor "" "Mulay") " '\b' should delete last char in pre field of editor")
+  (check-equal? (edit (make-editor "" "Mulay") "\b") (make-editor "" "Mulay") " '\b' should keep pre field empty")
+  
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "\t") (make-editor "Abhishek" "Mulay") "'\t' should be ignored")
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "\r") (make-editor "Abhishek" "Mulay") "'\r' should be ignored")
+  
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "left") (make-editor "Abhishe" "kMulay") "For 'left' caret should move one character towards left")
+  (check-equal? (edit (make-editor "A" "Mulay") "left") (make-editor "" "AMulay") "For 'left' caret should move one character towards left")
+  (check-equal? (edit (make-editor "" "Mulay") "left") (make-editor "" "Mulay") "For 'left' caret should move one character towards left")
+  
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "right") (make-editor "AbhishekM" "ulay") "For 'right' caret should move one character towards right")
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "a") (make-editor "Abhisheka" "Mulay") " should append other character to end of pre field of editor")
+  (check-equal? (edit (make-editor "Abhishek" "M") "right") (make-editor "AbhishekM" "") "For 'right' caret should move one character towards right")
+  (check-equal? (edit (make-editor "Abhishek" "") "right") (make-editor "Abhishek" "") "For 'right' caret should move one character towards right")
+  
+  (check-equal? (edit (make-editor "Abhishek" "Mulay") "a") (make-editor "Abhisheka" "Mulay") " should append alphabet to end of pre field of editor")
+  (check-equal? (edit (make-editor "Abhishek" "Mulay") "1") (make-editor "Abhishek1" "Mulay") " should append number character to end of pre field of editor")
   )
