@@ -4,14 +4,15 @@
 (require rackunit)
 (require 2htdp/universe)    ; needed for key=?
 (require "extras.rkt")
-      
+(check-location "02" "q1.rkt")
+
 (provide
  make-editor
  editor-pre
  editor-post
  editor?
  edit)
-(check-location "02" "q1.rkt")    
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
@@ -34,8 +35,6 @@
 ;;     (editor-pre ed)
 ;;       (editor-post ed)))
 ;;
-;;
-;;
 ;; edit : Editor + KeyEvent -> Editor
 ;;
 ;; GIVEN:
@@ -50,7 +49,55 @@
 
 ;; DESIGN STRATEGY: Divide into cases based on cond
 
+(define (edit ed ke)
+  (cond
+    [(key=? ke "\b") (delete-char ed)]
+    [(key=? ke "left") (move-caret-left ed)]
+    [(key=? ke "right") (move-caret-right ed)]
+    [(or (key=? ke "\t") (key=? ke "\r")) (ignore ed)]
+    [else (insert-at-caret ed ke)]))
 
+;; delete-char : Editor -> Editor
+;; GIVEN: An Editor with two string members "pre" and "post"
+;; RETURNS: Editor where last character from its "pre" member is removed
+
+(define (delete-char ed)
+  (make-editor(remove-last-char(editor-pre ed)) (editor-post ed)))
+
+;; remove-last-char : String -> String
+;; GIVEN: String
+;; RETURNS: String with last character removed from given string
+
+(define (remove-last-char string)
+  (substring string 0 (- (string-length string) 1) ) )
+
+;; insert-at-caret: Editor + KeyEvent -> Editor
+(define (insert-at-caret ed char)
+  (make-editor (string-append (editor-pre ed) char) (editor-post ed) ))
+
+;; ignore: Editor -> Editor
+;; Ignores any changes to Editor and returns same editor
+(define (ignore ed)
+  ed)
+
+(define (move-caret-right ed)
+  (make-editor
+   (string-append (editor-pre ed) (get-first-char (editor-post ed)))
+   (remove-first-char (editor-post ed)) ))
+
+(define (move-caret-left ed)
+  (make-editor
+   (string-append (remove-last-char (editor-pre ed)))
+   (string-append (get-last-char (editor-pre ed)) (editor-post ed) )))
+
+(define (get-last-char string)
+  (substring string (- (string-length string) 1) (string-length string)) )
+
+(define (get-first-char string)
+  (substring string 0 1))
+
+(define (remove-first-char string)
+  (substring string 1 (string-length string) ))
 
 ;; TESTS:
 (begin-for-test
@@ -60,5 +107,4 @@
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "left") (make-editor "Abhishe" "kMulay") "For 'left' caret should move one character towards left")
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "right") (make-editor "AbhishekM" "ulay") "For 'right' caret should move one character towards right")
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "a") (make-editor "Abhisheka" "Mulay") " should append other character to end of pre field of editor")
-)
-
+  )
