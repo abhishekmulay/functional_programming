@@ -18,22 +18,22 @@
 ;; INTERPRETATION:
 ;;    Self-evident
 ;; EXAMPLE:
-;;(define legal-input-d "d")
-;;(define legal-input-e "e")
-;;(define legal-input-p "p")
-;;(define legal-input-s "s")
+;; (define legal-input-d "d")
+;; (define legal-input-e "e")
+;; (define legal-input-p "p")
+;; (define legal-input-s "s")
 
 ;; TEMPLATE:
 ;; li-fn : LegalInput -> ??
-;;(define (li-fn li)
+;;(define (li-fn input)
 ;;  (cond
-;;    [(string=?) li "d"
+;;    [(string=?) input "d"
 ;;                ...])
-;;    [(string=?) li "e"
+;;    [(string=?) input "e"
 ;;                ...])
-;;    [(string=?) li "p"
+;;    [(string=?) input "p"
 ;;                ...])
-;;    [(string=?) li "s"
+;;    [(string=?) input "s"
 ;;                ...]))
 
 ;; State
@@ -66,14 +66,14 @@
 ;;   in the FSM diagram q2.png
 ;;
 ;; EXAMPLE:
-; (define state-err -1)
-; (define state-0 0)
-; (define state-1 1)
-; (define state-2 2)
-; (define state-3 3)
-; (define state-4 4)
-; (define state-5 5)
-
+;; (define state-err -1)
+;; (define state-0 0)
+;; (define state-1 1)
+;; (define state-2 2)
+;; (define state-3 3)
+;; (define state-4 4)
+;; (define state-5 5)
+;;
 ;; TEMPLATE:
 ;; state-fn : State -> ??
 ;; (define (state-fn st)
@@ -205,8 +205,9 @@
 ;; TESTS:
 (begin-for-test
   
-   (check-equal? (accepting-state? (next-state (next-state (initial-state 42) "s") "d")) #true "Should go to accepting state state-2")
-   
+   (check-equal? (accepting-state? (next-state (next-state (initial-state 42) "s") "d")) #true "Should accept")
+   (check-equal? (accepting-state? (next-state (next-state (next-state (initial-state 42) "s") "p") "e")) #false "Should go to error state")
+   (check-equal? (accepting-state? (next-state (next-state (next-state (next-state (initial-state 42) "s") "d") "d") "e")) #true "Should accept")
 
    (check-equal? (initial-state 42) 0 "Start state should be state-0")
    (check-equal? (rejecting-state? state-4) #true "state-4 should be a rejecting state")
