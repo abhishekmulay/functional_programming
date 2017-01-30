@@ -10,7 +10,7 @@
  initial-state
  next-state
  accepting-state?
- rejecting-state)
+ rejecting-state?)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
