@@ -13,7 +13,7 @@
  editor?
  edit)
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; CONSTANTS:
 (define DELETE "\b")
@@ -50,12 +50,16 @@
 ;; GIVEN:
 ;;    An Editor ed with two string members "pre" and "post"
 ;;    A KeyEvent ke 
-;; RETURNS: An Editor with changes made to the position of caret caused by the provided KeyEvent ke
+;; RETURNS: An Editor with changes made to the position of caret
+;;    caused by the provided KeyEvent ke
 ;;
 ;; EXAMPLE:
-;;   (edit (make-editor "Abhishek" "Mulay") "\b") = (make-editor "Abhishe" "Mulay")
-;;   (edit (make-editor "Abhishek" "Mulay") "left") = (make-editor "Abhishe" "kMulay")
-;;   (edit (make-editor "Abhishek" "Mulay") "right") = (make-editor "AbhishekM" "ulay")
+;;   (edit (make-editor "Abhishek" "Mulay") "\b") =
+;;         (make-editor "Abhishe" "Mulay")
+;;   (edit (make-editor "Abhishek" "Mulay") "left") =
+;;         (make-editor "Abhishe" "kMulay")
+;;   (edit (make-editor "Abhishek" "Mulay") "right") =
+;;         (make-editor "AbhishekM" "ulay")
 
 ;; DESIGN STRATEGY: Divide into cases based on KeyEvent
 (define (edit ed ke)
@@ -75,7 +79,8 @@
 
 ;; insert-at-caret: Editor KeyEvent -> Editor
 ;; GIVEN: Editor ed and KeyEvent
-;; RETURNS: Inserts the provided KeyEvent at the end of "pre" member of Editor ed
+;; RETURNS: Inserts the provided KeyEvent at the end of "pre"
+;; member of Editor ed
 (define (insert-at-caret ed char)
   (make-editor (string-append (editor-pre ed) char) (editor-post ed) ))
 
@@ -87,7 +92,8 @@
 
 ;; move-caret-right: Editor -> Editor
 ;; GIVEN: Editor with two string members "pre" and "post"
-;; RETURNS: Editor with the last character of "pre" field added to the start of "post"
+;; RETURNS: Editor with the last character of "pre" field added
+;; to the start of "post"
 (define (move-caret-right ed)
   (make-editor
    (string-append (editor-pre ed) (get-first-char (editor-post ed)))
@@ -95,7 +101,8 @@
 
 ;; move-caret-left: Editor -> Editor
 ;; GIVEN: Editor with two string members "pre" and "post"
-;; RETURNS: Editor with first character of "post" field added to start of "pre" field
+;; RETURNS: Editor with first character of "post" field added
+;; to start of "pre" field
 (define (move-caret-left ed)
   (make-editor
    (string-append (remove-last-char (editor-pre ed)))
@@ -152,16 +159,19 @@
   
   (check-equal? (edit ED "left") (make-editor "Abhishe" "kMulay")
                 "For 'left' caret should move one character towards left")
-  (check-equal? (edit (make-editor "A" "Mulay") "left") (make-editor "" "AMulay")
+  (check-equal? (edit (make-editor "A" "Mulay") "left")
+                (make-editor "" "AMulay")
                 "For 'left' caret should move one character towards left")
   (check-equal? (edit (make-editor "" "Mulay") "left") (make-editor "" "Mulay")
                 "For 'left' caret should move one character towards left")
   
   (check-equal? (edit ED "right") (make-editor "AbhishekM" "ulay")
                 "For 'right' caret should move one character towards right")
-  (check-equal? (edit (make-editor "Abhishek" "M") "right") (make-editor "AbhishekM" "")
+  (check-equal? (edit (make-editor "Abhishek" "M") "right")
+                (make-editor "AbhishekM" "")
                 "For 'right' caret should move one character towards right")
-  (check-equal? (edit (make-editor "Abhishek" "") "right") (make-editor "Abhishek" "")
+  (check-equal? (edit (make-editor "Abhishek" "") "right")
+                (make-editor "Abhishek" "")
                 "For 'right' caret should move one character towards right")
 
   (check-equal? (edit ED "start") (make-editor "Abhishek" "Mulay")
@@ -177,16 +187,24 @@
                 " should append number character to end of pre field of editor")
 
 
-  (check-equal? (remove-last-char "abc") "ab" "Should remove last character from given string")
-  (check-equal? (remove-last-char "") "" "Should handle empty string")
+  (check-equal? (remove-last-char "abc") "ab"
+                "Should remove last character from given string")
+  (check-equal? (remove-last-char "") ""
+                "Should handle empty string")
 
-  (check-equal? (remove-first-char "abc") "bc" "Should remove first character from given string")
-  (check-equal? (remove-first-char "") "" "Should handle empty string")
+  (check-equal? (remove-first-char "abc") "bc"
+                "Should remove first character from given string")
+  (check-equal? (remove-first-char "") ""
+                "Should handle empty string")
 
-  (check-equal? (get-first-char "abc") "a" "Should return first char of given string")
-  (check-equal? (get-first-char "") "" "Should handle empty string")
+  (check-equal? (get-first-char "abc") "a"
+                "Should return first char of given string")
+  (check-equal? (get-first-char "") ""
+                "Should handle empty string")
   
-  (check-equal? (get-last-char "abc") "c" "Should return first char of given string")
-  (check-equal? (get-last-char "") "" "Should handle empty string")
+  (check-equal? (get-last-char "abc") "c"
+                "Should return first char of given string")
+  (check-equal? (get-last-char "") ""
+                "Should handle empty string")
   
   )

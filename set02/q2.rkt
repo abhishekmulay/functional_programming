@@ -119,13 +119,15 @@
 
 ;; initial-state : Number -> State
 ;; GIVEN: a number
-;; RETURNS: a representation of the initial state of machine. The given number is ignored.
+;; RETURNS: a representation of the initial state of machine.
+;; The given number is ignored.
 (define (initial-state st)
   state-0)
  
 ;; next-state : State LegalInput -> State
 ;; GIVEN: a state of the machine and a machine input
-;; RETURNS: the state the machine should enter if it is in the given state and sees the given input.
+;; RETURNS: the state the machine should enter if it is in the given state
+;; and sees the given input.
 ;; STRATEGY: Break into cases based on state
 (define (next-state st input)
   (cond
@@ -204,7 +206,8 @@
 
 ;; rejecting-state? : State -> Boolean
 ;; GIVEN: a state of the machine
-;; RETURNS: true iff there is no path (empty or non-empty) from the given state to an accepting state      
+;; RETURNS: true iff there is no path (empty or non-empty) from the
+;; given state to an accepting state      
 (define (rejecting-state? st)
   (= st state-err))
 
@@ -226,7 +229,7 @@
                   (next-state
                    (next-state
                     (initial-state 42) "d") "e" ) ) #true
-                                                    "'de' should go to accepted state")
+                                                    "'de' should be accepted")
    (check-equal? (accepting-state?
                   (next-state
                    (next-state
@@ -237,7 +240,7 @@
                    (next-state
                     (next-state
                      (initial-state 42) "s") "p") "e")) #false
-                                                        "Should go to error state")
+                                                        "Should go to error")
    (check-equal? (accepting-state?
                   (next-state
                    (next-state
@@ -247,11 +250,16 @@
                                                               "Should accept")
 
    (check-equal? (initial-state 42) 0 "Start state should be state-0")
-   (check-equal? (rejecting-state? state-err) #true "state-err should be a rejecting state")
-   (check-equal? (accepting-state? state-0) #false "state-5 should be an accepting state")
-   (check-equal? (accepting-state? state-2) #true "state-2 should be an accepting state")
-   (check-equal? (accepting-state? state-4) #true "state-4 should be an accepting state")
-   (check-equal? (accepting-state? state-5) #true "state-5 should be an accepting state")
+   (check-equal? (rejecting-state? state-err) #true
+                 "state-err should be a rejecting state")
+   (check-equal? (accepting-state? state-0) #false
+                 "state-5 should be an accepting state")
+   (check-equal? (accepting-state? state-2) #true
+                 "state-2 should be an accepting state")
+   (check-equal? (accepting-state? state-4) #true
+                 "state-4 should be an accepting state")
+   (check-equal? (accepting-state? state-5) #true
+                 "state-5 should be an accepting state")
    
    (check-equal? (next-state state-0 legal-input-d) state-2
                  "state-0 should go to state-2 on legal input 'd' ")
