@@ -56,6 +56,7 @@
 ;;   According to the Finite State Automata design in file q2.jpg
 ;;   Start state is: 0
 ;;   Accepting/final states are: 2, 4, 5
+;;   Error state is: -1
 ;;
 ;;   state: -1 accepts: -       rejects: d, e, s, p
 ;;   state: 0 accepts: d, p, s  rejects: e
@@ -70,7 +71,9 @@
 ;;
 ;;   State "rejects" a LegalInput means there is NO outgoing path
 ;;   for that LegalInput from that state in the FSM diagram q2.png
-;;
+;;   
+;;   The Finite State Automata design shows only valid paths from every state, 
+;;   all other unaccepted inputs from each state go to the error state
 ;; EXAMPLE:
 ;; (define state-err -1)
 ;; (define state-0 0)

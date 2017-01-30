@@ -25,7 +25,6 @@
 (define DOWN "down")
 
 
-
 ;; DATA DEFINITIONS:
 
 (define-struct editor (pre post))
@@ -33,19 +32,20 @@
 ;; An Editor is a
 ;;   (make-editor String String)
 ;; INTERPRETATION:
-;;   An editor is made of two parts, we consider the editor holds two strings which are separated by a virtual caret.
+;;   An editor is made of two parts, we assume the editor holds two strings
+;;   which are separated by a virtual caret.
 ;;   Pre: it is the part of string which is to the left of virtual caret
 ;;   Post: it is the part of string which is to the right of virtual caret
 ;;
-;; Observer template:
-;; ------------------
+;; TEMPLATE: 
 ;; editor-fn : Editor -> ??
 ;;  (define (editor-fn ed)
 ;;    (...
 ;;     (editor-pre ed)
-;;       (editor-post ed)))
+;;     (editor-post ed)
+;;     (editor? ed)))
 ;;
-;; edit : Editor + KeyEvent -> Editor
+;; edit : Editor KeyEvent -> Editor
 ;;
 ;; GIVEN:
 ;;    An Editor ed with two string members "pre" and "post"
@@ -57,7 +57,7 @@
 ;;   (edit (make-editor "Abhishek" "Mulay") "left") = (make-editor "Abhishe" "kMulay")
 ;;   (edit (make-editor "Abhishek" "Mulay") "right") = (make-editor "AbhishekM" "ulay")
 
-;; DESIGN STRATEGY: Divide into cases based on cond
+;; DESIGN STRATEGY: Divide into cases based on KeyEvent
 (define (edit ed ke)
   (cond
     [(key=? ke DELETE) (delete-char ed)]
@@ -73,22 +73,27 @@
 (define (delete-char ed)
   (make-editor(remove-last-char(editor-pre ed)) (editor-post ed)))
 
-;; insert-at-caret: Editor + KeyEv1ent -> Editor
+;; insert-at-caret: Editor KeyEvent -> Editor
+;; GIVEN: Editor ed and KeyEvent
+;; RETURNS: Inserts the provided KeyEvent at the end of "pre" member of Editor ed
 (define (insert-at-caret ed char)
   (make-editor (string-append (editor-pre ed) char) (editor-post ed) ))
 
 ;; ignore: Editor -> Editor
-;; Ignores any changes to Editor and returns same editor
+;; GIVEN: Editor ed
+;; RETURNS: Returns same Editor ed without any changes
 (define (ignore ed)
   ed)
 
+;; move-caret-right: Editor -> Editor
 ;; GIVEN: Editor with two string members "pre" and "post"
-;; RETURNS: Editor with the last character of "pre" field added to that start of "post" filed
+;; RETURNS: Editor with the last character of "pre" field added to the start of "post"
 (define (move-caret-right ed)
   (make-editor
    (string-append (editor-pre ed) (get-first-char (editor-post ed)))
    (remove-first-char (editor-post ed)) ))
 
+;; move-caret-left: Editor -> Editor
 ;; GIVEN: Editor with two string members "pre" and "post"
 ;; RETURNS: Editor with first character of "post" field added to start of "pre" field
 (define (move-caret-left ed)
@@ -170,4 +175,18 @@
                 " should append alphabet to end of pre field of editor")
   (check-equal? (edit ED "1") (make-editor "Abhishek1" "Mulay")
                 " should append number character to end of pre field of editor")
+
+
+  (check-equal? (remove-last-char "abc") "ab" "Should remove last character from given string")
+  (check-equal? (remove-last-char "") "" "Should handle empty string")
+
+  (check-equal? (remove-first-char "abc") "bc" "Should remove first character from given string")
+  (check-equal? (remove-first-char "") "" "Should handle empty string")
+
+  (check-equal? (get-first-char "abc") "a" "Should return first char of given string")
+  (check-equal? (get-first-char "") "" "Should handle empty string")
+  
+  (check-equal? (get-last-char "abc") "c" "Should return first char of given string")
+  (check-equal? (get-last-char "") "" "Should handle empty string")
+  
   )
