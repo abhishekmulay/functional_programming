@@ -54,8 +54,9 @@
     [(key=? ke "\b") (delete-char ed)]
     [(key=? ke "left") (move-caret-left ed)]
     [(key=? ke "right") (move-caret-right ed)]
-    [(or (key=? ke "\t") (key=? ke "\r") (key=? ke "up") (key=? ke "down")) (ignore ed)]
-    [else (insert-at-caret ed ke)]))
+    [(or (key=? ke "\t") (key=? ke "\r")) (ignore ed)]
+    [(= (string-length ke) 1) (insert-at-caret ed ke)]
+    [else (ignore ed)]))
 
 ;; delete-char : Editor -> Editor
 ;; GIVEN: An Editor with two string members "pre" and "post"
@@ -63,7 +64,7 @@
 (define (delete-char ed)
   (make-editor(remove-last-char(editor-pre ed)) (editor-post ed)))
 
-;; insert-at-caret: Editor + KeyEvent -> Editor
+;; insert-at-caret: Editor + KeyEv1ent -> Editor
 (define (insert-at-caret ed char)
   (make-editor (string-append (editor-pre ed) char) (editor-post ed) ))
 
@@ -110,7 +111,6 @@
 ;; remove-last-char : String -> String
 ;; GIVEN: String
 ;; RETURNS: String with last character removed from given string
-
 (define (remove-last-char string)
   (if (= (string-length string) 0) ""
       (substring string 0 (- (string-length string) 1) ) ))
@@ -133,6 +133,10 @@
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "right") (make-editor "AbhishekM" "ulay") "For 'right' caret should move one character towards right")
   (check-equal? (edit (make-editor "Abhishek" "M") "right") (make-editor "AbhishekM" "") "For 'right' caret should move one character towards right")
   (check-equal? (edit (make-editor "Abhishek" "") "right") (make-editor "Abhishek" "") "For 'right' caret should move one character towards right")
+
+  (check-equal? (edit (make-editor "Abhishek" "Mulay") "start") (make-editor "Abhishek" "Mulay") "Should not append key events longer than 1")
+  (check-equal? (edit (make-editor "Abhishek" "Mulay") "f1") (make-editor "Abhishek" "Mulay") "Should not append key events longer than 1")
+  (check-equal? (edit (make-editor "Abhishek" "Mulay") "wheel-right") (make-editor "Abhishek" "Mulay") "Should not append key events longer than 1")
   
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "a") (make-editor "Abhisheka" "Mulay") " should append alphabet to end of pre field of editor")
   (check-equal? (edit (make-editor "Abhishek" "Mulay") "1") (make-editor "Abhishek1" "Mulay") " should append number character to end of pre field of editor")

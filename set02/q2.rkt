@@ -6,6 +6,12 @@
 (check-location "02" "q2.rkt")
 (check-location "02" "extras.rkt")
 
+(provide
+ initial-state
+ next-state
+ accepting-state?
+ rejecting-state)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; DATA DEFINITION:
@@ -198,7 +204,7 @@
 ;; GIVEN: a state of the machine
 ;; RETURNS: true iff there is no path (empty or non-empty) from the given state to an accepting state      
 (define (rejecting-state? st)
-  (= st state-4))
+  (= st state-err))
 
 
 
@@ -210,7 +216,7 @@
    (check-equal? (accepting-state? (next-state (next-state (next-state (next-state (initial-state 42) "s") "d") "d") "e")) #true "Should accept")
 
    (check-equal? (initial-state 42) 0 "Start state should be state-0")
-   (check-equal? (rejecting-state? state-4) #true "state-4 should be a rejecting state")
+   (check-equal? (rejecting-state? state-err) #true "state-err should be a rejecting state")
    (check-equal? (accepting-state? state-0) #false "state-5 should be an accepting state")
    (check-equal? (accepting-state? state-2) #true "state-2 should be an accepting state")
    (check-equal? (accepting-state? state-4) #true "state-4 should be an accepting state")
@@ -245,4 +251,5 @@
    (check-equal? (next-state state-5 legal-input-e) state-4 "state-5 should go to state-4 on legal input 'e' ")
    (check-equal? (next-state state-5 legal-input-s) state-err "state-5 should go to state-err on legal input 's' ")
    (check-equal? (next-state state-5 legal-input-p) state-err "state-5 should go to state-err on legal input 'p' ")
+
   )
