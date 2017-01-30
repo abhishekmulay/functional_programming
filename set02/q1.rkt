@@ -15,6 +15,16 @@
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; CONSTANTS:
+(define DELETE "\b")
+(define TAB "\t")
+(define RETURN "\r")
+(define LEFT "left")
+(define RIGHT "right")
+(define UP "up")
+(define DOWN "down")
+
+
 
 ;; DATA DEFINITIONS:
 
@@ -48,13 +58,12 @@
 ;;   (edit (make-editor "Abhishek" "Mulay") "right") = (make-editor "AbhishekM" "ulay")
 
 ;; DESIGN STRATEGY: Divide into cases based on cond
-
 (define (edit ed ke)
   (cond
-    [(key=? ke "\b") (delete-char ed)]
-    [(key=? ke "left") (move-caret-left ed)]
-    [(key=? ke "right") (move-caret-right ed)]
-    [(or (key=? ke "\t") (key=? ke "\r")) (ignore ed)]
+    [(key=? ke DELETE) (delete-char ed)]
+    [(key=? ke LEFT) (move-caret-left ed)]
+    [(key=? ke RIGHT) (move-caret-right ed)]
+    [(or (key=? ke TAB) (key=? ke RETURN)) (ignore ed)]
     [(= (string-length ke) 1) (insert-at-caret ed ke)]
     [else (ignore ed)]))
 
@@ -115,29 +124,50 @@
   (if (= (string-length string) 0) ""
       (substring string 0 (- (string-length string) 1) ) ))
 
+;; CONSTANTS FOR TESTING:
+(define ED (make-editor "Abhishek" "Mulay"))
+
 ;; TESTS:
 (begin-for-test
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "\b") (make-editor "Abhishe" "Mulay") " '\b' should delete last char in pre field of editor")
-  (check-equal? (edit (make-editor "A" "Mulay") "\b") (make-editor "" "Mulay") " '\b' should delete last char in pre field of editor")
-  (check-equal? (edit (make-editor "" "Mulay") "\b") (make-editor "" "Mulay") " '\b' should keep pre field empty")
+  (check-equal? (edit ED "\b") (make-editor "Abhishe" "Mulay")
+                " '\b' should delete last char in pre field of editor")
+  (check-equal? (edit (make-editor "A" "Mulay") "\b") (make-editor "" "Mulay")
+                " '\b' should delete last char in pre field of editor")
+  (check-equal? (edit (make-editor "" "Mulay") "\b") (make-editor "" "Mulay")
+                " '\b' should keep pre field empty")
   
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "\t") (make-editor "Abhishek" "Mulay") "'\t' should be ignored")
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "\r") (make-editor "Abhishek" "Mulay") "'\r' should be ignored")
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "up") (make-editor "Abhishek" "Mulay") "'up' should be ignored")
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "down") (make-editor "Abhishek" "Mulay") "'down' should be ignored")
+  (check-equal? (edit ED "\t") (make-editor "Abhishek" "Mulay")
+                "'\t' should be ignored")
+  (check-equal? (edit ED "\r") (make-editor "Abhishek" "Mulay")
+                "'\r' should be ignored")
+  (check-equal? (edit ED "up") (make-editor "Abhishek" "Mulay")
+                "'up' should be ignored")
+  (check-equal? (edit ED "down") (make-editor "Abhishek" "Mulay")
+                "'down' should be ignored")
   
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "left") (make-editor "Abhishe" "kMulay") "For 'left' caret should move one character towards left")
-  (check-equal? (edit (make-editor "A" "Mulay") "left") (make-editor "" "AMulay") "For 'left' caret should move one character towards left")
-  (check-equal? (edit (make-editor "" "Mulay") "left") (make-editor "" "Mulay") "For 'left' caret should move one character towards left")
+  (check-equal? (edit ED "left") (make-editor "Abhishe" "kMulay")
+                "For 'left' caret should move one character towards left")
+  (check-equal? (edit (make-editor "A" "Mulay") "left") (make-editor "" "AMulay")
+                "For 'left' caret should move one character towards left")
+  (check-equal? (edit (make-editor "" "Mulay") "left") (make-editor "" "Mulay")
+                "For 'left' caret should move one character towards left")
   
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "right") (make-editor "AbhishekM" "ulay") "For 'right' caret should move one character towards right")
-  (check-equal? (edit (make-editor "Abhishek" "M") "right") (make-editor "AbhishekM" "") "For 'right' caret should move one character towards right")
-  (check-equal? (edit (make-editor "Abhishek" "") "right") (make-editor "Abhishek" "") "For 'right' caret should move one character towards right")
+  (check-equal? (edit ED "right") (make-editor "AbhishekM" "ulay")
+                "For 'right' caret should move one character towards right")
+  (check-equal? (edit (make-editor "Abhishek" "M") "right") (make-editor "AbhishekM" "")
+                "For 'right' caret should move one character towards right")
+  (check-equal? (edit (make-editor "Abhishek" "") "right") (make-editor "Abhishek" "")
+                "For 'right' caret should move one character towards right")
 
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "start") (make-editor "Abhishek" "Mulay") "Should not append key events longer than 1")
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "f1") (make-editor "Abhishek" "Mulay") "Should not append key events longer than 1")
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "wheel-right") (make-editor "Abhishek" "Mulay") "Should not append key events longer than 1")
+  (check-equal? (edit ED "start") (make-editor "Abhishek" "Mulay")
+                "Should not append key events longer than 1")
+  (check-equal? (edit ED "f1") (make-editor "Abhishek" "Mulay")
+                "Should not append key events longer than 1")
+  (check-equal? (edit ED "wheel-right") (make-editor "Abhishek" "Mulay")
+                "Should not append key events longer than 1")
   
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "a") (make-editor "Abhisheka" "Mulay") " should append alphabet to end of pre field of editor")
-  (check-equal? (edit (make-editor "Abhishek" "Mulay") "1") (make-editor "Abhishek1" "Mulay") " should append number character to end of pre field of editor")
+  (check-equal? (edit ED "a") (make-editor "Abhisheka" "Mulay")
+                " should append alphabet to end of pre field of editor")
+  (check-equal? (edit ED "1") (make-editor "Abhishek1" "Mulay")
+                " should append number character to end of pre field of editor")
   )
