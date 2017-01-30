@@ -65,11 +65,11 @@
 ;;   state: 4 accepts: -        rejects: d, e, s, p
 ;;   state: 5 accepts: d, e     rejects: p, s
 ;;
-;;   State "accepts" a LegalInput means there is an outgoing path for that LegalInput from that state
-;;   in the FSM diagram q2.png
+;;   State "accepts" a LegalInput means there is an outgoing path
+;;   for that LegalInput from that state in the FSM diagram q2.png
 ;;
-;;   State "rejects" a LegalInput means there is NO outgoing path for that LegalInput from that state
-;;   in the FSM diagram q2.png
+;;   State "rejects" a LegalInput means there is NO outgoing path
+;;   for that LegalInput from that state in the FSM diagram q2.png
 ;;
 ;; EXAMPLE:
 ;; (define state-err -1)
@@ -116,7 +116,7 @@
 
 ;; initial-state : Number -> State
 ;; GIVEN: a number
-;; RETURNS: a representation of the initial state of your machine.  The given number is ignored.
+;; RETURNS: a representation of the initial state of machine. The given number is ignored.
 (define (initial-state st)
   state-0)
  
@@ -131,8 +131,7 @@
     [(= st 2) (state-2-next-state input)]
     [(= st 3) (state-3-next-state input)]
     [(= st 4) (state-4-next-state input)]
-    [(= st 5) (state-5-next-state input)]
-    ))
+    [(= st 5) (state-5-next-state input)]))
 
 ;; GIVEN: A machine input
 ;; RETURNS: The state machine should enter if given input is passed to state 0
@@ -207,13 +206,42 @@
   (= st state-err))
 
 
-
 ;; TESTS:
 (begin-for-test
-  
-   (check-equal? (accepting-state? (next-state (next-state (initial-state 42) "s") "d")) #true "Should accept")
-   (check-equal? (accepting-state? (next-state (next-state (next-state (initial-state 42) "s") "p") "e")) #false "Should go to error state")
-   (check-equal? (accepting-state? (next-state (next-state (next-state (next-state (initial-state 42) "s") "d") "d") "e")) #true "Should accept")
+
+   (check-equal? (accepting-state?
+                  (next-state
+                   (initial-state 42) "d")) #true
+                 "'d' should go to accepted state")
+
+   (check-equal? (accepting-state?
+                  (next-state
+                   (initial-state 42) "e")) #false
+                 "'e' should NOT go to accepted state")
+
+   (check-equal? (accepting-state?
+                  (next-state
+                   (next-state
+                    (initial-state 42) "d") "e" ) ) #true
+                                                    "'de' should go to accepted state")
+   (check-equal? (accepting-state?
+                  (next-state
+                   (next-state
+                    (initial-state 42) "s") "d")) #true
+                                                  "Should accept")
+   (check-equal? (accepting-state?
+                  (next-state
+                   (next-state
+                    (next-state
+                     (initial-state 42) "s") "p") "e")) #false
+                                                        "Should go to error state")
+   (check-equal? (accepting-state?
+                  (next-state
+                   (next-state
+                    (next-state
+                     (next-state
+                      (initial-state 42) "s") "d") "d") "e")) #true
+                                                              "Should accept")
 
    (check-equal? (initial-state 42) 0 "Start state should be state-0")
    (check-equal? (rejecting-state? state-err) #true "state-err should be a rejecting state")
@@ -222,34 +250,58 @@
    (check-equal? (accepting-state? state-4) #true "state-4 should be an accepting state")
    (check-equal? (accepting-state? state-5) #true "state-5 should be an accepting state")
    
-   (check-equal? (next-state state-0 legal-input-d) state-2 "state-0 should go to state-2 on legal input 'd' ")
-   (check-equal? (next-state state-0 legal-input-e) state-err "state-0 should go to state-err on legal input 'e' ")
-   (check-equal? (next-state state-0 legal-input-s) state-1 "state-0 should go to state-1 on legal input 's' ")
-   (check-equal? (next-state state-0 legal-input-p) state-3 "state-0 should go to state-3 on legal input 'p' ")
+   (check-equal? (next-state state-0 legal-input-d) state-2
+                 "state-0 should go to state-2 on legal input 'd' ")
+   (check-equal? (next-state state-0 legal-input-e) state-err
+                 "state-0 should go to state-err on legal input 'e' ")
+   (check-equal? (next-state state-0 legal-input-s) state-1
+                 "state-0 should go to state-1 on legal input 's' ")
+   (check-equal? (next-state state-0 legal-input-p) state-3
+                 "state-0 should go to state-3 on legal input 'p' ")
    
-   (check-equal? (next-state state-1 legal-input-d) state-2 "state-1 should go to state-2 on legal input 'd' ")
-   (check-equal? (next-state state-1 legal-input-e) state-err "state-1 should go to state-err on legal input 'e' ")
-   (check-equal? (next-state state-1 legal-input-s) state-err "state-1 should go to state-err on legal input 's' ")
-   (check-equal? (next-state state-1 legal-input-p) state-3 "state-1 should go to state-3 on legal input 'p' ")
+   (check-equal? (next-state state-1 legal-input-d) state-2
+                 "state-1 should go to state-2 on legal input 'd' ")
+   (check-equal? (next-state state-1 legal-input-e) state-err
+                 "state-1 should go to state-err on legal input 'e' ")
+   (check-equal? (next-state state-1 legal-input-s) state-err
+                 "state-1 should go to state-err on legal input 's' ")
+   (check-equal? (next-state state-1 legal-input-p) state-3
+                 "state-1 should go to state-3 on legal input 'p' ")
 
-   (check-equal? (next-state state-2 legal-input-d) state-2 "state-2 should go to state-2 on legal input 'd' ")
-   (check-equal? (next-state state-2 legal-input-e) state-4 "state-2 should go to state-4 on legal input 'e' ")
-   (check-equal? (next-state state-2 legal-input-s) state-err "state-2 should go to state-err on legal input 's' ")
-   (check-equal? (next-state state-2 legal-input-p) state-3 "state-2 should go to state-3 on legal input 'p' ")
+   (check-equal? (next-state state-2 legal-input-d) state-2
+                 "state-2 should go to state-2 on legal input 'd' ")
+   (check-equal? (next-state state-2 legal-input-e) state-4
+                 "state-2 should go to state-4 on legal input 'e' ")
+   (check-equal? (next-state state-2 legal-input-s) state-err
+                 "state-2 should go to state-err on legal input 's' ")
+   (check-equal? (next-state state-2 legal-input-p) state-3
+                 "state-2 should go to state-3 on legal input 'p' ")
 
-   (check-equal? (next-state state-3 legal-input-d) state-5 "state-3 should go to state-5 on legal input 'd' ")
-   (check-equal? (next-state state-3 legal-input-e) state-err "state-3 should go to state-err on legal input 'e' ")
-   (check-equal? (next-state state-3 legal-input-s) state-err "state-3 should go to state-err on legal input 's' ")
-   (check-equal? (next-state state-3 legal-input-p) state-err "state-3 should go to state-err on legal input 'p' ")
+   (check-equal? (next-state state-3 legal-input-d) state-5
+                 "state-3 should go to state-5 on legal input 'd' ")
+   (check-equal? (next-state state-3 legal-input-e) state-err
+                 "state-3 should go to state-err on legal input 'e' ")
+   (check-equal? (next-state state-3 legal-input-s) state-err
+                 "state-3 should go to state-err on legal input 's' ")
+   (check-equal? (next-state state-3 legal-input-p) state-err
+                 "state-3 should go to state-err on legal input 'p' ")
 
-   (check-equal? (next-state state-4 legal-input-d) state-err "state-4 should go to state-err on legal input 'd' ")
-   (check-equal? (next-state state-4 legal-input-e) state-err "state-4 should go to state-err on legal input 'e' ")
-   (check-equal? (next-state state-4 legal-input-s) state-err "state-4 should go to state-err on legal input 's' ")
-   (check-equal? (next-state state-4 legal-input-p) state-err "state-4 should go to state-err on legal input 'p' ")
+   (check-equal? (next-state state-4 legal-input-d) state-err
+                 "state-4 should go to state-err on legal input 'd' ")
+   (check-equal? (next-state state-4 legal-input-e) state-err
+                 "state-4 should go to state-err on legal input 'e' ")
+   (check-equal? (next-state state-4 legal-input-s) state-err
+                 "state-4 should go to state-err on legal input 's' ")
+   (check-equal? (next-state state-4 legal-input-p) state-err
+                 "state-4 should go to state-err on legal input 'p' ")
    
-   (check-equal? (next-state state-5 legal-input-d) state-5 "state-5 should go to state-5 on legal input 'd' ")
-   (check-equal? (next-state state-5 legal-input-e) state-4 "state-5 should go to state-4 on legal input 'e' ")
-   (check-equal? (next-state state-5 legal-input-s) state-err "state-5 should go to state-err on legal input 's' ")
-   (check-equal? (next-state state-5 legal-input-p) state-err "state-5 should go to state-err on legal input 'p' ")
+   (check-equal? (next-state state-5 legal-input-d) state-5
+                 "state-5 should go to state-5 on legal input 'd' ")
+   (check-equal? (next-state state-5 legal-input-e) state-4
+                 "state-5 should go to state-4 on legal input 'e' ")
+   (check-equal? (next-state state-5 legal-input-s) state-err
+                 "state-5 should go to state-err on legal input 's' ")
+   (check-equal? (next-state state-5 legal-input-p) state-err
+                 "state-5 should go to state-err on legal input 'p' ")
 
   )
