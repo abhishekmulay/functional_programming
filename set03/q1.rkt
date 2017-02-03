@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname q1) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname q1) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (require rackunit)
 (require 2htdp/image)
 (require 2htdp/universe)
@@ -21,45 +21,35 @@
 
 (define-struct world (radial-star-doodad square-doodad is-paused?))
 ;; A World is a (make-world Doodad Doodad Boolean)
-;; radial-star-doodad is doodad
-;; square-doodad is doodad
-;; paused? describes whether or not the world is paused
+;; radial-star-doodad is Doodad
+;; square-doodad is Doodad
+;; is-paused? describes whether or not the world is paused
 
 ;; template:
 ;; world-fn : World -> ??
 ;; (define (world-fn w)
-;;   (... (world-cat1 w) (world-cat2 w) (world-paused? w)))
+;;   (... (world-radial-star-doodad w) (world-square-doodad w) (world-is-paused? w)))
 
+(define-struct doodad (type x y vx vy color representation))
 ;; A Doodad is:
-;; -- (make-doodad type x y vx vy color)
+;; -- (define-struct doodad (String Int Int Int Int IMAGE))
 ;; INTERPRETATION:
 ;;   type: type is one of "radial-star" or "square"
 ;;   x: x-coordinate of Doodad
 ;;   y: x-coordinate of Doodad
 ;;   vx: number of pixels the Doodad moves on each tick in the x direction
 ;;   vy: number of pixels the Doodad moves on each tick in the y direction
-;;   color: current color of this doodad
-
-;; A Doodad is one of
-;;
-;; -- (make-radial-star-doodad color)
-;; INTERPRETATION:
-;;   colors: is the possible colors for this Doodad
-;;
-;; -- (make-square-doodad color)
-;; INTERPRETATION:
-;;   colors: is the possible colors for this Doodad
-
-(define-struct radial-star-doodad (x y vx vy color))
-(define-struct square-doodad (x y vx vy color))
+;;   color: color of this Doodad
+;;   representation: visual representation of Doodad, it is an Image
 
 ;; EXAMPLE:
-;;  (make-radial-star 10 10 5 5 "Gold")
-;;  (make-radial-star 10 10 5 5 "Gold")
+;;  (make-doodad "radial-star" 10 10 5 5 (radial-star 8 10 50 "outline" color))
+;;  (make-doodad "square" 10 10 5 5 (square 71 "outline" color))
+;;
 ;; TEMPLATE:
-;; doodad-fn : Cat -> ??
-;; (define (doodad-fn c)
-;;  (... (doodad-type w) (doodad-x w) (doodad-y w) (doodad-vx w) (doodad-vy w)))
+;; doodad-fn : Doodad -> ??
+;; (define (doodad-fn d)
+;;  (... (doodad-type d) (doodad-x d) (doodad-y d) (doodad-vx d) (doodad-vy d)))
 
 ;; TEMPLATE:
 ;; doodad-fn : Doodad -> ??
@@ -74,7 +64,8 @@
 (define CANVAS-WIDTH 450)
 (define CANVAS-HEIGHT 400)
 (define EMPTY-CANVAS (empty-scene CANVAS-WIDTH CANVAS-HEIGHT))
-(define RADIAL-STAR "radial-star")
+(define TYPE-RADIAL-STAR "radial-star")
+(define TYPE-SQUARE "square")
 (define RADIAL-STAR-START-X 125)
 (define RADIAL-STAR-START-Y 120)
 (define SQUARE "square")
@@ -84,8 +75,10 @@
 (define RADIAL-STAR-VY 12)
 (define SQUARE-VX -13)
 (define SQUARE-VY -9)
-(define RADIAL-STAR-IMAGE (radial-star 8 10 50 "outline" "red"))
-(define SQUARE-IMAGE (square 71 "outline" "black"))
+
+
+(define RADIAL-STAR-START-COLOR "gold")
+(define SQUARE-START-COLOR "gray")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -95,10 +88,12 @@
 ;;; EXAMPLE: (initial-world -174)
 (define (initial-world v)
   (make-world
-    (make-radial-star-doodad 125 120 10 12 "Gold")
-    (make-square-doodad 460 350 -13 -9 "Gray")
+    (make-doodad TYPE-RADIAL-STAR RADIAL-STAR-START-X RADIAL-STAR-START-Y
+                 RADIAL-STAR-VX RADIAL-STAR-VY RADIAL-STAR-START-COLOR
+                 (radial-star 8 10 50 "outline" RADIAL-STAR-START-COLOR))
+    (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
+                 SQUARE-START-COLOR (square 71 "outline" SQUARE-START-COLOR))
     false))
-
 
 ;; world-to-scene : World -> Scene
 ;; RETURNS: a Scene that portrays the given world.
@@ -117,16 +112,20 @@
 ;; on it.
 (define (place-radial-star star scene)
   (place-image
-    RADIAL-STAR-IMAGE
-    (radial-star-doodad-x star) (radial-star-doodad-y star)
+    (radial-star 8 10 50 "outline" (doodad-color star))
+    (doodad-x star) (doodad-y star)
     scene))
+
+;;  (make-doodad "radial-star" 10 10 5 5 (radial-star 8 10 50 "outline" color))
+;;  (make-doodad "square" 10 10 5 5 (square 71 "outline" color))
+
 
 ;; place-square : Doodad Scene -> Scene
 ;; RETURNS: a scene like the given one, but with the given Doodad painted on it.
 (define (place-square sq scene)
   (place-image
-    SQUARE-IMAGE
-    (square-doodad-x sq) (square-doodad-y sq)
+    (square 71 "outline" (doodad-color sq))
+    (doodad-x sq) (doodad-y sq)
     scene))
 
 ;; world-after-tick : World -> World
@@ -153,12 +152,12 @@
 ;; STRATEGY: use template for Doodad on dood
 
 (define (radial-star-doodad-after-tick dood)
-    (make-radial-star-doodad
-      (+ (radial-star-doodad-x dood) RADIAL-STAR-VX)
-      (+ (radial-star-doodad-y dood) RADIAL-STAR-VY)
-      (radial-star-doodad-vx dood)
-      (radial-star-doodad-vy dood)
-      (radial-star-doodad-color dood)))
+    (make-doodad
+      (+ (doodad-x dood) RADIAL-STAR-VX)
+      (+ (doodad-y dood) RADIAL-STAR-VY)
+      (doodad-vx dood)
+      (doodad-vy dood)
+      (doodad-color dood)))
   
 
 ;; square-doodad-after-tick : Doodad -> Doodad
@@ -171,15 +170,13 @@
 ;; STRATEGY: use template for Doodad on dood
 
 (define (square-doodad-after-tick dood)
-    (make-square-doodad
-      (+ (square-doodad-x dood) SQUARE-VX)
-      (+ (square-doodad-y dood) SQUARE-VY)
-      (square-doodad-vx dood)
-      (square-doodad-vy dood)
-      (square-doodad-color dood)))
+    (make-doodad
+      (+ (doodad-x dood) SQUARE-VX)
+      (+ (doodad-y dood) SQUARE-VY)
+      (doodad-vx dood)
+      (doodad-vy dood)
+      (doodad-color dood)))
   
-
-
 ;; world-after-key-event : World KeyEvent -> World
 ;; GIVEN: a world w
 ;; RETURNS: the world that should follow the given world
@@ -226,9 +223,28 @@
 (define (world-doodad-square w)
   (world-square-doodad w))
 
+
+;;; doodad-x : Doodad -> Integer
+;;; doodad-y : Doodad -> Integer
+;;; GIVEN: a Doodad
+;;; RETURNS: the x or y coordinate of the Doodad
+          
+;;; doodad-vx : Doodad -> Integer
+;;; doodad-vy : Doodad -> Integer
+;;; GIVEN: a Doodad
+;;; RETURNS: the vx or vy velocity component of the Doodad
+          
+;;; doodad-color : Doodad -> Color
+;;; GIVEN: a Doodad
+;;; RETURNS: the color of the Doodad, in one of the forms recognized
+;;;     as a color by DrRacket's image-color? predicate
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; CONSTANTS FOR TEST:
+(define RADIAL-STAR-IMAGE (radial-star 8 10 50 "outline" "gold"))
+(define SQUARE-IMAGE (square 71 "outline" "gray"))
+
 (define world-scene-at-beginning
   (place-image RADIAL-STAR-IMAGE 125 120
                (place-image SQUARE-IMAGE 460 350 EMPTY-CANVAS)))
