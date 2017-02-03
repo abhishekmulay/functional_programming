@@ -80,7 +80,10 @@
 (define SQUARE "square")
 (define SQUARE-START-X 460)
 (define SQUARE-START-Y 350)
-
+(define RADIAL-STAR-VX 10)
+(define RADIAL-STAR-VY 12)
+(define SQUARE-VX -13)
+(define SQUARE-VY -9)
 (define RADIAL-STAR-IMAGE (radial-star 8 10 50 "outline" "red"))
 (define SQUARE-IMAGE (square 71 "outline" "black"))
 
@@ -100,8 +103,7 @@
 ;; world-to-scene : World -> Scene
 ;; RETURNS: a Scene that portrays the given world.
 ;; EXAMPLE: (world-to-scene paused-world-at-20) should return a canvas with
-;; two Doodads, one at (125, 120) and one at (460, 350)
-;;          
+;;          two Doodads, one at (125, 120) and one at (460, 350)
 ;; STRATEGY: Use template for World on w
 (define (world-to-scene w)
   (place-radial-star
@@ -120,21 +122,122 @@
     scene))
 
 ;; place-square : Doodad Scene -> Scene
-;; RETURNS: a scene like the given one, but with the given Doodad painted
-;; on it.
+;; RETURNS: a scene like the given one, but with the given Doodad painted on it.
 (define (place-square sq scene)
   (place-image
     SQUARE-IMAGE
     (square-doodad-x sq) (square-doodad-y sq)
     scene))
 
+;; world-after-tick : World -> World
+;; GIVEN: any World that's possible for the animation
+;; RETURNS: the World that should follow the given World after a tick
+;; EXAMPLES: 
+;; STRATEGY: Use template for world on w
 
+(define (world-after-tick w)
+  (if (world-paused? w)
+    w
+    (make-world
+      (radial-star-doodad-after-tick (world-radial-star-doodad w))
+      (square-doodad-after-tick (world-square-doodad w))
+      (world-paused? w))))
+
+;; radial-star-doodad-after-tick : Doodad -> Doodad
+;; GIVEN: the state of a radial-star-doodad dood
+;; RETURNS: the state of the given doodad after a tick if it were in an unpaused world.
+
+;; examples: 
+;; 
+;;
+;; STRATEGY: use template for Doodad on dood
+
+(define (radial-star-doodad-after-tick dood)
+    (make-radial-star-doodad
+      (+ (radial-star-doodad-x dood) RADIAL-STAR-VX)
+      (+ (radial-star-doodad-y dood) RADIAL-STAR-VY)
+      (radial-star-doodad-vx dood)
+      (radial-star-doodad-vy dood)
+      (radial-star-doodad-color dood)))
+  
+
+;; square-doodad-after-tick : Doodad -> Doodad
+;; GIVEN: the state of a square-doodad dood
+;; RETURNS: the state of the given doodad after a tick if it were in an unpaused world.
+
+;; examples: 
+;; 
+;;
+;; STRATEGY: use template for Doodad on dood
+
+(define (square-doodad-after-tick dood)
+    (make-square-doodad
+      (+ (square-doodad-x dood) SQUARE-VX)
+      (+ (square-doodad-y dood) SQUARE-VY)
+      (square-doodad-vx dood)
+      (square-doodad-vy dood)
+      (square-doodad-color dood)))
+  
+
+
+;; world-after-key-event : World KeyEvent -> World
+;; GIVEN: a world w
+;; RETURNS: the world that should follow the given world
+;; after the given key event.
+;; on space, toggle paused?-- ignore all others
+;; EXAMPLES: see tests below
+;; STRATEGY: Cases on whether the kev is a pause event
+(define (world-after-key-event w kev)
+  (if (is-pause-key-event? kev)
+    (world-with-paused-toggled w)
+    w))
+
+;; world-with-paused-toggled : World -> World
+;; RETURNS: a world just like the given one, but with paused? toggled
+;; STRATEGY: use template for World on w
+(define (world-with-paused-toggled w)
+  (make-world
+   (world-radial-star-doodad w)
+   (world-square-doodad w)
+   (not (world-paused? w))))
+
+;; help function for key event
+;; is-pause-key-event? : KeyEvent -> Boolean
+;; GIVEN: a KeyEvent
+;; RETURNS: true iff the KeyEvent represents a pause instruction
+(define (is-pause-key-event? ke)
+  (key=? ke " "))
+
+;; world-paused? : World -> Boolean
+;; GIVEN: a World
+;; RETURNS: true iff the World is paused
+(define (world-paused? w)
+  (world-is-paused? w))
+
+;; world-doodad-star : World -> Doodad
+;; GIVEN: a World
+;; RETURNS: the star-like Doodad of the World
+(define (world-doodad-star w)
+  (world-radial-star-doodad w))
+
+;; world-doodad-square : World -> Doodad
+;; GIVEN: a World
+;; RETURNS: the square Doodad of the World
+(define (world-doodad-square w)
+  (world-square-doodad w))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; CONSTANTS FOR TEST:
 (define world-scene-at-beginning
   (place-image RADIAL-STAR-IMAGE 125 120
                (place-image SQUARE-IMAGE 460 350 EMPTY-CANVAS)))
 
+;; TESTS:
 (begin-for-test
 
   (check-equal? world-scene-at-beginning (world-to-scene(initial-world 12)))
 
   )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
