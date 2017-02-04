@@ -1,0 +1,36 @@
+TA-1 Name:- Wenjun Li
+TA-2 Name:- Sankar Gireesan
+
+
+Student1 CCIS ID:- abhishekmulay
+
+Design Grade:-AB
+
+TA Comments on Design:-
+> Good use of constants.
+> editor? is created automatically during structure definition. No need to include it in template.
+> Include examples and design strategy for helper functions also.
+> 100 % test coverage achieved.
+
+
+Presentation Grade:- A
+
+TA Comments on Presentation:-
+> was able to explain clearly.
+
+
+Question 2 :-
+
+Design Grade:- A
+
+TA Comments on Design:-
+> Good Design
+> Syntax error in template of Legal Input.
+> Contract of some functions were missing.
+> 100 % test coverage achieved.
+
+
+Presentation Grade:-A
+
+TA Comments on Presentation:-
+> Good understanding of the problem.
