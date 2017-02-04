@@ -7,11 +7,24 @@
 (require "extras.rkt")
 (check-location "03" "q1.rkt")
 
+(provide
+ animation
+ initial-world
+ world-after-tick
+ world-after-key-event
+ world-paused?
+ world-doodad-star
+ world-doodad-square
+ doodad-x
+ doodad-y
+ doodad-vx
+ doodad-vy
+ doodad-color)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; two draggable doodads.
-;; There are two doodads. They are individually draggable.
-;; But space pauses or unpauses the entire system.
+;; There are two doodads. They are moving and changing color as result of
+;; change in position.
+;; Pressing space pauses or unpauses the entire system.
 
 ;; starts with (animation 0)
 
@@ -91,13 +104,13 @@
 
 ;; animation : PosReal -> World
 ;; GIVEN: the speed of the animation, in seconds per tick
-;;     (so larger numbers run slower)
+;;        (so larger numbers run slower)
 ;; EFFECT: runs the animation, starting with the initial world as
-;;     specified in the problem set
+;;         specified in the problem set
 ;; RETURNS: the final state of the world
 ;; EXAMPLES:
-;;     (animation 1) runs the animation at normal speed
-;;     (animation 1/4) runs at a faster than normal speed
+;;         (animation 1) runs the animation at normal speed
+;;         (animation 1/4) runs at a faster than normal speed
 (define (animation speed)
   (big-bang (initial-world speed)
             (on-tick world-after-tick speed)
@@ -150,7 +163,6 @@
 ;; RETURNS: the World that should follow the given World after a tick
 ;; EXAMPLES: 
 ;; STRATEGY: Use template for world on w
-
 (define (world-after-tick w)
   (if (world-paused? w)
     w
@@ -159,7 +171,7 @@
       (doodad-after-tick (world-square w))
       (world-paused? w))))
 
-;; star-after-tick : Doodad -> Doodad
+;; doodad-after-tick : Doodad -> Doodad
 ;; GIVEN: the state of a radial-star-doodad dood
 ;; RETURNS: the state of the given doodad after a tick if it were in an unpaused world.
 
@@ -170,13 +182,17 @@
 (define (doodad-after-tick dood)
   (make-doodad
    TYPE-STAR
-   (get-x dood)
-   (get-y dood)
-   (get-vx dood)
-   (get-vy dood)
-   (get-color dood)))
+   (check-x dood)
+   (check-y dood)
+   (check-vx dood)
+   (check-vy dood)
+   (check-color dood)))
 
-(define (get-x dood)
+;; check-x: Doodad -> Integer
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY: 
+(define (check-x dood)
   (cond
      [(and (> (+ (doodad-x dood) (doodad-vx dood)) 0)
            (< (+ (doodad-x dood) (doodad-vx dood)) 601))
@@ -186,7 +202,12 @@
      [(>= (+ (doodad-x dood) (doodad-vx dood)) 601)
       (- 600 (- (+ (doodad-x dood) (doodad-vx dood)) 600))]))
 
-(define (get-y dood)
+
+;; check-y: Doodad -> Integer
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY: 
+(define (check-y dood)
   (cond
      [(and (> (+ (doodad-y dood) (doodad-vy dood)) 0)
            (< (+ (doodad-y dood) (doodad-vy dood)) 449))
@@ -196,7 +217,11 @@
      [(>= (+ (doodad-y dood) (doodad-vy dood)) 449)
       (- 448 (- (+ (doodad-y dood) (doodad-vy dood)) 448))]))
 
-(define (get-vx dood)
+;; check-vx: Doodad -> Integer
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY: 
+(define (check-vx dood)
   (cond
      [(and (> (+ (doodad-x dood) (doodad-vx dood)) 0)
            (< (+ (doodad-x dood) (doodad-vx dood)) 601))
@@ -206,7 +231,11 @@
      [(>= (+ (doodad-x dood) (doodad-vx dood)) 601)
       ( * -1 (doodad-vx dood))]))
 
-(define (get-vy dood)
+;; check-vy: Doodad -> Integer
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY: 
+(define (check-vy dood)
   (cond
      [(and (> (+ (doodad-y dood) (doodad-vy dood)) 0)
            (< (+ (doodad-y dood) (doodad-vy dood)) 449))
@@ -216,22 +245,43 @@
      [(>= (+ (doodad-y dood) (doodad-vy dood)) 449)
       ( * -1 (doodad-vy dood))]))
 
+;; core-bounce-x?: Doodad -> Boolean
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY: 
 (define (core-bounce-x? dood)
      (or (< (+ (doodad-x dood) (doodad-vx dood)) 0) 
      (>= (+ (doodad-x dood) (doodad-vx dood)) 601)))
 
+;; core-bounce-y?: Doodad -> Boolean
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY: Use template for Doodad on dood
 (define (core-bounce-y? dood)
      (or (< (+ (doodad-y dood) (doodad-vy dood)) 0) 
      (>= (+ (doodad-y dood) (doodad-vy dood)) 449)))
 
+;; core-bounce? : Doodad -> Boolean
+;; GIVEN: a Doodad
+;; RETURNS: true iff the given Doodad should do a core bounce because of change
+;; in
+;; STRATEGY: 
 (define (core-bounce? dood)
   (or (core-bounce-x? dood) (core-bounce-y? dood)))
 
-(define (get-color dood)
+;; check-color: Doodad -> String 
+;; GIVEN: Current color of Doodad
+;; RETURNS: Next color that should follow current color
+;; STRATEGY: Use template for Doodad on dood
+(define (check-color dood)
   (cond
     [(core-bounce? dood) (next-color (doodad-color dood))]
     [else (doodad-color dood)]))
 
+;; next-color: String -> String 
+;; GIVEN: Current color as a string
+;; RETURNS: Next color that should follow color c
+;; STRATEGY: Break into cases based on c
 (define (next-color c)
   (cond
     [(string=? c GOLD) GREEN]
@@ -245,9 +295,8 @@
 
 ;; world-after-key-event : World KeyEvent -> World
 ;; GIVEN: a world w
-;; RETURNS: the world that should follow the given world
-;; after the given key event.
-;; on space, toggle paused?-- ignore all others
+;; RETURNS: the world that should follow the given world after the given key
+;; event. on space, toggle paused?-- ignore all others
 ;; EXAMPLES: see tests below
 ;; STRATEGY: Cases on whether the kev is a pause event
 (define (world-after-key-event w kev)
@@ -288,22 +337,6 @@
 ;; RETURNS: the square Doodad of the World
 (define (world-doodad-square w)
   (world-square w))
-
-
-;;; doodad-x : Doodad -> Integer
-;;; doodad-y : Doodad -> Integer
-;;; GIVEN: a Doodad
-;;; RETURNS: the x or y coordinate of the Doodad
- 
-;;; doodad-vx : Doodad -> Integer
-;;; doodad-vy : Doodad -> Integer
-;;; GIVEN: a Doodad
-;;; RETURNS: the vx or vy velocity component of the Doodad
-          
-;;; doodad-color : Doodad -> Color
-;;; GIVEN: a Doodad
-;;; RETURNS: the color of the Doodad, in one of the forms recognized
-;;;     as a color by DrRacket's image-color? predicate
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
