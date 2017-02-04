@@ -61,11 +61,11 @@
 (define TYPE-SQUARE "square")
 (define STAR-START-X 125)
 (define STAR-START-Y 120)
+(define STAR-VX 10)
+(define STAR-VY 12)
 (define SQUARE "square")
 (define SQUARE-START-X 460)
 (define SQUARE-START-Y 350)
-(define STAR-VX 10)
-(define STAR-VY 12)
 (define SQUARE-VX -13)
 (define SQUARE-VY -9)
 
@@ -74,7 +74,17 @@
 (define STAR-OUTTER-RADIUS 50)
 (define SQUARE-SIDE 71)
 
-(define STAR-START-COLOR "gold")
+(define STAR-START-COLOR "Gold")
+(define GOLD "Gold")
+(define GREEN "Green")
+(define BLUE "Blue")
+
+(define GRAY "Gray")
+(define OLIVE-DRAB "OliveDrab")
+(define KHAKI "Khaki")
+(define ORANGE "Orange")
+(define CRIMSON "Crimson")
+
 (define SQUARE-START-COLOR "gray")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -101,9 +111,9 @@
 (define (initial-world v)
   (make-world
     (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
-                 STAR-START-COLOR)
+                 GOLD)
     (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
-                 SQUARE-START-COLOR)
+                 GRAY)
     false))
 
 ;; world-to-scene : World -> Scene
@@ -145,8 +155,8 @@
   (if (world-paused? w)
     w
     (make-world
-      (star-after-tick (world-star w))
-      (square-after-tick (world-square w))
+      (doodad-after-tick (world-star w))
+      (doodad-after-tick (world-square w))
       (world-paused? w))))
 
 ;; star-after-tick : Doodad -> Doodad
@@ -157,14 +167,14 @@
 ;; 
 ;;
 ;; STRATEGY: use template for Doodad on dood
-(define (star-after-tick dood)
+(define (doodad-after-tick dood)
   (make-doodad
    TYPE-STAR
    (get-x dood)
    (get-y dood)
    (get-vx dood)
    (get-vy dood)
-   (doodad-color dood)))
+   (get-color dood)))
 
 (define (get-x dood)
   (cond
@@ -206,22 +216,32 @@
      [(>= (+ (doodad-y dood) (doodad-vy dood)) 449)
       ( * -1 (doodad-vy dood))]))
 
-;; square-after-tick : Doodad -> Doodad
-;; GIVEN: the state of a square-doodad dood
-;; RETURNS: the state of the given doodad after a tick if it were in an unpaused world.
+(define (core-bounce-x? dood)
+     (or (< (+ (doodad-x dood) (doodad-vx dood)) 0) 
+     (>= (+ (doodad-x dood) (doodad-vx dood)) 601)))
 
-;; examples: 
-;; 
-;;
-;; STRATEGY: use template for Doodad on dood
-(define (square-after-tick dood)
-  (make-doodad
-   TYPE-SQUARE
-   (get-x dood)
-   (get-y dood)
-   (get-vx dood)
-   (get-vy dood)
-   (doodad-color dood)))
+(define (core-bounce-y? dood)
+     (or (< (+ (doodad-y dood) (doodad-vy dood)) 0) 
+     (>= (+ (doodad-y dood) (doodad-vy dood)) 449)))
+
+(define (core-bounce? dood)
+  (or (core-bounce-x? dood) (core-bounce-y? dood)))
+
+(define (get-color dood)
+  (cond
+    [(core-bounce? dood) (next-color (doodad-color dood))]
+    [else (doodad-color dood)]))
+
+(define (next-color c)
+  (cond
+    [(string=? c GOLD) GREEN]
+    [(string=? c GREEN) BLUE]
+    [(string=? c BLUE) GOLD]
+    [(string=? c GRAY) OLIVE-DRAB]
+    [(string=? c OLIVE-DRAB) KHAKI]
+    [(string=? c KHAKI) ORANGE]
+    [(string=? c ORANGE) CRIMSON]
+    [(string=? c CRIMSON) GRAY]))
 
 ;; world-after-key-event : World KeyEvent -> World
 ;; GIVEN: a world w
@@ -294,12 +314,10 @@
 (define world-scene-at-beginning
   (place-image RADIAL-STAR-IMAGE 125 120
                (place-image SQUARE-IMAGE 460 350 EMPTY-CANVAS)))
-
+ 
 ;; TESTS:
 (begin-for-test
 
   (check-equal? world-scene-at-beginning (world-to-scene(initial-world 12)))
-
   )
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
