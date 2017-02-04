@@ -19,18 +19,18 @@
 
 ;; DATA DEFINITIONS:
 
-(define-struct world (radial-star-doodad square-doodad is-paused?))
+(define-struct world (star square is-paused?))
 ;; A World is a (make-world Doodad Doodad Boolean)
-;; radial-star-doodad is Doodad
-;; square-doodad is Doodad
+;; star is Doodad shaped like a radial star
+;; square is Doodad shaped like a square
 ;; is-paused? describes whether or not the world is paused
 
 ;; template:
 ;; world-fn : World -> ??
 ;; (define (world-fn w)
-;;   (... (world-radial-star-doodad w) (world-square-doodad w) (world-is-paused? w)))
+;;   (... (world-star w) (world-square w) (world-is-paused? w)))
 
-(define-struct doodad (type x y vx vy color representation))
+(define-struct doodad (type x y vx vy color))
 ;; A Doodad is:
 ;; -- (define-struct doodad (String Int Int Int Int IMAGE))
 ;; INTERPRETATION:
@@ -49,38 +49,50 @@
 ;; TEMPLATE:
 ;; doodad-fn : Doodad -> ??
 ;; (define (doodad-fn d)
-;;  (... (doodad-type d) (doodad-x d) (doodad-y d) (doodad-vx d) (doodad-vy d)))
-
-;; TEMPLATE:
-;; doodad-fn : Doodad -> ??
-;; (define (doodad-fn dood)
-;;   (cond
-;;     [(radial-star? dood) ...]
-;;     [(square? dood)...]))
+;;  (... (doodad-type d) (doodad-x d) (doodad-y d) (doodad-vx d) (doodad-vy d) (doodad-color d)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; CONSTANTS:
-(define CANVAS-WIDTH 450)
-(define CANVAS-HEIGHT 400)
+(define CANVAS-WIDTH 601)
+(define CANVAS-HEIGHT 449)
 (define EMPTY-CANVAS (empty-scene CANVAS-WIDTH CANVAS-HEIGHT))
-(define TYPE-RADIAL-STAR "radial-star")
+(define TYPE-STAR "radial-star")
 (define TYPE-SQUARE "square")
-(define RADIAL-STAR-START-X 125)
-(define RADIAL-STAR-START-Y 120)
+(define STAR-START-X 125)
+(define STAR-START-Y 120)
 (define SQUARE "square")
 (define SQUARE-START-X 460)
 (define SQUARE-START-Y 350)
-(define RADIAL-STAR-VX 10)
-(define RADIAL-STAR-VY 12)
+(define STAR-VX 10)
+(define STAR-VY 12)
 (define SQUARE-VX -13)
 (define SQUARE-VY -9)
 
+(define STAR-POINT 8)
+(define STAR-INNER-RADIUS 10)
+(define STAR-OUTTER-RADIUS 50)
+(define SQUARE-SIDE 71)
 
-(define RADIAL-STAR-START-COLOR "gold")
+(define STAR-START-COLOR "gold")
 (define SQUARE-START-COLOR "gray")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; animation : PosReal -> World
+;; GIVEN: the speed of the animation, in seconds per tick
+;;     (so larger numbers run slower)
+;; EFFECT: runs the animation, starting with the initial world as
+;;     specified in the problem set
+;; RETURNS: the final state of the world
+;; EXAMPLES:
+;;     (animation 1) runs the animation at normal speed
+;;     (animation 1/4) runs at a faster than normal speed
+(define (animation speed)
+  (big-bang (initial-world speed)
+            (on-tick world-after-tick speed)
+            (on-draw world-to-scene)
+            (on-key world-after-key-event)))
 
 ;;; initial-world : Any -> World
 ;;; GIVEN: any value (ignored)
@@ -88,11 +100,10 @@
 ;;; EXAMPLE: (initial-world -174)
 (define (initial-world v)
   (make-world
-    (make-doodad TYPE-RADIAL-STAR RADIAL-STAR-START-X RADIAL-STAR-START-Y
-                 RADIAL-STAR-VX RADIAL-STAR-VY RADIAL-STAR-START-COLOR
-                 (radial-star 8 10 50 "outline" RADIAL-STAR-START-COLOR))
+    (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
+                 STAR-START-COLOR)
     (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
-                 SQUARE-START-COLOR (square 71 "outline" SQUARE-START-COLOR))
+                 SQUARE-START-COLOR)
     false))
 
 ;; world-to-scene : World -> Scene
@@ -101,30 +112,26 @@
 ;;          two Doodads, one at (125, 120) and one at (460, 350)
 ;; STRATEGY: Use template for World on w
 (define (world-to-scene w)
-  (place-radial-star
-    (world-radial-star-doodad w)
+  (place-star
+    (world-star w)
     (place-square
-      (world-square-doodad w)
+      (world-square w)
       EMPTY-CANVAS)))
 
 ;; place-radial-star : Doodad Scene -> Scene
 ;; RETURNS: a scene like the given one, but with the given Doodad painted
 ;; on it.
-(define (place-radial-star star scene)
+(define (place-star star scene)
   (place-image
-    (radial-star 8 10 50 "outline" (doodad-color star))
+    (radial-star 8 10 50 "solid" (doodad-color star))
     (doodad-x star) (doodad-y star)
     scene))
-
-;;  (make-doodad "radial-star" 10 10 5 5 (radial-star 8 10 50 "outline" color))
-;;  (make-doodad "square" 10 10 5 5 (square 71 "outline" color))
-
 
 ;; place-square : Doodad Scene -> Scene
 ;; RETURNS: a scene like the given one, but with the given Doodad painted on it.
 (define (place-square sq scene)
   (place-image
-    (square 71 "outline" (doodad-color sq))
+    (square 71 "solid" (doodad-color sq))
     (doodad-x sq) (doodad-y sq)
     scene))
 
@@ -138,11 +145,11 @@
   (if (world-paused? w)
     w
     (make-world
-      (radial-star-doodad-after-tick (world-radial-star-doodad w))
-      (square-doodad-after-tick (world-square-doodad w))
+      (star-after-tick (world-star w))
+      (square-after-tick (world-square w))
       (world-paused? w))))
 
-;; radial-star-doodad-after-tick : Doodad -> Doodad
+;; star-after-tick : Doodad -> Doodad
 ;; GIVEN: the state of a radial-star-doodad dood
 ;; RETURNS: the state of the given doodad after a tick if it were in an unpaused world.
 
@@ -150,17 +157,56 @@
 ;; 
 ;;
 ;; STRATEGY: use template for Doodad on dood
+(define (star-after-tick dood)
+  (make-doodad
+   TYPE-STAR
+   (get-x dood)
+   (get-y dood)
+   (get-vx dood)
+   (get-vy dood)
+   (doodad-color dood)))
 
-(define (radial-star-doodad-after-tick dood)
-    (make-doodad
-      (+ (doodad-x dood) RADIAL-STAR-VX)
-      (+ (doodad-y dood) RADIAL-STAR-VY)
-      (doodad-vx dood)
-      (doodad-vy dood)
-      (doodad-color dood)))
-  
+(define (get-x dood)
+  (cond
+     [(and (> (+ (doodad-x dood) (doodad-vx dood)) 0)
+           (< (+ (doodad-x dood) (doodad-vx dood)) 601))
+      (+ (doodad-x dood) (doodad-vx dood))]
+     [(<= (+ (doodad-x dood) (doodad-vx dood)) 0)
+      ( * -1 (+ (doodad-x dood) (doodad-vx dood)))]
+     [(>= (+ (doodad-x dood) (doodad-vx dood)) 601)
+      (- 600 (- (+ (doodad-x dood) (doodad-vx dood)) 600))]))
 
-;; square-doodad-after-tick : Doodad -> Doodad
+(define (get-y dood)
+  (cond
+     [(and (> (+ (doodad-y dood) (doodad-vy dood)) 0)
+           (< (+ (doodad-y dood) (doodad-vy dood)) 449))
+      (+ (doodad-y dood) (doodad-vy dood))]
+     [(<= (+ (doodad-y dood) (doodad-vy dood)) 0)
+      (* -1 (+ (doodad-y dood) (doodad-vy dood)))]
+     [(>= (+ (doodad-y dood) (doodad-vy dood)) 449)
+      (- 448 (- (+ (doodad-y dood) (doodad-vy dood)) 448))]))
+
+(define (get-vx dood)
+  (cond
+     [(and (> (+ (doodad-x dood) (doodad-vx dood)) 0)
+           (< (+ (doodad-x dood) (doodad-vx dood)) 601))
+      (doodad-vx dood)]
+     [(<= (+ (doodad-x dood) (doodad-vx dood)) 0)
+      ( * -1 (doodad-vx dood))]
+     [(>= (+ (doodad-x dood) (doodad-vx dood)) 601)
+      ( * -1 (doodad-vx dood))]))
+
+(define (get-vy dood)
+  (cond
+     [(and (> (+ (doodad-y dood) (doodad-vy dood)) 0)
+           (< (+ (doodad-y dood) (doodad-vy dood)) 449))
+      (doodad-vy dood)]
+     [(<= (+ (doodad-y dood) (doodad-vy dood)) 0)
+      ( * -1 (doodad-vy dood))]
+     [(>= (+ (doodad-y dood) (doodad-vy dood)) 449)
+      ( * -1 (doodad-vy dood))]))
+
+;; square-after-tick : Doodad -> Doodad
 ;; GIVEN: the state of a square-doodad dood
 ;; RETURNS: the state of the given doodad after a tick if it were in an unpaused world.
 
@@ -168,15 +214,15 @@
 ;; 
 ;;
 ;; STRATEGY: use template for Doodad on dood
+(define (square-after-tick dood)
+  (make-doodad
+   TYPE-SQUARE
+   (get-x dood)
+   (get-y dood)
+   (get-vx dood)
+   (get-vy dood)
+   (doodad-color dood)))
 
-(define (square-doodad-after-tick dood)
-    (make-doodad
-      (+ (doodad-x dood) SQUARE-VX)
-      (+ (doodad-y dood) SQUARE-VY)
-      (doodad-vx dood)
-      (doodad-vy dood)
-      (doodad-color dood)))
-  
 ;; world-after-key-event : World KeyEvent -> World
 ;; GIVEN: a world w
 ;; RETURNS: the world that should follow the given world
@@ -194,8 +240,8 @@
 ;; STRATEGY: use template for World on w
 (define (world-with-paused-toggled w)
   (make-world
-   (world-radial-star-doodad w)
-   (world-square-doodad w)
+   (world-star w)
+   (world-square w)
    (not (world-paused? w))))
 
 ;; help function for key event
@@ -215,20 +261,20 @@
 ;; GIVEN: a World
 ;; RETURNS: the star-like Doodad of the World
 (define (world-doodad-star w)
-  (world-radial-star-doodad w))
+  (world-star w))
 
 ;; world-doodad-square : World -> Doodad
 ;; GIVEN: a World
 ;; RETURNS: the square Doodad of the World
 (define (world-doodad-square w)
-  (world-square-doodad w))
+  (world-square w))
 
 
 ;;; doodad-x : Doodad -> Integer
 ;;; doodad-y : Doodad -> Integer
 ;;; GIVEN: a Doodad
 ;;; RETURNS: the x or y coordinate of the Doodad
-          
+ 
 ;;; doodad-vx : Doodad -> Integer
 ;;; doodad-vy : Doodad -> Integer
 ;;; GIVEN: a Doodad
@@ -242,8 +288,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; CONSTANTS FOR TEST:
-(define RADIAL-STAR-IMAGE (radial-star 8 10 50 "outline" "gold"))
-(define SQUARE-IMAGE (square 71 "outline" "gray"))
+(define RADIAL-STAR-IMAGE (radial-star 8 10 50 "solid" "gold"))
+(define SQUARE-IMAGE (square 71 "solid" "gray"))
 
 (define world-scene-at-beginning
   (place-image RADIAL-STAR-IMAGE 125 120
