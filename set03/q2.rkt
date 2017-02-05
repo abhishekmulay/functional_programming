@@ -49,7 +49,7 @@
 ;; (define (world-fn w)
 ;;   (... (world-star w) (world-square w) (world-is-paused? w)))
 
-(define-struct doodad (type x y vx vy color selected?))
+(define-struct doodad (type x y vx vy color selected? xd yd))
 ;; A Doodad is:
 ;; -- (define-struct doodad (String Int Int Int Int IMAGE))
 ;; INTERPRETATION:
@@ -141,9 +141,9 @@
 (define (initial-world v)
   (make-world
     (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
-                 GOLD false)
+                 GOLD false 0 0)
     (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
-                 GRAY false)
+                 GRAY false 0 0)
     false))
 
 ;; world-to-scene : World -> Scene
@@ -189,6 +189,9 @@
       (world-paused? w))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                     MOUSE EVENT HANDLING                                   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; doodad-after-mouse-event : Doodad -> Doodad
 (define (doodad-after-mouse-event dood mx my mev)
   (cond
@@ -199,33 +202,35 @@
 
 ;; helper functions:
 
+(define HALF-DOODAD-HEIGHT 71/2)
+(define HALF-DOODAD-WIDTH  71/2)
+
 ;; cat-after-button-down : Cat Integer Integer -> Cat
 ;; RETURNS: the cat following a button-down at the given location.
 ;; STRATEGY: Use template for Cat on c
-(define (doodad-after-button-down dood x y)
-  (if (in-doodad? dood x y)
-      (make-doodad (doodad-type dood) x y (doodad-vx dood) (doodad-vy dood) (doodad-color dood) true)
-      dood))
-
-;(make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD)
-
-(define HALF-DOODAD-HEIGHT 71/2)
-(define HALF-DOODAD-WIDTH  71/2)
+(define (doodad-after-button-down dood mx my)
+  (if (in-doodad? dood mx my)
+      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood) (doodad-vx dood)
+                   (doodad-vy dood) (doodad-color dood) true
+                   (get-xd (doodad-x dood) mx) (get-yd (doodad-y dood) my)) dood))
 
 ;; cat-after-drag : Cat Integer Integer -> Cat
 ;; RETURNS: the cat following a drag at the given location
 ;; STRATEGY: Use template for Cat on c
-(define (doodad-after-drag dood x y)
+(define (doodad-after-drag dood mx my)
   (if (doodad-selected? dood)
-      (make-doodad (doodad-type dood) x y (doodad-vx dood) (doodad-vy dood) (doodad-color dood) true)
+      (make-doodad (doodad-type dood) (- mx (doodad-xd dood))
+                   (- my (doodad-yd dood)) (doodad-vx dood) (doodad-vy dood)
+                   (doodad-color dood) true (doodad-xd dood) (doodad-yd dood))
       dood))
 
 ;; cat-after-button-up : Cat Integer Integer -> Cat
 ;; RETURNS: the cat following a button-up at the given location
 ;; STRATEGY: Use template for Cat on c
-(define (doodad-after-button-up dood x y)
+(define (doodad-after-button-up dood mx my)
   (if (doodad-selected? dood)
-      (make-doodad (doodad-type dood) x y (doodad-vx dood) (doodad-vy dood) (doodad-color dood) false)
+      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood) (doodad-vx dood)
+                   (doodad-vy dood) (doodad-color dood) false (doodad-xd dood) (doodad-yd dood))
       dood))
 
 ;; in-cat? : Cat Integer Integer -> Cat
@@ -245,6 +250,14 @@
       (+ (doodad-y dood) HALF-DOODAD-HEIGHT))))
 
 
+(define (get-xd x mx)
+  (- mx x)
+)
+
+(define (get-yd y my)
+  (- my y)
+)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; doodad-after-tick : Doodad -> Doodad
@@ -263,7 +276,7 @@
    (check-vx dood)
    (check-vy dood)
    (check-color dood)
-   (doodad-selected? dood)))
+   (doodad-selected? dood) 0 0))
 
 ;; check-x: Doodad -> Integer
 ;; GIVEN: 
@@ -386,9 +399,9 @@
 (define (world-with-next-color-for w)
   (make-world
    (make-doodad TYPE-STAR (doodad-x (world-star w)) (doodad-y (world-star w))  (doodad-vx (world-star w))
-                (doodad-vy (world-star w)) (next-color-if-selected (world-star w)) (doodad-selected? (world-star w)))
+                (doodad-vy (world-star w)) (next-color-if-selected (world-star w)) (doodad-selected? (world-star w)) 0 0)
    (make-doodad  TYPE-SQUARE (doodad-x (world-square w)) (doodad-y (world-square w))  (doodad-vx (world-square w))
-                (doodad-vy (world-square w)) (next-color-if-selected (world-square w)) (doodad-selected? (world-square w)))
+                (doodad-vy (world-square w)) (next-color-if-selected (world-square w)) (doodad-selected? (world-square w)) 0 0)
    (world-paused? w)))
 
 (define (next-color-if-selected dood)
