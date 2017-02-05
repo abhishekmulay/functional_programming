@@ -287,6 +287,7 @@
     [(string=? c GOLD) GREEN]
     [(string=? c GREEN) BLUE]
     [(string=? c BLUE) GOLD]
+    
     [(string=? c GRAY) OLIVE-DRAB]
     [(string=? c OLIVE-DRAB) KHAKI]
     [(string=? c KHAKI) ORANGE]

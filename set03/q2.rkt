@@ -377,9 +377,19 @@
 ;; EXAMPLES: see tests below
 ;; STRATEGY: Cases on whether the kev is a pause event
 (define (world-after-key-event w kev)
-  (if (is-pause-key-event? kev)
-    (world-with-paused-toggled w)
-    w))
+  (cond
+    [(is-pause-key-event? kev) (world-with-paused-toggled w)]
+    [(is-c-key-event? kev) (world-with-next-color-for w)]
+    [else w]))
+
+;; return World
+(define (world-with-next-color-for w)
+  (make-world
+   (make-doodad TYPE-STAR (doodad-x (world-star w)) (doodad-y (world-star w))  (doodad-vx (world-star w))
+                (doodad-vy (world-star w)) (next-color (doodad-color (world-star w))) (doodad-selected? (world-star w)))
+   (make-doodad  TYPE-SQUARE (doodad-x (world-square w)) (doodad-y (world-square w))  (doodad-vx (world-square w))
+                (doodad-vy (world-square w)) (next-color (doodad-color (world-square w))) (doodad-selected? (world-square w)))
+   (world-paused? w)))
 
 ;; world-with-paused-toggled : World -> World
 ;; RETURNS: a world just like the given one, but with paused? toggled
@@ -396,6 +406,13 @@
 ;; RETURNS: true iff the KeyEvent represents a pause instruction
 (define (is-pause-key-event? ke)
   (key=? ke " "))
+
+;; help function for key event
+;; is-pause-key-event? : KeyEvent -> Boolean
+;; GIVEN: a KeyEvent
+;; RETURNS: true iff the KeyEvent represents a pause instruction
+(define (is-c-key-event? ke)
+  (key=? ke "c"))
 
 ;; world-paused? : World -> Boolean
 ;; GIVEN: a World
