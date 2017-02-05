@@ -386,10 +386,15 @@
 (define (world-with-next-color-for w)
   (make-world
    (make-doodad TYPE-STAR (doodad-x (world-star w)) (doodad-y (world-star w))  (doodad-vx (world-star w))
-                (doodad-vy (world-star w)) (next-color (doodad-color (world-star w))) (doodad-selected? (world-star w)))
+                (doodad-vy (world-star w)) (next-color-if-selected (world-star w)) (doodad-selected? (world-star w)))
    (make-doodad  TYPE-SQUARE (doodad-x (world-square w)) (doodad-y (world-square w))  (doodad-vx (world-square w))
-                (doodad-vy (world-square w)) (next-color (doodad-color (world-square w))) (doodad-selected? (world-square w)))
+                (doodad-vy (world-square w)) (next-color-if-selected (world-square w)) (doodad-selected? (world-square w)))
    (world-paused? w)))
+
+(define (next-color-if-selected dood)
+  (cond
+    [(doodad-selected? dood) (next-color (doodad-color dood))]
+    [else (doodad-color dood)]))
 
 ;; world-with-paused-toggled : World -> World
 ;; RETURNS: a world just like the given one, but with paused? toggled
