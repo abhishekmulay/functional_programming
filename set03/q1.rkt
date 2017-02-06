@@ -83,25 +83,24 @@
 (define SQUARE-START-Y 350)
 (define SQUARE-VX -13)
 (define SQUARE-VY -9)
-
 (define STAR-POINT 8)
 (define STAR-INNER-RADIUS 10)
 (define STAR-OUTTER-RADIUS 50)
 (define SQUARE-SIDE 71)
 
+(define SQUARE-START-COLOR "gray")
 (define STAR-START-COLOR "Gold")
 (define GOLD "Gold")
 (define GREEN "Green")
 (define BLUE "Blue")
-
 (define GRAY "Gray")
 (define OLIVE-DRAB "OliveDrab")
 (define KHAKI "Khaki")
 (define ORANGE "Orange")
 (define CRIMSON "Crimson")
 
-(define SQUARE-START-COLOR "gray")
-
+(define X-MAX 661)
+(define Y-MAX 449)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                           Animation and World methods                      ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -192,7 +191,7 @@
 ;; GIVEN: Square Doodad of the world and Scene on which the Doodad is to be
 ;;        drawn
 ;; RETURNS: a scene like the given one, but with the given Doodad painted on it.
-;; EXAMPLE:
+;; EXAMPLE: 
 ;; STRATEGY: Use template for Doodad on sq
 (define (place-square sq scene)
   (place-image
@@ -241,12 +240,12 @@
 (define (check-x dood)
   (cond
      [(and (> (+ (doodad-x dood) (doodad-vx dood)) 0)
-           (< (+ (doodad-x dood) (doodad-vx dood)) 601))
+           (< (+ (doodad-x dood) (doodad-vx dood)) X-MAX))
       (+ (doodad-x dood) (doodad-vx dood))]
      [(<= (+ (doodad-x dood) (doodad-vx dood)) 0)
       ( * -1 (+ (doodad-x dood) (doodad-vx dood)))]
-     [(>= (+ (doodad-x dood) (doodad-vx dood)) 601)
-      (- 600 (- (+ (doodad-x dood) (doodad-vx dood)) 600))]))
+     [(>= (+ (doodad-x dood) (doodad-vx dood)) X-MAX)
+      (- (- X-MAX 1) (- (+ (doodad-x dood) (doodad-vx dood)) (- X-MAX 1)))]))
 
 ;; check-y: Doodad -> Integer
 ;; GIVEN: A Doodad dood
@@ -256,12 +255,12 @@
 (define (check-y dood)
   (cond
      [(and (> (+ (doodad-y dood) (doodad-vy dood)) 0)
-           (< (+ (doodad-y dood) (doodad-vy dood)) 449))
+           (< (+ (doodad-y dood) (doodad-vy dood)) Y-MAX))
       (+ (doodad-y dood) (doodad-vy dood))]
      [(<= (+ (doodad-y dood) (doodad-vy dood)) 0)
       (* -1 (+ (doodad-y dood) (doodad-vy dood)))]
-     [(>= (+ (doodad-y dood) (doodad-vy dood)) 449)
-      (- 448 (- (+ (doodad-y dood) (doodad-vy dood)) 448))]))
+     [(>= (+ (doodad-y dood) (doodad-vy dood)) Y-MAX)
+      (- (- Y-MAX 1) (- (+ (doodad-y dood) (doodad-vy dood)) (- Y-MAX 1)))]))
 
 ;; check-vx: Doodad -> Integer
 ;; GIVEN: A Doodad dood
@@ -271,11 +270,11 @@
 (define (check-vx dood)
   (cond
      [(and (> (+ (doodad-x dood) (doodad-vx dood)) 0)
-           (< (+ (doodad-x dood) (doodad-vx dood)) 601))
+           (< (+ (doodad-x dood) (doodad-vx dood)) X-MAX))
       (doodad-vx dood)]
      [(<= (+ (doodad-x dood) (doodad-vx dood)) 0)
       ( * -1 (doodad-vx dood))]
-     [(>= (+ (doodad-x dood) (doodad-vx dood)) 601)
+     [(>= (+ (doodad-x dood) (doodad-vx dood)) X-MAX)
       ( * -1 (doodad-vx dood))]))
 
 ;; check-vy: Doodad -> Integer
@@ -286,11 +285,11 @@
 (define (check-vy dood)
   (cond
      [(and (> (+ (doodad-y dood) (doodad-vy dood)) 0)
-           (< (+ (doodad-y dood) (doodad-vy dood)) 449))
+           (< (+ (doodad-y dood) (doodad-vy dood)) Y-MAX))
       (doodad-vy dood)]
      [(<= (+ (doodad-y dood) (doodad-vy dood)) 0)
       ( * -1 (doodad-vy dood))]
-     [(>= (+ (doodad-y dood) (doodad-vy dood)) 449)
+     [(>= (+ (doodad-y dood) (doodad-vy dood)) Y-MAX)
       ( * -1 (doodad-vy dood))]))
 
 ;; core-bounce-x?: Doodad -> Boolean
@@ -302,7 +301,7 @@
 ;; STRATEGY: use template for Doodad on dood
 (define (core-bounce-x? dood)
      (or (< (+ (doodad-x dood) (doodad-vx dood)) 0) 
-     (>= (+ (doodad-x dood) (doodad-vx dood)) 601)))
+     (>= (+ (doodad-x dood) (doodad-vx dood)) X-MAX)))
 
 ;; core-bounce-y?: Doodad -> Boolean
 ;; GIVEN: a Doodad dood
@@ -313,7 +312,7 @@
 ;; STRATEGY: use template for Doodad on dood
 (define (core-bounce-y? dood)
      (or (< (+ (doodad-y dood) (doodad-vy dood)) 0) 
-     (>= (+ (doodad-y dood) (doodad-vy dood)) 449)))
+     (>= (+ (doodad-y dood) (doodad-vy dood)) Y-MAX)))
 
 ;; core-bounce? : Doodad -> Boolean
 ;; GIVEN: a Doodad
@@ -394,10 +393,36 @@
 (define world-scene-at-beginning
   (place-image RADIAL-STAR-IMAGE 125 120
                (place-image SQUARE-IMAGE 460 350 EMPTY-CANVAS)))
+
+(define STAR-OUTSIDE-X-LIMIT (make-doodad "radial-star" 700 80 -10 12 "Green"))
+(define STAR-OUTSIDE-Y-LIMIT (make-doodad "radila-star" 553 500 -13 -9 "Khaki"))
+(define STAR-IN-LIMIT (make-doodad "radial-star" 553 80 -10 12 "Green"))
+
+(define SQUARE-OUTSIDE-X-LIMIT (make-doodad "square" 666 380 -13 -9 "Khaki"))
+(define SQUARE-OUTSIDE-Y-LIMIT (make-doodad "square" 553 500 -13 -9 "Khaki"))
+(define SQUARE-IN-LIMIT (make-doodad "square" 658 380 -13 -9 "Khaki"))
  
 ;; TESTS:
 (begin-for-test
 
   (check-equal? world-scene-at-beginning (world-to-scene(initial-world 12)))
+  (check-equal? (core-bounce? STAR-OUTSIDE-X-LIMIT) true
+                "Should perform a core bounce" )
+  (check-equal? (core-bounce? STAR-OUTSIDE-Y-LIMIT) true
+                "Should perform a core bounce" )
+  (check-equal? (core-bounce? SQUARE-OUTSIDE-X-LIMIT) true
+                "Should perform a core bounce" )
+  (check-equal? (core-bounce? SQUARE-OUTSIDE-Y-LIMIT) true
+                "Should perform a core bounce" )
+  
+  ;; tests for next-color
+  (check-equal? (next-color GOLD) GREEN)
+  (check-equal? (next-color GREEN) BLUE)
+  (check-equal? (next-color BLUE) GOLD)
+  (check-equal? (next-color GRAY) OLIVE-DRAB)
+  (check-equal? (next-color OLIVE-DRAB) KHAKI)
+  (check-equal? (next-color KHAKI) ORANGE)
+  (check-equal? (next-color ORANGE) CRIMSON)
+  (check-equal? (next-color CRIMSON) GRAY)
   )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
