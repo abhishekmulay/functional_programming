@@ -24,10 +24,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; There are two doodads. They are moving and changing color as result of
-;; change in position.
-;; Pressing space pauses or unpauses the entire system.
-
+;; Two moving Doodads, they bounce off of the corner of rectangular
+;; enclosure.
+;; Animation can be paused using space key
 ;; starts with (animation 0)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -496,7 +495,6 @@
   (check-equal? (doodad-after-tick SQUARE-OUTSIDE-X-LIMIT)
                 (make-doodad 547 371 13 -9 "Orange")
                 "This Doodad should bounce")
-  
   
   ;; tests for next-color
   (check-equal? (next-color GOLD) GREEN)

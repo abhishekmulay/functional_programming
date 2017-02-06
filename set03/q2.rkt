@@ -28,10 +28,9 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; There are two doodads. They are moving and changing color as result of
-;; change in position.
-;; Pressing space pauses or unpauses the entire system.
-
+;; Two moving draggable Doodads, they bounce off of the corner of rectangular enclosure.
+;; Animation can be paused using space key
+;; Doodads can be dragged 
 ;; starts with (animation 0)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -43,32 +42,42 @@
 ;; star is Doodad shaped like a radial star
 ;; square is Doodad shaped like a square
 ;; is-paused? describes whether or not the world is paused
+;; dotx: x co-ordinate for center of black dot
+;; doty: y co-ordinate for center of black dot
 
 ;; template:
 ;; world-fn : World -> ??
 ;; (define (world-fn w)
-;;   (... (world-star w) (world-square w) (world-is-paused? w)))
+;;   (... (world-star w) (world-square w) (world-is-paused? w) (world-dotx w)
+;;     (world-doty w)))
 
 (define-struct doodad (type x y vx vy color selected? xd yd))
 ;; A Doodad is:
-;; -- (define-struct doodad (String Int Int Int Int IMAGE))
+;; -- (define-struct doodad (String Integer Integer Integer Integener String
+;;      Boolean Integer Integer))
 ;; INTERPRETATION:
 ;;   x: x-coordinate of Doodad
 ;;   y: x-coordinate of Doodad
 ;;   vx: number of pixels the Doodad moves on each tick in the x direction
 ;;   vy: number of pixels the Doodad moves on each tick in the y direction
-;;   color: color of this Doodad
-;;   representation: visual representation of Doodad, it is an Image
+;;   color: color of this Doodad as a String
+;;   selected?: describes whether or not the Doodad is selected.
+;;   xd: Difference of x co-cordinate from center of Doodad
+;;   yd: Difference of y co-cordinate from center of Doodad
 
 ;; EXAMPLE:
-;;  (make-doodad "radial-star" 10 10 5 5 (radial-star 8 10 50 "outline" color))
-;;  (make-doodad "square" 10 10 5 5 (square 71 "outline" color))
+;;  (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0) =
+;;  (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0)
+;;
+;;  (make-doodad "square" 500 80 -10 12 "Khaki" #f 0 0) =
+;;  (make-doodad "square" 500 80 -10 12 "Khaki" #f 0 0)
 ;;
 ;; TEMPLATE:
 ;; doodad-fn : Doodad -> ??
-;; (define (doodad-fn d)
-;;  (... (doodad-type d) (doodad-x d) (doodad-y d) (doodad-vx d)
-;;       (doodad-vy d) (doodad-color d)))
+;; (define (doodad-fn dood)
+;;  (... (doodad-type dood) (doodad-x dood) (doodad-y dood) (doodad-vx dood)
+;;       (doodad-vy dood) (doodad-color dood) (doodad-selected? dood)
+;;       (doodad-xd dood) (doodad-yd dood) ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -145,18 +154,45 @@
 ;; world-paused? : World -> Boolean
 ;; GIVEN: a World
 ;; RETURNS: true iff the World is paused
+;; EXAMPLE:
+;;       (define TEST-WORLD
+;;         (make-world (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0)
+;;         (make-doodad "square" 500 80 -10 12 "Khaki" #f 0 0) #f 0 0))
+;;
+;; (world-paused? TEST-WORLD) = false
+;;
+;; STRATEGY: Use template for World on w
 (define (world-paused? w)
   (world-is-paused? w))
 
 ;; world-doodad-star : World -> Doodad
 ;; GIVEN: a World
 ;; RETURNS: the star-like Doodad of the World
+;; EXAMPLE:
+;;       (define TEST-WORLD
+;;         (make-world (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0)
+;;         (make-doodad "square" 500 80 -10 12 "Khaki" #f 0 0) #f 0 0))
+;;
+;;  (world-doodad-star TEST-WORLD) = (make-world
+;;                                     (make-doodad "radial-star"
+;;                                        500 80 -10 12 "Green" #f 0 0)
+;;
+;; STRATEGY: Use template for World on w
 (define (world-doodad-star w)
   (world-star w))
 
 ;; world-doodad-square : World -> Doodad
 ;; GIVEN: a World
 ;; RETURNS: the square Doodad of the World
+;; EXAMPLE:
+;;       (define TEST-WORLD
+;;         (make-world (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0)
+;;         (make-doodad "square" 500 80 -10 12 "Khaki" #f 0 0) #f 0 0))
+;;
+;;  (world-doodad-square TEST-WORLD) = (make-doodad "square" 500 80 -10 12
+;;                                        "Khaki" #f 0 0) #f 0 0))
+;;
+;; STRATEGY: Use template for World on w
 (define (world-doodad-square w)
   (world-square w))
 
@@ -175,7 +211,11 @@
     (world-paused? w)
     mx my))
 
-;; doodad-after-mouse-event : Doodad -> Doodad
+;; doodad-after-mouse-event : Doodad Integer Integer MouseEvent -> Doodad
+;; GIVEN: Doodad, current co-ordinates of mouse and description of mouse event
+;; RETURNS: The Doodad that should follow the current Doodad
+;; EXAMPLES: Check in tests
+;; STRATEGY:Divide into cases based on mouse event
 (define (doodad-after-mouse-event dood mx my mev)
   (cond
     [(mouse=? mev "button-down") (doodad-after-button-down dood mx my)]
@@ -186,6 +226,13 @@
 ;; cat-after-button-down : Cat Integer Integer -> Cat
 ;; RETURNS: the cat following a button-down at the given location.
 ;; STRATEGY: Use template for Cat on c
+
+;; doodad-after-button-down : Doodad Integer Integer -> Doodad
+;; GIVEN: Doodad, curren mouse co-ordinates 
+;; RETURNS: The Doodad that should follow the current Doodad after mouse
+;;          button down event
+;; EXAMPLES:
+;; STRATEGY:Use template for Doodad on dood
 (define (doodad-after-button-down dood mx my)
   (if (in-doodad? dood mx my)
       (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
@@ -193,9 +240,10 @@
                    (get-xd (doodad-x dood) mx)
                    (get-yd (doodad-y dood) my)) dood))
 
-;; cat-after-drag : Cat Integer Integer -> Cat
-;; RETURNS: the cat following a drag at the given location
-;; STRATEGY: Use template for Cat on c
+;; doodad-after-drag : Doodad Integer Integer -> Doodad
+;; GIVEN: a Doodad, current co-ordinates of mouse
+;; RETURNS: the Doodad following a drag at the given location
+;; STRATEGY: Use template for Doodad on dood
 (define (doodad-after-drag dood mx my)
   (if (doodad-selected? dood)
       (make-doodad (doodad-type dood) (- mx (doodad-xd dood))
@@ -203,9 +251,9 @@
                    (doodad-color dood) true (doodad-xd dood) (doodad-yd dood))
       dood))
 
-;; cat-after-button-up : Cat Integer Integer -> Cat
-;; RETURNS: the cat following a button-up at the given location
-;; STRATEGY: Use template for Cat on c
+;; doodad-after-button-up : Doodad Integer Integer -> Doodad
+;; RETURNS: the Doodad following a button-up at the given location
+;; STRATEGY: Use template for Doodad on dood
 (define (doodad-after-button-up dood mx my)
   (if (doodad-selected? dood)
       (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
@@ -213,11 +261,12 @@
                    (doodad-xd dood) (doodad-yd dood))
       dood))
 
-;; in-cat? : Cat Integer Integer -> Cat
+;; in-cat? : Doodad Integer Integer -> Doodad
+;; GIVEN: a Doodad and co-ordinates of a point
 ;; RETURNS true iff the given coordinate is inside the bounding box of
-;; the given cat.
+;; the given Doodad.
 ;; EXAMPLES: see tests below
-;; STRATEGY: Use template for Cat on c
+;; STRATEGY: Use template for Doodad on dood
 (define (in-doodad? dood x y)
   (and
     (<= 
@@ -230,18 +279,22 @@
       (+ (doodad-y dood) HALF-DOODAD-HEIGHT))))
 
 
-;; method-name
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY:
+;; get-xd: Integer Integer -> Integer
+;; GIVEN: current x co-ordinate of Doodad center and x-coordinate of
+;;        mouse pointer
+;; RETURNS: Distance between x-cordinate of center of Doodad and
+;;        clicked location
+;; STRATEGY: Combine simpler functions
 (define (get-xd x mx)
   (- mx x)
 )
 
-;; method-name
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY:
+;; get-xd: Integer Integer -> Integer
+;; GIVEN: current y co-ordinate of Doodad center and x-coordinate of
+;;        mouse pointer
+;; RETURNS: Distance between y-cordinate of center of Doodad and
+;;        clicked location
+;; STRATEGY: Combine simpler functions
 (define (get-yd y my)
   (- my y)
 )
@@ -251,9 +304,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; world-to-scene : World -> Scene
+;; GIVEN: a World
 ;; RETURNS: a Scene that portrays the given world.
-;; EXAMPLE: (world-to-scene paused-world-at-20) should return a canvas with
-;;          two Doodads, one at (125, 120) and one at (460, 350)
+;; EXAMPLE: Available in tests
 ;; STRATEGY: Use template for World on w
 (define (world-to-scene w)
   (place-star
@@ -263,8 +316,11 @@
       EMPTY-CANVAS w) w))
 
 ;; place-radial-star : Doodad Scene -> Scene
+;; GIVEN: a Doodad and Scene onn which the Doodad is to be drawn, the World
+;;        which contains this Doodad
 ;; RETURNS: a scene like the given one, but with the given Doodad painted
-;; on it.
+;;        on it.
+;; EXAMPLE: Use template for Doodad on star and use template for World on w
 (define (place-star star scene w)
   (cond
     [(doodad-selected? star)
@@ -273,7 +329,10 @@
     [else (draw-star-helper star scene)]))
 
 ;; place-square : Doodad Scene -> Scene
+;; GIVEN: a Doodad and Scene on which this Doodad is to be drawn 
 ;; RETURNS: a scene like the given one, but with the given Doodad painted on it
+;; EXAMPLE: Use template for Doodad on sq and use template for World on w
+;; STRATEGY: Combine simpler functions
 (define (place-square sq scene w)
   (cond
     [(doodad-selected? sq)
@@ -284,27 +343,31 @@
     [else (draw-square-helper sq scene)])
   )
 
-;; method-name
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY:
+;; draw-doodad-with-dot: Doodad Scene Integer Integer -> Scene
+;; GIVEN: a Doodad, a Scene on which the Doodad is to be drawn and dotx, doty
+;;        are co-ordinates for small black to be drawn
+;; RETURNS: a scene like the given one, but with the given Doodad and Black dot
+;;          painted on it
+;; STRATEGY: Combine simpler functions
 (define (draw-doodad-with-dot dood scene dotx doty)
   (place-image (circle 3 "solid" "black") dotx doty scene))
 
-;; method-name
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY:
+;; draw-star-helper: Doodad Scene
+;; GIVEN: Star like Doodad of the World
+;; RETURNS: a Scene like original but given star-like Doodad and a small black
+;;          circle print on it
+;; STRATEGY: Use template for Doodad on dood
 (define (draw-star-helper star scene)
   (place-image
     (radial-star 8 10 50 "solid" (doodad-color star))
     (doodad-x star) (doodad-y star)
     scene))
 
-;; method-name
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY:
+;; draw-square-helper: Doodad Scene
+;; GIVEN: Star like Doodad of the World
+;; RETURNS: a Scene like original but given square Doodad and a small black
+;;          circle print on it
+;; STRATEGY: Use template for Doodad on dood
 (define (draw-square-helper sq scene)
   (place-image
     (square 71 "solid" (doodad-color sq))
@@ -319,7 +382,7 @@
 ;; GIVEN: a world w
 ;; RETURNS: the world that should follow the given world after the given key
 ;; event. on space, toggle paused?-- ignore all others
-;; EXAMPLES: see tests below
+;; EXAMPLES: Available in the tests
 ;; STRATEGY: Cases on whether the kev is a pause event
 (define (world-after-key-event w kev)
   (cond
@@ -328,6 +391,7 @@
     [else w]))
 
 ;; world-with-paused-toggled : World -> World
+;; GIVEN: a World
 ;; RETURNS: a world just like the given one, but with paused? toggled
 ;; STRATEGY: use template for World on w
 (define (world-with-paused-toggled w)
@@ -336,18 +400,16 @@
    (world-square w)
    (not (world-paused? w)) 0 0))
 
-;; help function for key event
 ;; is-pause-key-event? : KeyEvent -> Boolean
 ;; GIVEN: a KeyEvent
 ;; RETURNS: true iff the KeyEvent represents a pause instruction
 (define (is-pause-key-event? ke)
   (key=? ke " "))
 
-
-;; method-name
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY:
+;; world-with-next-color-for: World -> Color
+;; GIVEN: a World
+;; RETURNS: next Color as String for Doodad of the given world
+;; STRATEGY: Use template for Doodad on dood and use teamplte for World on w
 (define (world-with-next-color-for w)
   (make-world
    (make-doodad (doodad-type (world-star w)) (doodad-x (world-star w)) (doodad-y (world-star w))
@@ -362,22 +424,21 @@
    (world-paused? w) 0 0))
 
 
-;; method-name
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY:
+;; next-color-if-selected : Doodad -> Color
+;; GIVEN: a Doodad
+;; RETURNS: next Color as String for the given Doodad 
+;; STRATEGY: Use template for Doodad on dood
 (define (next-color-if-selected dood)
   (cond
     [(doodad-selected? dood) (next-color (doodad-color dood))]
     [else (doodad-color dood)]))
 
-;; help function for key event
 ;; is-pause-key-event? : KeyEvent -> Boolean
 ;; GIVEN: a KeyEvent
 ;; RETURNS: true iff the KeyEvent represents a pause instruction
+;; STRATEGY: Combine simpler functions
 (define (is-c-key-event? ke)
   (key=? ke "c"))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                       Tick handlers                                       ;;
@@ -401,8 +462,13 @@
 ;; RETURNS: the state of the given doodad after a tick if it were in an
 ;;          unpaused world.
 
-;; examples: 
-;; 
+;; examples:
+;; (define STAR-X-MAX
+;;   (make-doodad "radial-star" 800 80 -10 12 "Green" #f 0 0))
+;; (define STAR-X-MAX-AFTER
+;;   (make-doodad "radial-star" 530 92 10 12 "Blue" #f 0 0))
+;;
+;; (doodad-after-tick STAR-X-MAX) = STAR-X-MAX-AFTER
 ;;
 ;; STRATEGY: use template for Doodad on dood
 (define (doodad-after-tick dood)
@@ -416,9 +482,12 @@
    (doodad-selected? dood) 0 0))
 
 ;; check-x: Doodad -> Integer
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY: 
+;; GIVEN: a Doodad dood
+;; RETURNS: new value of x for Doodad dood
+;; EXAMPLE:
+;; (check-x (make-doodad "radial-star" 490 -2 10 -12 "Green" #f 0 0)) = 510
+;; (check-x (make-doodad "radial-star" 0 -2 -10 -12 "Green" #f 0 0)) = 10
+;; STRATEGY: Use template for Doodad on dood
 (define (check-x dood)
   (cond
      [(and (> (+ (doodad-x dood) (doodad-vx dood)) 0)
@@ -431,9 +500,12 @@
 
 
 ;; check-y: Doodad -> Integer
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY: 
+;; GIVEN: a Doodad dood
+;; RETURNS: new value of y for Doodad dood
+;; EXAMPLE:
+;; (check-y (make-doodad "radial-star" 490 2 10 12 "Green" #f 0 0)) = 14
+;; (check-y (make-doodad "radial-star" 490 -2 10 -12 "Green" #f 0 0)) = 14
+;; STRATEGY: Use template for Doodad on dood
 (define (check-y dood)
   (cond
      [(and (> (+ (doodad-y dood) (doodad-vy dood)) 0)
@@ -445,9 +517,12 @@
       (- (- Y-MAX 1) (- (+ (doodad-y dood) (doodad-vy dood)) (- Y-MAX 1)))]))
 
 ;; check-vx: Doodad -> Integer
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY: 
+;; GIVEN: a Doodad dood
+;; RETURNS: new value of vx for Doodad dood
+;; EXAMPLE:
+;; (check-vx (make-doodad "radial-star" 490 2 10 12 "Green" #f 0 0)) = 500
+;; (check-vx (make-doodad "radial-star" 0 2 -10 12 "Green" #f 0 0)) = 10
+;; STRATEGY: Use template for Doodad on dood
 (define (check-vx dood)
   (cond
      [(and (> (+ (doodad-x dood) (doodad-vx dood)) 0)
@@ -459,9 +534,12 @@
       ( * -1 (doodad-vx dood))]))
 
 ;; check-vy: Doodad -> Integer
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY: 
+;; GIVEN: a Doodad dood
+;; RETURNS: new value of vy for Doodad dood
+;; EXAMPLE:
+;; (check-vy (make-doodad "radial-star" 490 2 10 12 "Green" #f 0 0)) = 14
+;; (check-vy (make-doodad "radial-star" 0 -2 -10 -12 "Green" #f 0 0)) = 14
+;; STRATEGY: Use template for Doodad on dood
 (define (check-vy dood)
   (cond
      [(and (> (+ (doodad-y dood) (doodad-vy dood)) 0)
@@ -473,16 +551,22 @@
       ( * -1 (doodad-vy dood))]))
 
 ;; core-bounce-x?: Doodad -> Boolean
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY: 
+;; GIVEN: a Doodad dood
+;; RETURNS: if the Doodad should perform a core bounce because of change in x
+;; EXAMPLE:
+;; (core-bounce-x? (make-doodad "radial-star" 800 80 -10 12 "Green" #f 0 0))=\t
+;; (core-bounce-x? (make-doodad "radial-star" 400 80 -10 12 "Green" #f 0 0))=\f
+;; STRATEGY: Use template for Doodad on dood
 (define (core-bounce-x? dood)
      (or (< (+ (doodad-x dood) (doodad-vx dood)) 0) 
      (>= (+ (doodad-x dood) (doodad-vx dood)) X-MAX)))
 
 ;; core-bounce-y?: Doodad -> Boolean
-;; GIVEN: 
-;; RETURNS: 
+;; GIVEN: a Doodad dood
+;; RETURNS: if the Doodad should perform a core bounce because of change in y
+;; EXAMPLES:
+;; (core-bounce-y? (make-doodad "radial-star" 400 80 -10 12 "Green" #f 0 0))=\f
+;; (core-bounce-y? (make-doodad "radial-star" 400 -80 -10 12 "Green" #f 0 0))=\t
 ;; STRATEGY: Use template for Doodad on dood
 (define (core-bounce-y? dood)
      (or (< (+ (doodad-y dood) (doodad-vy dood)) 0) 
@@ -492,13 +576,21 @@
 ;; GIVEN: a Doodad
 ;; RETURNS: true iff the given Doodad should do a core bounce because of change
 ;; in
-;; STRATEGY: 
+;; EXAMPLE:
+;; (core-bounce? (make-doodad "radial-star" 400 80 -10 12 "Green" #f 0 0))=\f
+;; (core-bounce? (make-doodad "radial-star" 800 -80 -10 12 "Green" #f 0 0))=\t
+;; STRATEGY: Combine simpler functions
 (define (core-bounce? dood)
   (or (core-bounce-x? dood) (core-bounce-y? dood)))
 
 ;; check-color: Doodad -> String 
 ;; GIVEN: Current color of Doodad
 ;; RETURNS: Next color that should follow current color
+;; EXAMPLE:
+;; (check-color (make-doodad "radial-star" 400 80 -10 12 "Green" #f 0 0))
+;;   = Green
+;; (check-color (make-doodad "radial-star" 800 80 -10 12 "Green" #f 0 0))
+;;   = Blue
 ;; STRATEGY: Use template for Doodad on dood
 (define (check-color dood)
   (cond
@@ -506,8 +598,11 @@
     [else (doodad-color dood)]))
 
 ;; next-color: String -> String 
-;; GIVEN: Current color as a string
+;; GIVEN: Current color of Doodad as a string
 ;; RETURNS: Next color that should follow color c
+;; EXAMPLE:
+;;   (next-color "Green") = "Blue"
+;;   (next-color "Blue") = "Gold"
 ;; STRATEGY: Break into cases based on c
 (define (next-color c)
   (cond
