@@ -321,7 +321,7 @@
 ;;        which contains this Doodad
 ;; RETURNS: a scene like the given one, but with the given Doodad painted
 ;;        on it.
-;; EXAMPLE: Use template for Doodad on star and use template for World on w
+;; STRATEGY: Use template for Doodad on star and use template for World on w
 (define (place-star star scene w)
   (cond
     [(doodad-selected? star)
@@ -449,7 +449,7 @@
 ;; world-after-tick : World -> World
 ;; GIVEN: any World that's possible for the animation
 ;; RETURNS: the World that should follow the given World after a tick
-;; EXAMPLES: 
+;; EXAMPLES: Available in comments
 ;; STRATEGY: Use template for world on w
 (define (world-after-tick w)
   (if (world-paused? w)
