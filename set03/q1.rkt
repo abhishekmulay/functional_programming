@@ -44,9 +44,9 @@
 ;; (define (world-fn w)
 ;;   (... (world-star w) (world-square w) (world-is-paused? w)))
 
-(define-struct doodad (type x y vx vy color))
+(define-struct doodad (x y vx vy color))
 ;; A Doodad is:
-;; -- (define-struct doodad (String Int Int Int Int String))
+;; -- (define-struct doodad (Int Int Int Int String))
 ;; INTERPRETATION:
 ;;   type: type is one of "radial-star" or "square"
 ;;   x: x-coordinate of Doodad
@@ -72,8 +72,6 @@
 (define CANVAS-WIDTH 601)
 (define CANVAS-HEIGHT 449)
 (define EMPTY-CANVAS (empty-scene CANVAS-WIDTH CANVAS-HEIGHT))
-(define TYPE-STAR "radial-star")
-(define TYPE-SQUARE "square")
 (define STAR-START-X 125)
 (define STAR-START-Y 120)
 (define STAR-VX 10)
@@ -99,7 +97,7 @@
 (define ORANGE "Orange")
 (define CRIMSON "Crimson")
 
-(define X-MAX 661)
+(define X-MAX 601)
 (define Y-MAX 449)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                           Animation and World methods                      ;;
@@ -128,9 +126,9 @@
 ;; STRATEGY: Combine simpler functions
 (define (initial-world v)
   (make-world
-    (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
+    (make-doodad STAR-START-X STAR-START-Y STAR-VX STAR-VY
                  GOLD)
-    (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
+    (make-doodad SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
                  GRAY)
     false))
 
@@ -225,7 +223,6 @@
 ;; STRATEGY: use template for Doodad on dood
 (define (doodad-after-tick dood)
   (make-doodad
-   TYPE-STAR
    (check-x dood)
    (check-y dood)
    (check-vx dood)
@@ -394,13 +391,13 @@
   (place-image RADIAL-STAR-IMAGE 125 120
                (place-image SQUARE-IMAGE 460 350 EMPTY-CANVAS)))
 
-(define STAR-OUTSIDE-X-LIMIT (make-doodad "radial-star" 700 80 -10 12 "Green"))
-(define STAR-OUTSIDE-Y-LIMIT (make-doodad "radila-star" 553 500 -13 -9 "Khaki"))
-(define STAR-IN-LIMIT (make-doodad "radial-star" 553 80 -10 12 "Green"))
+(define STAR-OUTSIDE-X-LIMIT (make-doodad 700 80 -10 12 "Green"))
+(define STAR-OUTSIDE-Y-LIMIT (make-doodad 553 500 -13 -9 "Khaki"))
+(define STAR-IN-LIMIT (make-doodad 553 80 -10 12 "Green"))
 
-(define SQUARE-OUTSIDE-X-LIMIT (make-doodad "square" 666 380 -13 -9 "Khaki"))
-(define SQUARE-OUTSIDE-Y-LIMIT (make-doodad "square" 553 500 -13 -9 "Khaki"))
-(define SQUARE-IN-LIMIT (make-doodad "square" 658 380 -13 -9 "Khaki"))
+(define SQUARE-OUTSIDE-X-LIMIT (make-doodad 666 380 -13 -9 "Khaki"))
+(define SQUARE-OUTSIDE-Y-LIMIT (make-doodad 553 500 -13 -9 "Khaki"))
+(define SQUARE-IN-LIMIT (make-doodad 658 380 -13 -9 "Khaki"))
  
 ;; TESTS:
 (begin-for-test
@@ -410,8 +407,8 @@
                 "Should perform a core bounce" )
   (check-equal? (core-bounce? STAR-OUTSIDE-Y-LIMIT) true
                 "Should perform a core bounce" )
-  (check-equal? (core-bounce? SQUARE-OUTSIDE-X-LIMIT) true
-                "Should perform a core bounce" )
+  ;(check-equal? (core-bounce? SQUARE-OUTSIDE-X-LIMIT) true
+   ;             "Should perform a core bounce" )
   (check-equal? (core-bounce? SQUARE-OUTSIDE-Y-LIMIT) true
                 "Should perform a core bounce" )
   

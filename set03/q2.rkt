@@ -49,11 +49,10 @@
 ;; (define (world-fn w)
 ;;   (... (world-star w) (world-square w) (world-is-paused? w)))
 
-(define-struct doodad (type x y vx vy color selected? xd yd))
+(define-struct doodad (x y vx vy color selected? xd yd))
 ;; A Doodad is:
 ;; -- (define-struct doodad (String Int Int Int Int IMAGE))
 ;; INTERPRETATION:
-;;   type: type is one of "radial-star" or "square"
 ;;   x: x-coordinate of Doodad
 ;;   y: x-coordinate of Doodad
 ;;   vx: number of pixels the Doodad moves on each tick in the x direction
@@ -137,9 +136,9 @@
 ;;; EXAMPLE: (initial-world -174)
 (define (initial-world v)
   (make-world
-    (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
+    (make-doodad STAR-START-X STAR-START-Y STAR-VX STAR-VY
                  GOLD false 0 0)
-    (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
+    (make-doodad SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
                  GRAY false 0 0) 
     false 0 0))
 
@@ -189,7 +188,7 @@
 ;; STRATEGY: Use template for Cat on c
 (define (doodad-after-button-down dood mx my)
   (if (in-doodad? dood mx my)
-      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
+      (make-doodad (doodad-x dood) (doodad-y dood)
                    (doodad-vx dood) (doodad-vy dood) (doodad-color dood) true
                    (get-xd (doodad-x dood) mx)
                    (get-yd (doodad-y dood) my)) dood))
@@ -199,7 +198,7 @@
 ;; STRATEGY: Use template for Cat on c
 (define (doodad-after-drag dood mx my)
   (if (doodad-selected? dood)
-      (make-doodad (doodad-type dood) (- mx (doodad-xd dood))
+      (make-doodad (- mx (doodad-xd dood))
                    (- my (doodad-yd dood)) (doodad-vx dood) (doodad-vy dood)
                    (doodad-color dood) true (doodad-xd dood) (doodad-yd dood))
       dood))
@@ -209,7 +208,7 @@
 ;; STRATEGY: Use template for Cat on c
 (define (doodad-after-button-up dood mx my)
   (if (doodad-selected? dood)
-      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
+      (make-doodad (doodad-x dood) (doodad-y dood)
                    (doodad-vx dood) (doodad-vy dood) (doodad-color dood) false
                    (doodad-xd dood) (doodad-yd dood))
       dood))
@@ -351,11 +350,11 @@
 ;; STRATEGY:
 (define (world-with-next-color-for w)
   (make-world
-   (make-doodad TYPE-STAR (doodad-x (world-star w)) (doodad-y (world-star w))
+   (make-doodad (doodad-x (world-star w)) (doodad-y (world-star w))
                 (doodad-vx (world-star w)) (doodad-vy (world-star w))
                 (next-color-if-selected (world-star w))
                 (doodad-selected? (world-star w)) 0 0)
-   (make-doodad  TYPE-SQUARE (doodad-x (world-square w))
+   (make-doodad (doodad-x (world-square w))
                 (doodad-y (world-square w))  (doodad-vx (world-square w))
                 (doodad-vy (world-square w))
                 (next-color-if-selected (world-square w))
@@ -408,7 +407,6 @@
 ;; STRATEGY: use template for Doodad on dood
 (define (doodad-after-tick dood)
   (make-doodad
-   TYPE-STAR
    (check-x dood)
    (check-y dood)
    (check-vx dood)
@@ -536,11 +534,11 @@
 ;(make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
 ;                GOLD false 0 0)
 
-(define selected-star (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD true 0 0))
-(define unselected-star (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD false 0 0))
+(define selected-star (make-doodad STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD true 0 0))
+(define unselected-star (make-doodad STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD false 0 0))
 
-(define selected-square (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD true 0 0))
-(define unselected-square (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD false 0 0))
+(define selected-square (make-doodad STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD true 0 0))
+(define unselected-square (make-doodad STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD false 0 0))
 
 
 ;; TESTS:
@@ -559,4 +557,4 @@
   (check-equal? (next-color CRIMSON) GRAY)
   )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;(animation 1/2)
+(animation 1/2)
