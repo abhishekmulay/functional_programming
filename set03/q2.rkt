@@ -215,7 +215,7 @@
 ;; doodad-after-mouse-event : Doodad Integer Integer MouseEvent -> Doodad
 ;; GIVEN: Doodad, current co-ordinates of mouse and description of mouse event
 ;; RETURNS: The Doodad that should follow the current Doodad
-;; EXAMPLES: Check in tests
+;; EXAMPLES: Available in comments
 ;; STRATEGY:Divide into cases based on mouse event
 (define (doodad-after-mouse-event dood mx my mev)
   (cond
@@ -224,15 +224,11 @@
     [(mouse=? mev "button-up") (doodad-after-button-up dood mx my)]
     [else dood]))
 
-;; cat-after-button-down : Cat Integer Integer -> Cat
-;; RETURNS: the cat following a button-down at the given location.
-;; STRATEGY: Use template for Cat on c
-
 ;; doodad-after-button-down : Doodad Integer Integer -> Doodad
 ;; GIVEN: Doodad, curren mouse co-ordinates 
 ;; RETURNS: The Doodad that should follow the current Doodad after mouse
 ;;          button down event
-;; EXAMPLES:
+;; EXAMPLES: Available in comments
 ;; STRATEGY:Use template for Doodad on dood
 (define (doodad-after-button-down dood mx my)
   (if (in-doodad? dood mx my)
@@ -262,7 +258,7 @@
                    (doodad-xd dood) (doodad-yd dood))
       dood))
 
-;; in-cat? : Doodad Integer Integer -> Doodad
+;; in-doodad? : Doodad Integer Integer -> Doodad
 ;; GIVEN: a Doodad and co-ordinates of a point
 ;; RETURNS true iff the given coordinate is inside the bounding box of
 ;; the given Doodad.
@@ -321,6 +317,21 @@
 ;;        which contains this Doodad
 ;; RETURNS: a scene like the given one, but with the given Doodad painted
 ;;        on it.
+;;
+;; (define SELECTED-STAR
+;;  (make-doodad TYPE-STAR 500 80 -10 12 "Green" true 0 0))
+;;
+;; (define UNPAUSED-WORLD-WITH-SELECTED-STAR
+;;  (make-world SELECTED-STAR UNSELECTED-SQUARE false 500 80))
+;;
+;; (define SQUARE-UI
+;;   (place-image (square 71 "solid" "Khaki") 500 80 EMPTY-CANVAS))
+;;   (define DOT-WITH-SQUARE (place-image
+;;                         (circle 3 "solid" "black") 500 80 SQUARE-UI))
+;;
+;; (place-star SELECTED-STAR EMPTY-CANVAS
+;;                            UNPAUSED-WORLD-WITH-SELECTED-STAR) = SQUARE-UI
+;;
 ;; STRATEGY: Use template for Doodad on star and use template for World on w
 (define (place-star star scene w)
   (cond
@@ -463,8 +474,7 @@
 ;; GIVEN: the state of a radial-star-doodad dood
 ;; RETURNS: the state of the given doodad after a tick if it were in an
 ;;          unpaused world.
-
-;; examples:
+;; EXAMPLE:
 ;; (define STAR-X-MAX
 ;;   (make-doodad "radial-star" 800 80 -10 12 "Green" #f 0 0))
 ;; (define STAR-X-MAX-AFTER
