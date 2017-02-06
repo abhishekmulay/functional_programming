@@ -7,7 +7,7 @@
 (require "extras.rkt")
 (check-location "03" "q2.rkt")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (provide
  animation
@@ -26,7 +26,7 @@
  doodad-after-mouse-event
  doodad-selected?)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; There are two doodads. They are moving and changing color as result of
 ;; change in position.
@@ -34,7 +34,7 @@
 
 ;; starts with (animation 0)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; DATA DEFINITIONS:
 
@@ -68,9 +68,10 @@
 ;; TEMPLATE:
 ;; doodad-fn : Doodad -> ??
 ;; (define (doodad-fn d)
-;;  (... (doodad-type d) (doodad-x d) (doodad-y d) (doodad-vx d) (doodad-vy d) (doodad-color d)))
+;;  (... (doodad-type d) (doodad-x d) (doodad-y d) (doodad-vx d)
+;;       (doodad-vy d) (doodad-color d)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; CONSTANTS:
 (define CANVAS-WIDTH 601)
@@ -108,9 +109,9 @@
 (define HALF-DOODAD-HEIGHT 71/2)
 (define HALF-DOODAD-WIDTH  71/2)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                     Animation Launcher                                     ;;  
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                     Animation Launcher                                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; animation : PosReal -> World
 ;; GIVEN: the speed of the animation, in seconds per tick
@@ -158,9 +159,9 @@
 (define (world-doodad-square w)
   (world-square w))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                     MOUSE EVENT HANDLING                                   ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                     MOUSE EVENT HANDLING                                  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; world-after-mouse-event : World Integer Integer MouseEvent -> World
 ;; GIVEN: a world and a description of a mouse event
@@ -186,9 +187,10 @@
 ;; STRATEGY: Use template for Cat on c
 (define (doodad-after-button-down dood mx my)
   (if (in-doodad? dood mx my)
-      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood) (doodad-vx dood)
-                   (doodad-vy dood) (doodad-color dood) true
-                   (get-xd (doodad-x dood) mx) (get-yd (doodad-y dood) my)) dood))
+      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
+                   (doodad-vx dood) (doodad-vy dood) (doodad-color dood) true
+                   (get-xd (doodad-x dood) mx)
+                   (get-yd (doodad-y dood) my)) dood))
 
 ;; cat-after-drag : Cat Integer Integer -> Cat
 ;; RETURNS: the cat following a drag at the given location
@@ -205,8 +207,9 @@
 ;; STRATEGY: Use template for Cat on c
 (define (doodad-after-button-up dood mx my)
   (if (doodad-selected? dood)
-      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood) (doodad-vx dood)
-                   (doodad-vy dood) (doodad-color dood) false (doodad-xd dood) (doodad-yd dood))
+      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
+                   (doodad-vx dood) (doodad-vy dood) (doodad-color dood) false
+                   (doodad-xd dood) (doodad-yd dood))
       dood))
 
 ;; in-cat? : Cat Integer Integer -> Cat
@@ -242,9 +245,9 @@
   (- my y)
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                        Drawing functions                                   ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                        Drawing functions                                  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; world-to-scene : World -> Scene
 ;; RETURNS: a Scene that portrays the given world.
@@ -263,14 +266,20 @@
 ;; on it.
 (define (place-star star scene w)
   (cond
-    [(doodad-selected? star) (draw-doodad-with-dot star (draw-star-helper star scene) (world-dotx w) (world-doty w))]
+    [(doodad-selected? star)
+     (draw-doodad-with-dot star (draw-star-helper star scene) (world-dotx w)
+                           (world-doty w))]
     [else (draw-star-helper star scene)]))
 
 ;; place-square : Doodad Scene -> Scene
-;; RETURNS: a scene like the given one, but with the given Doodad painted on it.
+;; RETURNS: a scene like the given one, but with the given Doodad painted on it
 (define (place-square sq scene w)
   (cond
-    [(doodad-selected? sq) (draw-doodad-with-dot sq (draw-square-helper sq scene) (world-dotx w) (world-doty w))]
+    [(doodad-selected? sq)
+     (draw-doodad-with-dot sq
+                           (draw-square-helper sq scene)
+                           (world-dotx w)
+                           (world-doty w))]
     [else (draw-square-helper sq scene)])
   )
 
@@ -301,9 +310,9 @@
     (doodad-x sq) (doodad-y sq)
     scene))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                        Key event handlers                                  ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                        Key event handlers                                 ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; world-after-key-event : World KeyEvent -> World
 ;; GIVEN: a world w
@@ -340,10 +349,15 @@
 ;; STRATEGY:
 (define (world-with-next-color-for w)
   (make-world
-   (make-doodad TYPE-STAR (doodad-x (world-star w)) (doodad-y (world-star w))  (doodad-vx (world-star w))
-                (doodad-vy (world-star w)) (next-color-if-selected (world-star w)) (doodad-selected? (world-star w)) 0 0)
-   (make-doodad  TYPE-SQUARE (doodad-x (world-square w)) (doodad-y (world-square w))  (doodad-vx (world-square w))
-                (doodad-vy (world-square w)) (next-color-if-selected (world-square w)) (doodad-selected? (world-square w)) 0 0)
+   (make-doodad TYPE-STAR (doodad-x (world-star w)) (doodad-y (world-star w))
+                (doodad-vx (world-star w)) (doodad-vy (world-star w))
+                (next-color-if-selected (world-star w))
+                (doodad-selected? (world-star w)) 0 0)
+   (make-doodad  TYPE-SQUARE (doodad-x (world-square w))
+                (doodad-y (world-square w))  (doodad-vx (world-square w))
+                (doodad-vy (world-square w))
+                (next-color-if-selected (world-square w))
+                (doodad-selected? (world-square w)) 0 0)
    (world-paused? w) 0 0))
 
 
@@ -364,9 +378,9 @@
   (key=? ke "c"))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                       Tick handlers                                        ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                       Tick handlers                                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; world-after-tick : World -> World
 ;; GIVEN: any World that's possible for the animation
@@ -383,7 +397,8 @@
 
 ;; doodad-after-tick : Doodad -> Doodad
 ;; GIVEN: the state of a radial-star-doodad dood
-;; RETURNS: the state of the given doodad after a tick if it were in an unpaused world.
+;; RETURNS: the state of the given doodad after a tick if it were in an
+;;          unpaused world.
 
 ;; examples: 
 ;; 
@@ -504,7 +519,7 @@
     [(string=? c ORANGE) CRIMSON]
     [(string=? c CRIMSON) GRAY]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; CONSTANTS FOR TEST:
 (define RADIAL-STAR-IMAGE (radial-star 8 10 50 "solid" "gold"))
@@ -519,5 +534,5 @@
 
   (check-equal? world-scene-at-beginning (world-to-scene(initial-world 12)))
   )
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (animation 1/2)
