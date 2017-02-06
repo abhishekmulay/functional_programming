@@ -28,7 +28,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Two moving draggable Doodads, they bounce off of the corner of rectangular enclosure.
+;; Two moving draggable Doodads, they bounce off of the corner of rectangular
+;; enclosure.
 ;; Animation can be paused using space key
 ;; Doodads can be dragged 
 ;; starts with (animation 0)
@@ -412,8 +413,9 @@
 ;; STRATEGY: Use template for Doodad on dood and use teamplte for World on w
 (define (world-with-next-color-for w)
   (make-world
-   (make-doodad (doodad-type (world-star w)) (doodad-x (world-star w)) (doodad-y (world-star w))
-                (doodad-vx (world-star w)) (doodad-vy (world-star w))
+   (make-doodad (doodad-type (world-star w)) (doodad-x (world-star w))
+                (doodad-y (world-star w)) (doodad-vx (world-star w))
+                (doodad-vy (world-star w))
                 (next-color-if-selected (world-star w))
                 (doodad-selected? (world-star w)) 0 0)
    (make-doodad (doodad-type (world-square w)) (doodad-x (world-square w))
@@ -630,15 +632,23 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define UNSELECTED-STAR (make-doodad TYPE-STAR 500 80 -10 12 "Green" false 0 0))
-(define SELECTED-STAR (make-doodad TYPE-STAR 500 80 -10 12 "Green" true 0 0))
-(define UNSELECTED-SQUARE (make-doodad TYPE-SQUARE 500 80 -10 12 "Khaki" false 0 0))
-(define SELECTED-SQUARE (make-doodad TYPE-SQUARE 500 80 -10 12 "Khaki" true 0 0))
+(define UNSELECTED-STAR
+  (make-doodad TYPE-STAR 500 80 -10 12 "Green" false 0 0))
+(define SELECTED-STAR
+  (make-doodad TYPE-STAR 500 80 -10 12 "Green" true 0 0))
+(define UNSELECTED-SQUARE
+  (make-doodad TYPE-SQUARE 500 80 -10 12 "Khaki" false 0 0))
+(define SELECTED-SQUARE
+  (make-doodad TYPE-SQUARE 500 80 -10 12 "Khaki" true 0 0))
 
-(define UNPAUSED-WORLD (make-world UNSELECTED-STAR UNSELECTED-SQUARE false 0 0))
-(define PAUSED-WORLD (make-world UNSELECTED-STAR UNSELECTED-SQUARE true 0 0))
-(define UNPAUSED-WORLD-WITH-SELECTED-STAR (make-world SELECTED-STAR UNSELECTED-SQUARE false 500 80))
-(define UNPAUSED-WORLD-WITH-SELECTED-SQUARE (make-world UNSELECTED-STAR SELECTED-SQUARE false 500 80))
+(define UNPAUSED-WORLD
+  (make-world UNSELECTED-STAR UNSELECTED-SQUARE false 0 0))
+(define PAUSED-WORLD
+  (make-world UNSELECTED-STAR UNSELECTED-SQUARE true 0 0))
+(define UNPAUSED-WORLD-WITH-SELECTED-STAR
+  (make-world SELECTED-STAR UNSELECTED-SQUARE false 500 80))
+(define UNPAUSED-WORLD-WITH-SELECTED-SQUARE
+  (make-world UNSELECTED-STAR SELECTED-SQUARE false 500 80))
 
 (define UNPAUSED-WORLD-WITH-NEXT-COLOR-FOR-STAR
   (make-world (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0)
@@ -655,11 +665,15 @@
 (define STAR-X-MIN (make-doodad "radial-star" -10 80 -10 12 "Green" #f 0 0))
 (define STAR-X-MIN-AFTER (make-doodad "radial-star" 20 92 10 12 "Blue" #f 0 0))
 
-(define STAR-Y-MAX (make-doodad "radial-star" 500 500 -10 12 "Green" #f 0 0))
-(define STAR-Y-MAX-AFTER (make-doodad "radial-star" 490 384 -10 -12 "Blue" #f 0 0))
+(define STAR-Y-MAX
+  (make-doodad "radial-star" 500 500 -10 12 "Green" #f 0 0))
+(define STAR-Y-MAX-AFTER
+  (make-doodad "radial-star" 490 384 -10 -12 "Blue" #f 0 0))
 
-(define STAR-Y-MIN (make-doodad "radial-star" 500 -10 -10 12 "Green" #f 0 0))
-(define STAR-Y-MIN-AFTER (make-doodad "radial-star" 490 2 -10 12 "Green" #f 0 0))
+(define STAR-Y-MIN
+  (make-doodad "radial-star" 500 -10 -10 12 "Green" #f 0 0))
+(define STAR-Y-MIN-AFTER
+  (make-doodad "radial-star" 490 2 -10 12 "Green" #f 0 0))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -672,20 +686,28 @@
 (define UNPAUSED-WORLD-AFTER-TICK
 (make-world STAR-X-MAX-AFTER SQUARE-X-MAX-AFTER false 0 0))
 
-(define STAR-UI (place-image (radial-star 8 10 50 "solid" "green") 500 80 EMPTY-CANVAS))
+(define STAR-UI (place-image
+                 (radial-star 8 10 50 "solid" "green") 500 80 EMPTY-CANVAS))
 (define DOT-WITH-STAR (place-image (circle 3 "solid" "black") 500 80 STAR-UI))
 
 (define SQUARE-UI (place-image (square 71 "solid" "Khaki") 500 80 EMPTY-CANVAS))
-(define DOT-WITH-SQUARE (place-image (circle 3 "solid" "black") 500 80 SQUARE-UI))
+(define DOT-WITH-SQUARE (place-image
+                         (circle 3 "solid" "black") 500 80 SQUARE-UI))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (begin-for-test
   ;; Draw test
   (check-equal? world-scene-at-beginning (world-to-scene(initial-world 12)))
-  (check-equal? (place-star UNSELECTED-STAR EMPTY-CANVAS UNPAUSED-WORLD) STAR-UI "Should match the design")
-  (check-equal? (place-square UNSELECTED-SQUARE EMPTY-CANVAS UNPAUSED-WORLD) SQUARE-UI "Should match the design")
-  (check-equal? (place-star SELECTED-STAR EMPTY-CANVAS UNPAUSED-WORLD-WITH-SELECTED-STAR) DOT-WITH-STAR "Should match the design")
-  (check-equal? (place-square SELECTED-SQUARE EMPTY-CANVAS UNPAUSED-WORLD-WITH-SELECTED-STAR) DOT-WITH-SQUARE "Should match the design")
+  (check-equal? (place-star UNSELECTED-STAR EMPTY-CANVAS UNPAUSED-WORLD)
+                STAR-UI "Should match the design")
+  (check-equal? (place-square UNSELECTED-SQUARE EMPTY-CANVAS UNPAUSED-WORLD)
+                SQUARE-UI "Should match the design")
+  (check-equal? (place-star SELECTED-STAR EMPTY-CANVAS
+                            UNPAUSED-WORLD-WITH-SELECTED-STAR)
+                DOT-WITH-STAR "Should match the design")
+  (check-equal? (place-square SELECTED-SQUARE EMPTY-CANVAS
+                              UNPAUSED-WORLD-WITH-SELECTED-STAR)
+                DOT-WITH-SQUARE "Should match the design")
   
   ;; world test
    (check-equal? (world-after-tick PAUSED-WORLD) PAUSED-WORLD
@@ -711,8 +733,10 @@
                  "Should get square Doodad of the world")
 
    ;; check velocity
-   (check-equal? (check-y (make-doodad "radial-star" 490 -2 10 -12 "Green" #f 0 0)) 14 "y Should be 10")
-   (check-equal? (check-vy (make-doodad "radial-star" 490 -2 10 -12 "Green" #f 0 0)) 12 "y Should be 12")
+   (check-equal? (check-y (make-doodad "radial-star" 490 -2 10 -12 "Green"
+                                       #f 0 0)) 14 "y Should be 10")
+   (check-equal? (check-vy (make-doodad "radial-star" 490 -2 10 -12 "Green"
+                                        #f 0 0)) 12 "y Should be 12")
    
    ;; world after tick
    (check-equal? (world-after-tick UNPAUSED-WORLD-BEFORE-TICK)
@@ -728,15 +752,31 @@
    (check-equal? (doodad-after-tick STAR-Y-MIN) STAR-Y-MIN-AFTER
                  "Star should bounce after tick")
   ;; mouse events:
-   (check-equal? (world-after-mouse-event UNPAUSED-WORLD 100 100 "drag") (make-world (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0) (make-doodad "square" 500 80 -10 12 "Khaki" #f 0 0) #f 100 100) "")
-   (check-equal? (doodad-after-button-up SELECTED-STAR 100 100)  UNSELECTED-STAR "Should return SELECTED-STAR")
-   (check-equal? (doodad-after-button-up UNSELECTED-STAR 100 100)  UNSELECTED-STAR "Should return SELECTED-STAR")
-   (check-equal? (doodad-after-button-down UNSELECTED-STAR 500 80) (make-doodad "radial-star" 500 80 -10 12 "Green" #t 0 0) "should grab this Doodad")
-   (check-equal? (doodad-after-drag SELECTED-STAR 100 100) (make-doodad "radial-star" 100 100 -10 12 "Green" #t 0 0) "Should drag to new position")
-   (check-equal? (doodad-after-drag UNSELECTED-STAR 100 100) (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0) "Should drag to new position")
-   (check-equal? (doodad-after-mouse-event UNSELECTED-STAR 100 100 "button-up") UNSELECTED-STAR "Should return same doodad")
-   (check-equal? (doodad-after-mouse-event UNSELECTED-STAR 100 100 "button-down") UNSELECTED-STAR "Should return same doodad")
-   (check-equal? (doodad-after-mouse-event UNSELECTED-STAR 100 100 "enter") UNSELECTED-STAR "Should return same doodad")
+   (check-equal? (world-after-mouse-event UNPAUSED-WORLD 100 100 "drag")
+                 (make-world (make-doodad "radial-star" 500 80 -10 12 "Green"
+                                          #f 0 0)
+                             (make-doodad "square" 500 80 -10 12 "Khaki"
+                                          #f 0 0) #f 100 100) "")
+   (check-equal? (doodad-after-button-up SELECTED-STAR 100 100)
+                 UNSELECTED-STAR "Should return SELECTED-STAR")
+   (check-equal? (doodad-after-button-up UNSELECTED-STAR 100 100)
+                 UNSELECTED-STAR "Should return SELECTED-STAR")
+   (check-equal? (doodad-after-button-down UNSELECTED-STAR 500 80)
+                 (make-doodad "radial-star" 500 80 -10 12 "Green" #t 0 0)
+                 "should grab this Doodad")
+   (check-equal? (doodad-after-drag SELECTED-STAR 100 100)
+                 (make-doodad "radial-star" 100 100 -10 12 "Green" #t 0 0)
+                 "Should drag to new position")
+   (check-equal? (doodad-after-drag UNSELECTED-STAR 100 100)
+                 (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0)
+                 "Should drag to new position")
+   (check-equal? (doodad-after-mouse-event UNSELECTED-STAR 100 100 "button-up")
+                 UNSELECTED-STAR "Should return same doodad")
+   (check-equal? (doodad-after-mouse-event UNSELECTED-STAR 100 100
+                                           "button-down")
+                 UNSELECTED-STAR "Should return same doodad")
+   (check-equal? (doodad-after-mouse-event UNSELECTED-STAR 100 100 "enter")
+                 UNSELECTED-STAR "Should return same doodad")
    
   ;; tests for next-color
   (check-equal? (next-color GOLD) GREEN)
