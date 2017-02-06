@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname q2) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname q2) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (require rackunit)
 (require 2htdp/image)
 (require 2htdp/universe)
@@ -609,12 +609,16 @@
    (check-equal? (world-after-key-event UNPAUSED-WORLD "\t" ) UNPAUSED-WORLD
                 "Paused World should not change on \t key event ")
    
-   (check-equal? (world-star UNPAUSED-WORLD) UNSELECTED-STAR
+   (check-equal? (world-doodad-star UNPAUSED-WORLD) UNSELECTED-STAR
                  "Should get star-like Doodad of the world")
 
-   (check-equal? (world-square UNPAUSED-WORLD) UNSELECTED-SQUARE
+   (check-equal? (world-doodad-square UNPAUSED-WORLD) UNSELECTED-SQUARE
                  "Should get square Doodad of the world")
 
+   ;; check velocity
+   (check-equal? (check-y (make-doodad "radial-star" 490 -2 10 -12 "Green" #f 0 0)) 14 "y Should be 10")
+   (check-equal? (check-vy (make-doodad "radial-star" 490 -2 10 -12 "Green" #f 0 0)) 12 "y Should be 12")
+   
    ;; world after tick
    (check-equal? (world-after-tick UNPAUSED-WORLD-BEFORE-TICK)
                  UNPAUSED-WORLD-AFTER-TICK "world should change after tick")
@@ -628,8 +632,16 @@
                  "Star should bounce after tick")
    (check-equal? (doodad-after-tick STAR-Y-MIN) STAR-Y-MIN-AFTER
                  "Star should bounce after tick")
-  ;; key events:
+  ;; mouse events:
+   (check-equal? (world-after-mouse-event UNPAUSED-WORLD 100 100 "drag") (make-world (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0) (make-doodad "square" 500 80 -10 12 "Khaki" #f 0 0) #f 100 100) "")
    (check-equal? (doodad-after-button-up SELECTED-STAR 100 100)  UNSELECTED-STAR "Should return SELECTED-STAR")
+   (check-equal? (doodad-after-button-up UNSELECTED-STAR 100 100)  UNSELECTED-STAR "Should return SELECTED-STAR")
+   (check-equal? (doodad-after-button-down UNSELECTED-STAR 500 80) (make-doodad "radial-star" 500 80 -10 12 "Green" #t 0 0) "should grab this Doodad")
+   (check-equal? (doodad-after-drag SELECTED-STAR 100 100) (make-doodad "radial-star" 100 100 -10 12 "Green" #t 0 0) "Should drag to new position")
+   (check-equal? (doodad-after-drag UNSELECTED-STAR 100 100) (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0) "Should drag to new position")
+   (check-equal? (doodad-after-mouse-event UNSELECTED-STAR 100 100 "button-up") UNSELECTED-STAR "Should return same doodad")
+   (check-equal? (doodad-after-mouse-event UNSELECTED-STAR 100 100 "button-down") UNSELECTED-STAR "Should return same doodad")
+   (check-equal? (doodad-after-mouse-event UNSELECTED-STAR 100 100 "enter") UNSELECTED-STAR "Should return same doodad")
    
   ;; tests for next-color
   (check-equal? (next-color GOLD) GREEN)
