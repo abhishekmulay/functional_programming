@@ -439,14 +439,12 @@
                                      STAR-AFTER-BOUNCE-X-MIN
                                      STAR-AFTER-BOUNCE-Y-MIN false))
 
-
 (define PAUSED-WORLD-BEFORE-TICK (make-world
                                       SQUARE-ABOUT-TO-BOUNCE-X-MAX
                                       SQUARE-ABOUT-TO-BOUNCE-Y-MAX true))
 (define PAUSED-WORLD-AFTER-TICK (make-world
                                      SQUARE-ABOUT-TO-BOUNCE-X-MAX
                                      SQUARE-ABOUT-TO-BOUNCE-Y-MAX true))
-
 ;; TESTS:
 (begin-for-test
 
