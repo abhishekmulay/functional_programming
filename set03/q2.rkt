@@ -49,7 +49,7 @@
 ;; (define (world-fn w)
 ;;   (... (world-star w) (world-square w) (world-is-paused? w)))
 
-(define-struct doodad (x y vx vy color selected? xd yd))
+(define-struct doodad (type x y vx vy color selected? xd yd))
 ;; A Doodad is:
 ;; -- (define-struct doodad (String Int Int Int Int IMAGE))
 ;; INTERPRETATION:
@@ -136,9 +136,9 @@
 ;;; EXAMPLE: (initial-world -174)
 (define (initial-world v)
   (make-world
-    (make-doodad STAR-START-X STAR-START-Y STAR-VX STAR-VY
+    (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
                  GOLD false 0 0)
-    (make-doodad SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
+    (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
                  GRAY false 0 0) 
     false 0 0))
 
@@ -188,7 +188,7 @@
 ;; STRATEGY: Use template for Cat on c
 (define (doodad-after-button-down dood mx my)
   (if (in-doodad? dood mx my)
-      (make-doodad (doodad-x dood) (doodad-y dood)
+      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
                    (doodad-vx dood) (doodad-vy dood) (doodad-color dood) true
                    (get-xd (doodad-x dood) mx)
                    (get-yd (doodad-y dood) my)) dood))
@@ -198,7 +198,7 @@
 ;; STRATEGY: Use template for Cat on c
 (define (doodad-after-drag dood mx my)
   (if (doodad-selected? dood)
-      (make-doodad (- mx (doodad-xd dood))
+      (make-doodad (doodad-type dood) (- mx (doodad-xd dood))
                    (- my (doodad-yd dood)) (doodad-vx dood) (doodad-vy dood)
                    (doodad-color dood) true (doodad-xd dood) (doodad-yd dood))
       dood))
@@ -208,7 +208,7 @@
 ;; STRATEGY: Use template for Cat on c
 (define (doodad-after-button-up dood mx my)
   (if (doodad-selected? dood)
-      (make-doodad (doodad-x dood) (doodad-y dood)
+      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
                    (doodad-vx dood) (doodad-vy dood) (doodad-color dood) false
                    (doodad-xd dood) (doodad-yd dood))
       dood))
@@ -350,11 +350,11 @@
 ;; STRATEGY:
 (define (world-with-next-color-for w)
   (make-world
-   (make-doodad (doodad-x (world-star w)) (doodad-y (world-star w))
+   (make-doodad (doodad-type (world-star w)) (doodad-x (world-star w)) (doodad-y (world-star w))
                 (doodad-vx (world-star w)) (doodad-vy (world-star w))
                 (next-color-if-selected (world-star w))
                 (doodad-selected? (world-star w)) 0 0)
-   (make-doodad (doodad-x (world-square w))
+   (make-doodad (doodad-type (world-square w)) (doodad-x (world-square w))
                 (doodad-y (world-square w))  (doodad-vx (world-square w))
                 (doodad-vy (world-square w))
                 (next-color-if-selected (world-square w))
@@ -407,6 +407,7 @@
 ;; STRATEGY: use template for Doodad on dood
 (define (doodad-after-tick dood)
   (make-doodad
+   (doodad-type dood)
    (check-x dood)
    (check-y dood)
    (check-vx dood)
@@ -521,30 +522,125 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#|
 ;; CONSTANTS FOR TEST:
 (define RADIAL-STAR-IMAGE (radial-star 8 10 50 "solid" "gold"))
 (define SQUARE-IMAGE (square 71 "solid" "gray"))
 
-;; World at beginning for testing
 (define world-scene-at-beginning
   (place-image RADIAL-STAR-IMAGE 125 120
                (place-image SQUARE-IMAGE 460 350 EMPTY-CANVAS)))
 
-;; examples of Doodads for testing
-;(make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
-;                GOLD false 0 0)
+(define STAR-OUTSIDE-X-LIMIT (make-doodad 700 80 -10 12 "Green"))
+(define STAR-OUTSIDE-Y-LIMIT (make-doodad 553 500 -13 -9 "Khaki"))
+(define STAR-IN-LIMIT (make-doodad 553 80 -10 12 "Green"))
+(define SQUARE-OUTSIDE-X-LIMIT (make-doodad 666 380 -13 -9 "Khaki"))
+(define SQUARE-OUTSIDE-Y-LIMIT (make-doodad 553 -10 -13 0 "Khaki"))
+(define SQUARE-IN-LIMIT (make-doodad 658 380 -13 -9 "Khaki"))
 
-(define selected-star (make-doodad STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD true 0 0))
-(define unselected-star (make-doodad STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD false 0 0))
 
-(define selected-square (make-doodad STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD true 0 0))
-(define unselected-square (make-doodad STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD false 0 0))
+(define STAR-ABOUT-TO-BOUNCE-X-MAX (make-doodad 601 400 -10 12 "Green"))
+(define STAR-AFTER-BOUNCE-X-MAX (make-doodad 591 412 -10 12 "Green"))
 
+(define STAR-ABOUT-TO-BOUNCE-X-MIN (make-doodad -1 400 -10 12 "Green"))
+(define STAR-AFTER-BOUNCE-X-MIN (make-doodad 11 412 10 12 "Blue"))
+
+(define STAR-ABOUT-TO-BOUNCE-Y-MAX (make-doodad 600 489 -10 12 "Green"))
+(define STAR-AFTER-BOUNCE-Y-MAX (make-doodad 590 395 -10 -12 "Blue"))
+
+(define STAR-ABOUT-TO-BOUNCE-Y-MIN (make-doodad 600 -1 -10 12 "Green"))
+(define STAR-AFTER-BOUNCE-Y-MIN (make-doodad 590 11 -10 12 "Green"))
+
+(define SQUARE-ABOUT-TO-BOUNCE-X-MAX (make-doodad 601 400 12 12 "Green"))
+(define SQUARE-AFTER-BOUNCE-X-MAX (make-doodad 512 396 12 -12 "Blue"))
+
+(define SQUARE-ABOUT-TO-BOUNCE-Y-MAX (make-doodad 500 489 12 12 "Green"))
+(define SQUARE-AFTER-BOUNCE-Y-MAX (make-doodad 512 395 12 -12 "Blue"))
+
+
+(define UNPAUSED-WORLD (make-world
+                                    STAR-ABOUT-TO-BOUNCE-X-MAX
+                                    STAR-ABOUT-TO-BOUNCE-Y-MAX false))
+(define PAUSED-WORLD (make-world
+                                    STAR-ABOUT-TO-BOUNCE-X-MAX
+                                    STAR-ABOUT-TO-BOUNCE-Y-MAX true))
+
+(define UNPAUSED-WORLD-BEFORE-TICK (make-world
+                                    STAR-ABOUT-TO-BOUNCE-X-MAX
+                                    STAR-ABOUT-TO-BOUNCE-Y-MAX false))
+(define UNPAUSED-WORLD-AFTER-TICK (make-world
+                                     STAR-AFTER-BOUNCE-X-MAX
+                                     STAR-AFTER-BOUNCE-Y-MAX false))
+
+(define UNPAUSED-WORLD-MIN-BEFORE-TICK (make-world
+                                    STAR-ABOUT-TO-BOUNCE-X-MIN
+                                    STAR-ABOUT-TO-BOUNCE-Y-MIN false))
+(define UNPAUSED-WORLD-MIN-AFTER-TICK (make-world
+                                     STAR-AFTER-BOUNCE-X-MIN
+                                     STAR-AFTER-BOUNCE-Y-MIN false))
+
+
+(define PAUSED-WORLD-BEFORE-TICK (make-world
+                                      SQUARE-ABOUT-TO-BOUNCE-X-MAX
+                                      SQUARE-ABOUT-TO-BOUNCE-Y-MAX true))
+(define PAUSED-WORLD-AFTER-TICK (make-world
+                                     SQUARE-ABOUT-TO-BOUNCE-X-MAX
+                                     SQUARE-ABOUT-TO-BOUNCE-Y-MAX true))
 
 ;; TESTS:
 (begin-for-test
 
+  ;; tests for world
   (check-equal? world-scene-at-beginning (world-to-scene(initial-world 12)))
+  
+  (check-equal? (world-after-tick UNPAUSED-WORLD-BEFORE-TICK)
+                UNPAUSED-WORLD-AFTER-TICK
+                "Unpaused World after tick should match world with expected")
+  
+  (check-equal? (world-after-tick UNPAUSED-WORLD-MIN-BEFORE-TICK)
+                UNPAUSED-WORLD-MIN-AFTER-TICK
+                "Unpaused World after tick should match world with expected")
+
+  (check-equal? (world-doodad-star UNPAUSED-WORLD)
+                STAR-ABOUT-TO-BOUNCE-X-MAX
+                "Should return star-like Doodad of the world")
+
+  (check-equal? (world-doodad-square UNPAUSED-WORLD)
+                STAR-ABOUT-TO-BOUNCE-Y-MAX
+                "Should return star-like Doodad of the world")
+  
+  (check-equal? (world-after-tick PAUSED-WORLD-BEFORE-TICK)
+                PAUSED-WORLD-AFTER-TICK
+                "Paused World after tick should not change when paused")
+
+  (check-equal? (world-after-key-event UNPAUSED-WORLD " " ) PAUSED-WORLD
+                "Paused World should pause on ' ' key event ")
+  
+  (check-equal? (world-after-key-event UNPAUSED-WORLD "\t" ) UNPAUSED-WORLD
+                "Paused World should not change on \t key event ")
+  
+  (check-equal? (check-y SQUARE-OUTSIDE-Y-LIMIT) 10 "y Should be 10")
+  (check-equal? (check-vy SQUARE-OUTSIDE-Y-LIMIT) 0 "y Should be 0")
+  
+  ;; tests for core bounce
+  (check-equal? (core-bounce? STAR-OUTSIDE-X-LIMIT) true
+                "Should perform a core bounce" )
+  (check-equal? (core-bounce? STAR-OUTSIDE-Y-LIMIT) true
+                "Should perform a core bounce" )
+  (check-equal? (core-bounce? SQUARE-OUTSIDE-X-LIMIT) true
+                "Should perform a core bounce" )
+  (check-equal? (core-bounce? SQUARE-OUTSIDE-Y-LIMIT) true
+                "Should perform a core bounce" )
+  
+  (check-equal? (doodad-after-tick STAR-ABOUT-TO-BOUNCE-X-MAX)
+                STAR-AFTER-BOUNCE-X-MAX
+                "This Doodad should bounce")
+  (check-equal? (doodad-after-tick SQUARE-OUTSIDE-X-LIMIT)
+                (make-doodad 547 371 13 -9 "Orange")
+                "This Doodad should bounce")
+  
   
   ;; tests for next-color
   (check-equal? (next-color GOLD) GREEN)
@@ -556,5 +652,5 @@
   (check-equal? (next-color ORANGE) CRIMSON)
   (check-equal? (next-color CRIMSON) GRAY)
   )
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(animation 1/2)
+|#
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
