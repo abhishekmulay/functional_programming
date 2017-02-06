@@ -46,15 +46,14 @@
 
 (define-struct doodad (type x y vx vy color))
 ;; A Doodad is:
-;; -- (define-struct doodad (String Int Int Int Int IMAGE))
+;; -- (define-struct doodad (String Int Int Int Int String))
 ;; INTERPRETATION:
 ;;   type: type is one of "radial-star" or "square"
 ;;   x: x-coordinate of Doodad
 ;;   y: x-coordinate of Doodad
 ;;   vx: number of pixels the Doodad moves on each tick in the x direction
 ;;   vy: number of pixels the Doodad moves on each tick in the y direction
-;;   color: color of this Doodad
-;;   representation: visual representation of Doodad, it is an Image
+;;   color: color of this Doodad as a String
 
 ;; EXAMPLE:
 ;;  (make-doodad "radial-star" 10 10 5 5 (radial-star 8 10 50 "outline" color))
@@ -104,7 +103,7 @@
 (define SQUARE-START-COLOR "gray")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                           Animation                                        ;;
+;;                           Animation and World methods                      ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; animation : PosReal -> World
@@ -116,16 +115,18 @@
 ;; EXAMPLES:
 ;;         (animation 1) runs the animation at normal speed
 ;;         (animation 1/4) runs at a faster than normal speed
+;; STRATEGY: Combine simpler functions
 (define (animation speed)
   (big-bang (initial-world speed)
             (on-tick world-after-tick speed)
             (on-draw world-to-scene)
             (on-key world-after-key-event)))
 
-;;; initial-world : Any -> World
-;;; GIVEN: any value (ignored)
-;;; RETURNS: the initial world specified for the animation
-;;; EXAMPLE: (initial-world -174)
+;; initial-world : Any -> World
+;; GIVEN: any value (ignored)
+;; RETURNS: the initial world specified for the animation
+;; EXAMPLE: (initial-world -174)
+;; STRATEGY: Combine simpler functions
 (define (initial-world v)
   (make-world
     (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
@@ -137,18 +138,24 @@
 ;; world-paused? : World -> Boolean
 ;; GIVEN: a World
 ;; RETURNS: true iff the World is paused
+;; EXAMPLES: (world-paused? w) = true
+;;           (world-paused? w) = false
+;; STRATEGY: Use template for World on w
 (define (world-paused? w)
   (world-is-paused? w))
 
 ;; world-doodad-star : World -> Doodad
 ;; GIVEN: a World
 ;; RETURNS: the star-like Doodad of the World
+;; EXAMPLE: (world-doodad-star w) = 
+;; STRATEGY: Use template for World on w
 (define (world-doodad-star w)
   (world-star w))
 
 ;; world-doodad-square : World -> Doodad
 ;; GIVEN: a World
 ;; RETURNS: the square Doodad of the World
+;; STRATEGY: Use template for World on w
 (define (world-doodad-square w)
   (world-square w))
 
@@ -169,8 +176,12 @@
       EMPTY-CANVAS)))
 
 ;; place-radial-star : Doodad Scene -> Scene
+;; GIVEN: Star-like Doodad of the world and Scene on which the Doodad is to be
+;;        drawn
+;; EXAMPLES: Check in test cases
 ;; RETURNS: a scene like the given one, but with the given Doodad painted
-;; on it.
+;;          on it.
+;; STRATEGY: Use template for Doodad on star
 (define (place-star star scene)
   (place-image
     (radial-star 8 10 50 "solid" (doodad-color star))
@@ -178,7 +189,11 @@
     scene))
 
 ;; place-square : Doodad Scene -> Scene
+;; GIVEN: Square Doodad of the world and Scene on which the Doodad is to be
+;;        drawn
 ;; RETURNS: a scene like the given one, but with the given Doodad painted on it.
+;; EXAMPLE:
+;; STRATEGY: Use template for Doodad on sq
 (define (place-square sq scene)
   (place-image
     (square 71 "solid" (doodad-color sq))
@@ -203,12 +218,10 @@
       (world-paused? w))))
 
 ;; doodad-after-tick : Doodad -> Doodad
-;; GIVEN: the state of a radial-star-doodad dood
-;; RETURNS: the state of the given doodad after a tick if it were in an
+;; GIVEN: the state of a star-like Doodad
+;; RETURNS: the state of the given Doodad after a tick if it were in an
 ;;          unpaused world.
-
-;; examples: 
-;; 
+;; EXAMPLES: 
 ;;
 ;; STRATEGY: use template for Doodad on dood
 (define (doodad-after-tick dood)
@@ -221,9 +234,10 @@
    (check-color dood)))
 
 ;; check-x: Doodad -> Integer
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY: 
+;; GIVEN: A Doodad dood
+;; RETURNS: The new value of x co-ordinate of this Doodad subject to conditions
+;; EXAMPLES:
+;; STRATEGY: use template for Doodad on dood
 (define (check-x dood)
   (cond
      [(and (> (+ (doodad-x dood) (doodad-vx dood)) 0)
@@ -234,11 +248,11 @@
      [(>= (+ (doodad-x dood) (doodad-vx dood)) 601)
       (- 600 (- (+ (doodad-x dood) (doodad-vx dood)) 600))]))
 
-
 ;; check-y: Doodad -> Integer
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY: 
+;; GIVEN: A Doodad dood
+;; RETURNS: The new value of y co-ordinate of this Doodad subject to conditions
+;; EXAMPLES:
+;; STRATEGY: use template for Doodad on dood
 (define (check-y dood)
   (cond
      [(and (> (+ (doodad-y dood) (doodad-vy dood)) 0)
@@ -250,9 +264,10 @@
       (- 448 (- (+ (doodad-y dood) (doodad-vy dood)) 448))]))
 
 ;; check-vx: Doodad -> Integer
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY: 
+;; GIVEN: A Doodad dood
+;; RETURNS: The new value of x velocity of this Doodad subject to conditions
+;; EXAMPLES:
+;; STRATEGY: use template for Doodad on dood
 (define (check-vx dood)
   (cond
      [(and (> (+ (doodad-x dood) (doodad-vx dood)) 0)
@@ -264,9 +279,10 @@
       ( * -1 (doodad-vx dood))]))
 
 ;; check-vy: Doodad -> Integer
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY: 
+;; GIVEN: A Doodad dood
+;; RETURNS: The new value of y velocity of this Doodad subject to conditions 
+;; EXAMPLES:
+;; STRATEGY: use template for Doodad on dood
 (define (check-vy dood)
   (cond
      [(and (> (+ (doodad-y dood) (doodad-vy dood)) 0)
@@ -278,33 +294,43 @@
       ( * -1 (doodad-vy dood))]))
 
 ;; core-bounce-x?: Doodad -> Boolean
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY: 
+;; GIVEN: a Doodad dood
+;; RETURNS: Returns true if the Doodad can perform a core bounce because of
+;;          change in x property
+;; EXAMPLE: (core-bounce-x? dood) = true
+;;          (core-bounce-x? dood) = false
+;; STRATEGY: use template for Doodad on dood
 (define (core-bounce-x? dood)
      (or (< (+ (doodad-x dood) (doodad-vx dood)) 0) 
      (>= (+ (doodad-x dood) (doodad-vx dood)) 601)))
 
 ;; core-bounce-y?: Doodad -> Boolean
-;; GIVEN: 
-;; RETURNS: 
-;; STRATEGY: Use template for Doodad on dood
+;; GIVEN: a Doodad dood
+;; RETURNS: Returns true if the Doodad can perform a core bounce because of
+;;          change in y property
+;; EXAMPLE: (core-bounce-y? dood) = true
+;;          (core-bounce-y? dood) = false
+;; STRATEGY: use template for Doodad on dood
 (define (core-bounce-y? dood)
      (or (< (+ (doodad-y dood) (doodad-vy dood)) 0) 
      (>= (+ (doodad-y dood) (doodad-vy dood)) 449)))
 
 ;; core-bounce? : Doodad -> Boolean
 ;; GIVEN: a Doodad
-;; RETURNS: true iff the given Doodad should do a core bounce because of change
-;; in
-;; STRATEGY: 
+;; RETURNS: true iff the given Doodad should perform a core bounce
+;; EXAMPLE: (core-bounce? dood) = true
+;;          (core-bounce? dood) = false
+;; STRATEGY: Combine simpler functions
 (define (core-bounce? dood)
   (or (core-bounce-x? dood) (core-bounce-y? dood)))
 
 ;; check-color: Doodad -> String 
 ;; GIVEN: Current color of Doodad
-;; RETURNS: Next color that should follow current color
-;; STRATEGY: Use template for Doodad on dood
+;; RETURNS:Next color that should follow current color. If there has been a
+;;         core bounce, get next color for that Doodad else keep the same
+;;         color of that Doodad
+;; EXAMPLES:
+;; STRATEGY:Use template for Doodad on dood
 (define (check-color dood)
   (cond
     [(core-bounce? dood) (next-color (doodad-color dood))]
@@ -319,7 +345,6 @@
     [(string=? c GOLD) GREEN]
     [(string=? c GREEN) BLUE]
     [(string=? c BLUE) GOLD]
-    
     [(string=? c GRAY) OLIVE-DRAB]
     [(string=? c OLIVE-DRAB) KHAKI]
     [(string=? c KHAKI) ORANGE]
@@ -342,7 +367,9 @@
     w))
 
 ;; world-with-paused-toggled : World -> World
+;; GIVEN: a World w
 ;; RETURNS: a world just like the given one, but with paused? toggled
+;; EXAMPLES:
 ;; STRATEGY: use template for World on w
 (define (world-with-paused-toggled w)
   (make-world
@@ -350,10 +377,11 @@
    (world-square w)
    (not (world-paused? w))))
 
-;; help function for key event
 ;; is-pause-key-event? : KeyEvent -> Boolean
 ;; GIVEN: a KeyEvent
 ;; RETURNS: true iff the KeyEvent represents a pause instruction
+;; EXAMPLE: (is-pause-key-event? " ") = true
+;; STRATEGY: Combine simpler functions
 (define (is-pause-key-event? ke)
   (key=? ke " "))
 
