@@ -38,7 +38,7 @@
 
 ;; DATA DEFINITIONS:
 
-(define-struct world (star square is-paused?))
+(define-struct world (star square is-paused? dotx doty))
 ;; A World is a (make-world Doodad Doodad Boolean)
 ;; star is Doodad shaped like a radial star
 ;; square is Doodad shaped like a square
@@ -98,14 +98,18 @@
 (define GREEN "Green")
 (define BLUE "Blue")
 
+(define SQUARE-START-COLOR "gray")
 (define GRAY "Gray")
 (define OLIVE-DRAB "OliveDrab")
 (define KHAKI "Khaki")
 (define ORANGE "Orange")
 (define CRIMSON "Crimson")
 
-(define SQUARE-START-COLOR "gray")
+(define HALF-DOODAD-HEIGHT 71/2)
+(define HALF-DOODAD-WIDTH  71/2)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                     Animation Launcher                                     ;;  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; animation : PosReal -> World
@@ -124,16 +128,6 @@
             (on-key world-after-key-event)
             (on-mouse world-after-mouse-event)))
 
-;; world-after-mouse-event : World Integer Integer MouseEvent -> World
-;; GIVEN: a world and a description of a mouse event
-;; RETURNS: the world that should follow the given mouse event
-;; STRATEGY: use template for World on w
-(define (world-after-mouse-event w mx my mev)
-  (make-world
-    (doodad-after-mouse-event (world-star w) mx my mev)
-    (doodad-after-mouse-event (world-square w) mx my mev)
-    (world-paused? w)))
-
 ;;; initial-world : Any -> World
 ;;; GIVEN: any value (ignored)
 ;;; RETURNS: the initial world specified for the animation
@@ -143,54 +137,41 @@
     (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
                  GOLD false 0 0)
     (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
-                 GRAY false 0 0)
-    false))
+                 GRAY false 0 0) 
+    false 0 0))
 
-;; world-to-scene : World -> Scene
-;; RETURNS: a Scene that portrays the given world.
-;; EXAMPLE: (world-to-scene paused-world-at-20) should return a canvas with
-;;          two Doodads, one at (125, 120) and one at (460, 350)
-;; STRATEGY: Use template for World on w
-(define (world-to-scene w)
-  (place-star
-    (world-star w)
-    (place-square
-      (world-square w)
-      EMPTY-CANVAS)))
+;; world-paused? : World -> Boolean
+;; GIVEN: a World
+;; RETURNS: true iff the World is paused
+(define (world-paused? w)
+  (world-is-paused? w))
 
-;; place-radial-star : Doodad Scene -> Scene
-;; RETURNS: a scene like the given one, but with the given Doodad painted
-;; on it.
-(define (place-star star scene)
-  (place-image
-    (radial-star 8 10 50 "solid" (doodad-color star))
-    (doodad-x star) (doodad-y star)
-    scene))
+;; world-doodad-star : World -> Doodad
+;; GIVEN: a World
+;; RETURNS: the star-like Doodad of the World
+(define (world-doodad-star w)
+  (world-star w))
 
-;; place-square : Doodad Scene -> Scene
-;; RETURNS: a scene like the given one, but with the given Doodad painted on it.
-(define (place-square sq scene)
-  (place-image
-    (square 71 "solid" (doodad-color sq))
-    (doodad-x sq) (doodad-y sq)
-    scene))
-
-;; world-after-tick : World -> World
-;; GIVEN: any World that's possible for the animation
-;; RETURNS: the World that should follow the given World after a tick
-;; EXAMPLES: 
-;; STRATEGY: Use template for world on w
-(define (world-after-tick w)
-  (if (world-paused? w)
-    w
-    (make-world
-      (doodad-after-tick (world-star w))
-      (doodad-after-tick (world-square w))
-      (world-paused? w))))
+;; world-doodad-square : World -> Doodad
+;; GIVEN: a World
+;; RETURNS: the square Doodad of the World
+(define (world-doodad-square w)
+  (world-square w))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                     MOUSE EVENT HANDLING                                   ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; world-after-mouse-event : World Integer Integer MouseEvent -> World
+;; GIVEN: a world and a description of a mouse event
+;; RETURNS: the world that should follow the given mouse event
+;; STRATEGY: use template for World on w
+(define (world-after-mouse-event w mx my mev)
+  (make-world
+    (doodad-after-mouse-event (world-star w) mx my mev)
+    (doodad-after-mouse-event (world-square w) mx my mev)
+    (world-paused? w)
+    mx my))
 
 ;; doodad-after-mouse-event : Doodad -> Doodad
 (define (doodad-after-mouse-event dood mx my mev)
@@ -199,11 +180,6 @@
     [(mouse=? mev "drag") (doodad-after-drag dood mx my)]
     [(mouse=? mev "button-up") (doodad-after-button-up dood mx my)]
     [else dood]))
-
-;; helper functions:
-
-(define HALF-DOODAD-HEIGHT 71/2)
-(define HALF-DOODAD-WIDTH  71/2)
 
 ;; cat-after-button-down : Cat Integer Integer -> Cat
 ;; RETURNS: the cat following a button-down at the given location.
@@ -250,15 +226,160 @@
       (+ (doodad-y dood) HALF-DOODAD-HEIGHT))))
 
 
+;; method-name
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY:
 (define (get-xd x mx)
   (- mx x)
 )
 
+;; method-name
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY:
 (define (get-yd y my)
   (- my y)
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                        Drawing functions                                   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; world-to-scene : World -> Scene
+;; RETURNS: a Scene that portrays the given world.
+;; EXAMPLE: (world-to-scene paused-world-at-20) should return a canvas with
+;;          two Doodads, one at (125, 120) and one at (460, 350)
+;; STRATEGY: Use template for World on w
+(define (world-to-scene w)
+  (place-star
+    (world-star w)
+    (place-square
+      (world-square w)
+      EMPTY-CANVAS w) w))
+
+;; place-radial-star : Doodad Scene -> Scene
+;; RETURNS: a scene like the given one, but with the given Doodad painted
+;; on it.
+(define (place-star star scene w)
+  (cond
+    [(doodad-selected? star) (draw-doodad-with-dot star (draw-star-helper star scene) (world-dotx w) (world-doty w))]
+    [else (draw-star-helper star scene)]))
+
+;; place-square : Doodad Scene -> Scene
+;; RETURNS: a scene like the given one, but with the given Doodad painted on it.
+(define (place-square sq scene w)
+  (cond
+    [(doodad-selected? sq) (draw-doodad-with-dot sq (draw-square-helper sq scene) (world-dotx w) (world-doty w))]
+    [else (draw-square-helper sq scene)])
+  )
+
+;; method-name
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY:
+(define (draw-doodad-with-dot dood scene dotx doty)
+  (place-image (circle 3 "solid" "black") dotx doty scene))
+
+;; method-name
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY:
+(define (draw-star-helper star scene)
+  (place-image
+    (radial-star 8 10 50 "solid" (doodad-color star))
+    (doodad-x star) (doodad-y star)
+    scene))
+
+;; method-name
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY:
+(define (draw-square-helper sq scene)
+  (place-image
+    (square 71 "solid" (doodad-color sq))
+    (doodad-x sq) (doodad-y sq)
+    scene))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                        Key event handlers                                  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; world-after-key-event : World KeyEvent -> World
+;; GIVEN: a world w
+;; RETURNS: the world that should follow the given world after the given key
+;; event. on space, toggle paused?-- ignore all others
+;; EXAMPLES: see tests below
+;; STRATEGY: Cases on whether the kev is a pause event
+(define (world-after-key-event w kev)
+  (cond
+    [(is-pause-key-event? kev) (world-with-paused-toggled w)]
+    [(is-c-key-event? kev) (world-with-next-color-for w)]
+    [else w]))
+
+;; world-with-paused-toggled : World -> World
+;; RETURNS: a world just like the given one, but with paused? toggled
+;; STRATEGY: use template for World on w
+(define (world-with-paused-toggled w)
+  (make-world
+   (world-star w)
+   (world-square w)
+   (not (world-paused? w)) 0 0))
+
+;; help function for key event
+;; is-pause-key-event? : KeyEvent -> Boolean
+;; GIVEN: a KeyEvent
+;; RETURNS: true iff the KeyEvent represents a pause instruction
+(define (is-pause-key-event? ke)
+  (key=? ke " "))
+
+
+;; method-name
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY:
+(define (world-with-next-color-for w)
+  (make-world
+   (make-doodad TYPE-STAR (doodad-x (world-star w)) (doodad-y (world-star w))  (doodad-vx (world-star w))
+                (doodad-vy (world-star w)) (next-color-if-selected (world-star w)) (doodad-selected? (world-star w)) 0 0)
+   (make-doodad  TYPE-SQUARE (doodad-x (world-square w)) (doodad-y (world-square w))  (doodad-vx (world-square w))
+                (doodad-vy (world-square w)) (next-color-if-selected (world-square w)) (doodad-selected? (world-square w)) 0 0)
+   (world-paused? w) 0 0))
+
+
+;; method-name
+;; GIVEN: 
+;; RETURNS: 
+;; STRATEGY:
+(define (next-color-if-selected dood)
+  (cond
+    [(doodad-selected? dood) (next-color (doodad-color dood))]
+    [else (doodad-color dood)]))
+
+;; help function for key event
+;; is-pause-key-event? : KeyEvent -> Boolean
+;; GIVEN: a KeyEvent
+;; RETURNS: true iff the KeyEvent represents a pause instruction
+(define (is-c-key-event? ke)
+  (key=? ke "c"))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                       Tick handlers                                        ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; world-after-tick : World -> World
+;; GIVEN: any World that's possible for the animation
+;; RETURNS: the World that should follow the given World after a tick
+;; EXAMPLES: 
+;; STRATEGY: Use template for world on w
+(define (world-after-tick w)
+  (if (world-paused? w)
+    w
+    (make-world
+      (doodad-after-tick (world-star w))
+      (doodad-after-tick (world-square w))
+      (world-paused? w) 0 0)))
 
 ;; doodad-after-tick : Doodad -> Doodad
 ;; GIVEN: the state of a radial-star-doodad dood
@@ -382,92 +503,6 @@
     [(string=? c KHAKI) ORANGE]
     [(string=? c ORANGE) CRIMSON]
     [(string=? c CRIMSON) GRAY]))
-
-;; world-after-key-event : World KeyEvent -> World
-;; GIVEN: a world w
-;; RETURNS: the world that should follow the given world after the given key
-;; event. on space, toggle paused?-- ignore all others
-;; EXAMPLES: see tests below
-;; STRATEGY: Cases on whether the kev is a pause event
-(define (world-after-key-event w kev)
-  (cond
-    [(is-pause-key-event? kev) (world-with-paused-toggled w)]
-    [(is-c-key-event? kev) (world-with-next-color-for w)]
-    [else w]))
-
-;; return World
-(define (world-with-next-color-for w)
-  (make-world
-   (make-doodad TYPE-STAR (doodad-x (world-star w)) (doodad-y (world-star w))  (doodad-vx (world-star w))
-                (doodad-vy (world-star w)) (next-color-if-selected (world-star w)) (doodad-selected? (world-star w)) 0 0)
-   (make-doodad  TYPE-SQUARE (doodad-x (world-square w)) (doodad-y (world-square w))  (doodad-vx (world-square w))
-                (doodad-vy (world-square w)) (next-color-if-selected (world-square w)) (doodad-selected? (world-square w)) 0 0)
-   (world-paused? w)))
-
-(define (next-color-if-selected dood)
-  (cond
-    [(doodad-selected? dood) (next-color (doodad-color dood))]
-    [else (doodad-color dood)]))
-
-;; world-with-paused-toggled : World -> World
-;; RETURNS: a world just like the given one, but with paused? toggled
-;; STRATEGY: use template for World on w
-(define (world-with-paused-toggled w)
-  (make-world
-   (world-star w)
-   (world-square w)
-   (not (world-paused? w))))
-
-;; help function for key event
-;; is-pause-key-event? : KeyEvent -> Boolean
-;; GIVEN: a KeyEvent
-;; RETURNS: true iff the KeyEvent represents a pause instruction
-(define (is-pause-key-event? ke)
-  (key=? ke " "))
-
-;; help function for key event
-;; is-pause-key-event? : KeyEvent -> Boolean
-;; GIVEN: a KeyEvent
-;; RETURNS: true iff the KeyEvent represents a pause instruction
-(define (is-c-key-event? ke)
-  (key=? ke "c"))
-
-;; world-paused? : World -> Boolean
-;; GIVEN: a World
-;; RETURNS: true iff the World is paused
-(define (world-paused? w)
-  (world-is-paused? w))
-
-;; world-doodad-star : World -> Doodad
-;; GIVEN: a World
-;; RETURNS: the star-like Doodad of the World
-(define (world-doodad-star w)
-  (world-star w))
-
-;; world-doodad-square : World -> Doodad
-;; GIVEN: a World
-;; RETURNS: the square Doodad of the World
-(define (world-doodad-square w)
-  (world-square w))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;                            Question 2                                      ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; world-after-mouse-event: World Int Int MouseEvent -> World
-;; GIVEN: A world, the x- and y-coordinates of a mouse event, and the
-;;     mouse event
-;; RETURNS: the world that should follow the given world after the
-;;     given mouse event
-          
-;; doodad-after-mouse-event :  Doodad Int Int MouseEvent -> Doodad
-;; GIVEN: A doodad, the x- and y-coordinates of a mouse event, and
-;;     the mouse event
-;; RETURNS: the doodad as it should be after the given mouse event
-          
-;; doodad-selected? : Doodad -> Boolean
-;; RETURNS: true iff the given doodad is selected
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
