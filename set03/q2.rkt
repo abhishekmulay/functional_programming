@@ -39,7 +39,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-struct world (star square is-paused? dotx doty))
-;; A World is a (make-world Doodad Doodad Boolean)
+
+;; A World is a (make-world Doodad Doodad Boolean Integer Integer)
 ;; star is Doodad shaped like a radial star
 ;; square is Doodad shaped like a square
 ;; is-paused? describes whether or not the world is paused
@@ -53,6 +54,7 @@
 ;;     (world-doty w)))
 
 (define-struct doodad (type x y vx vy color selected? xd yd))
+
 ;; A Doodad is:
 ;; -- (define-struct doodad (String Integer Integer Integer Integener String
 ;;      Boolean Integer Integer))
@@ -140,10 +142,14 @@
             (on-key world-after-key-event)
             (on-mouse world-after-mouse-event)))
 
-;;; initial-world : Any -> World
-;;; GIVEN: any value (ignored)
-;;; RETURNS: the initial world specified for the animation
-;;; EXAMPLE: (initial-world -174)
+;; initial-world : Any -> World
+;; GIVEN: any value (ignored)
+;; RETURNS: the initial world specified for the animation
+;; EXAMPLE: (initial-world -174) =
+;; (make-world
+;;   (make-doodad "radial-star" 125 120 10 12 "Gold" #false 0 0)
+;;   (make-doodad "square" 460 350 -13 -9 "Gray" #false 0 0) #false 0 0)
+;; STRATEGY: Combine simpler functions
 (define (initial-world v)
   (make-world
     (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
@@ -159,7 +165,6 @@
 ;;       (define TEST-WORLD
 ;;         (make-world (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0)
 ;;         (make-doodad "square" 500 80 -10 12 "Khaki" #f 0 0) #f 0 0))
-;;
 ;; (world-paused? TEST-WORLD) = false
 ;;
 ;; STRATEGY: Use template for World on w
@@ -192,7 +197,6 @@
 ;;
 ;;  (world-doodad-square TEST-WORLD) = (make-doodad "square" 500 80 -10 12
 ;;                                        "Khaki" #f 0 0) #f 0 0))
-;;
 ;; STRATEGY: Use template for World on w
 (define (world-doodad-square w)
   (world-square w))
@@ -204,6 +208,15 @@
 ;; world-after-mouse-event : World Integer Integer MouseEvent -> World
 ;; GIVEN: a world and a description of a mouse event
 ;; RETURNS: the world that should follow the given mouse event
+;; (define UNPAUSED-WORLD (make-world
+;;   (make-doodad "radial-star" 500 80 -10 12 "Green" #false 0 0)
+;;   (make-doodad "square" 500 80 -10 12 "Khaki" #false 0 0) #false 0 0))
+;;
+;; (world-after-mouse-event UNPAUSED-WORLD 100 100 "drag")
+;;                 (make-world (make-doodad "radial-star" 500 80 -10 12 "Green"
+;;                                          #f 0 0)
+;;                             (make-doodad "square" 500 80 -10 12 "Khaki"
+;;                                          #f 0 0) #f 100 100) "")
 ;; STRATEGY: use template for World on w
 (define (world-after-mouse-event w mx my mev)
   (make-world
@@ -215,7 +228,11 @@
 ;; doodad-after-mouse-event : Doodad Integer Integer MouseEvent -> Doodad
 ;; GIVEN: Doodad, current co-ordinates of mouse and description of mouse event
 ;; RETURNS: The Doodad that should follow the current Doodad
-;; EXAMPLES: Available in comments
+;; EXAMPLE:
+;;  (doodad-after-mouse-event (make-doodad "radial-star" 500 80 -10 12
+;;                            "Green" #false 0 0) 100 100 "enter") =
+;;  (make-doodad "radial-star" 500 80 -10 12 "Green" #false 0 0)
+;;
 ;; STRATEGY:Divide into cases based on mouse event
 (define (doodad-after-mouse-event dood mx my mev)
   (cond
@@ -240,6 +257,7 @@
 ;; doodad-after-drag : Doodad Integer Integer -> Doodad
 ;; GIVEN: a Doodad, current co-ordinates of mouse
 ;; RETURNS: the Doodad following a drag at the given location
+;; EXAMPLES: Available in comments
 ;; STRATEGY: Use template for Doodad on dood
 (define (doodad-after-drag dood mx my)
   (if (doodad-selected? dood)

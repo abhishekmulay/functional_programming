@@ -32,7 +32,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                         DATA DEFINITIONS                                  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define-struct world (star square is-paused?))
+
 ;; A World is a (make-world Doodad Doodad Boolean)
 ;; star is Doodad shaped like a radial star
 ;; square is Doodad shaped like a square
@@ -44,6 +46,7 @@
 ;;   (... (world-star w) (world-square w) (world-is-paused? w)))
 
 (define-struct doodad (x y vx vy color))
+
 ;; A Doodad is:
 ;; -- (define-struct doodad (Int Int Int Int String))
 ;; INTERPRETATION:
