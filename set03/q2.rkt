@@ -35,8 +35,8 @@
 ;; starts with (animation 0)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; DATA DEFINITIONS:
+;;                       DATA DEFINITIONS                                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-struct world (star square is-paused? dotx doty))
 ;; A World is a (make-world Doodad Doodad Boolean)
