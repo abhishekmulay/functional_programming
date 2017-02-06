@@ -108,6 +108,8 @@
 
 (define HALF-DOODAD-HEIGHT 71/2)
 (define HALF-DOODAD-WIDTH  71/2)
+(define X-MAX 661)
+(define Y-MAX 449)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                     Animation Launcher                                    ;;
@@ -421,12 +423,12 @@
 (define (check-x dood)
   (cond
      [(and (> (+ (doodad-x dood) (doodad-vx dood)) 0)
-           (< (+ (doodad-x dood) (doodad-vx dood)) 601))
+           (< (+ (doodad-x dood) (doodad-vx dood)) X-MAX))
       (+ (doodad-x dood) (doodad-vx dood))]
      [(<= (+ (doodad-x dood) (doodad-vx dood)) 0)
       ( * -1 (+ (doodad-x dood) (doodad-vx dood)))]
-     [(>= (+ (doodad-x dood) (doodad-vx dood)) 601)
-      (- 600 (- (+ (doodad-x dood) (doodad-vx dood)) 600))]))
+     [(>= (+ (doodad-x dood) (doodad-vx dood)) X-MAX)
+      (- (- X-MAX 1) (- (+ (doodad-x dood) (doodad-vx dood)) (- X-MAX 1) ))]))
 
 
 ;; check-y: Doodad -> Integer
@@ -436,12 +438,12 @@
 (define (check-y dood)
   (cond
      [(and (> (+ (doodad-y dood) (doodad-vy dood)) 0)
-           (< (+ (doodad-y dood) (doodad-vy dood)) 449))
+           (< (+ (doodad-y dood) (doodad-vy dood)) Y-MAX))
       (+ (doodad-y dood) (doodad-vy dood))]
      [(<= (+ (doodad-y dood) (doodad-vy dood)) 0)
       (* -1 (+ (doodad-y dood) (doodad-vy dood)))]
-     [(>= (+ (doodad-y dood) (doodad-vy dood)) 449)
-      (- 448 (- (+ (doodad-y dood) (doodad-vy dood)) 448))]))
+     [(>= (+ (doodad-y dood) (doodad-vy dood)) Y-MAX)
+      (- (- Y-MAX 1) (- (+ (doodad-y dood) (doodad-vy dood)) (- Y-MAX 1)))]))
 
 ;; check-vx: Doodad -> Integer
 ;; GIVEN: 
@@ -450,11 +452,11 @@
 (define (check-vx dood)
   (cond
      [(and (> (+ (doodad-x dood) (doodad-vx dood)) 0)
-           (< (+ (doodad-x dood) (doodad-vx dood)) 601))
+           (< (+ (doodad-x dood) (doodad-vx dood)) X-MAX))
       (doodad-vx dood)]
      [(<= (+ (doodad-x dood) (doodad-vx dood)) 0)
       ( * -1 (doodad-vx dood))]
-     [(>= (+ (doodad-x dood) (doodad-vx dood)) 601)
+     [(>= (+ (doodad-x dood) (doodad-vx dood)) X-MAX)
       ( * -1 (doodad-vx dood))]))
 
 ;; check-vy: Doodad -> Integer
@@ -464,11 +466,11 @@
 (define (check-vy dood)
   (cond
      [(and (> (+ (doodad-y dood) (doodad-vy dood)) 0)
-           (< (+ (doodad-y dood) (doodad-vy dood)) 449))
+           (< (+ (doodad-y dood) (doodad-vy dood)) Y-MAX))
       (doodad-vy dood)]
      [(<= (+ (doodad-y dood) (doodad-vy dood)) 0)
       ( * -1 (doodad-vy dood))]
-     [(>= (+ (doodad-y dood) (doodad-vy dood)) 449)
+     [(>= (+ (doodad-y dood) (doodad-vy dood)) Y-MAX)
       ( * -1 (doodad-vy dood))]))
 
 ;; core-bounce-x?: Doodad -> Boolean
@@ -477,7 +479,7 @@
 ;; STRATEGY: 
 (define (core-bounce-x? dood)
      (or (< (+ (doodad-x dood) (doodad-vx dood)) 0) 
-     (>= (+ (doodad-x dood) (doodad-vx dood)) 601)))
+     (>= (+ (doodad-x dood) (doodad-vx dood)) X-MAX)))
 
 ;; core-bounce-y?: Doodad -> Boolean
 ;; GIVEN: 
@@ -485,7 +487,7 @@
 ;; STRATEGY: Use template for Doodad on dood
 (define (core-bounce-y? dood)
      (or (< (+ (doodad-y dood) (doodad-vy dood)) 0) 
-     (>= (+ (doodad-y dood) (doodad-vy dood)) 449)))
+     (>= (+ (doodad-y dood) (doodad-vy dood)) Y-MAX)))
 
 ;; core-bounce? : Doodad -> Boolean
 ;; GIVEN: a Doodad
@@ -525,14 +527,36 @@
 (define RADIAL-STAR-IMAGE (radial-star 8 10 50 "solid" "gold"))
 (define SQUARE-IMAGE (square 71 "solid" "gray"))
 
+;; World at beginning for testing
 (define world-scene-at-beginning
   (place-image RADIAL-STAR-IMAGE 125 120
                (place-image SQUARE-IMAGE 460 350 EMPTY-CANVAS)))
- 
+
+;; examples of Doodads for testing
+;(make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
+;                GOLD false 0 0)
+
+(define selected-star (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD true 0 0))
+(define unselected-star (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD false 0 0))
+
+(define selected-square (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD true 0 0))
+(define unselected-square (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY GOLD false 0 0))
+
+
 ;; TESTS:
 (begin-for-test
 
   (check-equal? world-scene-at-beginning (world-to-scene(initial-world 12)))
+  
+  ;; tests for next-color
+  (check-equal? (next-color GOLD) GREEN)
+  (check-equal? (next-color GREEN) BLUE)
+  (check-equal? (next-color BLUE) GOLD)
+  (check-equal? (next-color GRAY) OLIVE-DRAB)
+  (check-equal? (next-color OLIVE-DRAB) KHAKI)
+  (check-equal? (next-color KHAKI) ORANGE)
+  (check-equal? (next-color ORANGE) CRIMSON)
+  (check-equal? (next-color CRIMSON) GRAY)
   )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(animation 1/2)
+;(animation 1/2)

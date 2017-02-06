@@ -6,6 +6,7 @@
 (require 2htdp/universe)
 (require "extras.rkt")
 (check-location "03" "q1.rkt")
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (provide
  animation
@@ -20,7 +21,8 @@
  doodad-vx
  doodad-vy
  doodad-color)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; There are two doodads. They are moving and changing color as result of
 ;; change in position.
@@ -28,10 +30,9 @@
 
 ;; starts with (animation 0)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; DATA DEFINITIONS:
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                         DATA DEFINITIONS                                  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define-struct world (star square is-paused?))
 ;; A World is a (make-world Doodad Doodad Boolean)
 ;; star is Doodad shaped like a radial star
@@ -62,11 +63,13 @@
 ;; TEMPLATE:
 ;; doodad-fn : Doodad -> ??
 ;; (define (doodad-fn d)
-;;  (... (doodad-type d) (doodad-x d) (doodad-y d) (doodad-vx d) (doodad-vy d) (doodad-color d)))
+;;  (... (doodad-type d) (doodad-x d) (doodad-y d) (doodad-vx d) (doodad-vy d)
+;;       (doodad-color d)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                           CONSTANTS                                        ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; CONSTANTS:
 (define CANVAS-WIDTH 601)
 (define CANVAS-HEIGHT 449)
 (define EMPTY-CANVAS (empty-scene CANVAS-WIDTH CANVAS-HEIGHT))
@@ -101,6 +104,8 @@
 (define SQUARE-START-COLOR "gray")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                           Animation                                        ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; animation : PosReal -> World
 ;; GIVEN: the speed of the animation, in seconds per tick
@@ -128,6 +133,28 @@
     (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
                  GRAY)
     false))
+
+;; world-paused? : World -> Boolean
+;; GIVEN: a World
+;; RETURNS: true iff the World is paused
+(define (world-paused? w)
+  (world-is-paused? w))
+
+;; world-doodad-star : World -> Doodad
+;; GIVEN: a World
+;; RETURNS: the star-like Doodad of the World
+(define (world-doodad-star w)
+  (world-star w))
+
+;; world-doodad-square : World -> Doodad
+;; GIVEN: a World
+;; RETURNS: the square Doodad of the World
+(define (world-doodad-square w)
+  (world-square w))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                           Drawing methods                                  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; world-to-scene : World -> Scene
 ;; RETURNS: a Scene that portrays the given world.
@@ -158,6 +185,10 @@
     (doodad-x sq) (doodad-y sq)
     scene))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                           After tick handler                               ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; world-after-tick : World -> World
 ;; GIVEN: any World that's possible for the animation
 ;; RETURNS: the World that should follow the given World after a tick
@@ -173,7 +204,8 @@
 
 ;; doodad-after-tick : Doodad -> Doodad
 ;; GIVEN: the state of a radial-star-doodad dood
-;; RETURNS: the state of the given doodad after a tick if it were in an unpaused world.
+;; RETURNS: the state of the given doodad after a tick if it were in an
+;;          unpaused world.
 
 ;; examples: 
 ;; 
@@ -294,6 +326,10 @@
     [(string=? c ORANGE) CRIMSON]
     [(string=? c CRIMSON) GRAY]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                           Key event handlers                               ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; world-after-key-event : World KeyEvent -> World
 ;; GIVEN: a world w
 ;; RETURNS: the world that should follow the given world after the given key
@@ -320,24 +356,6 @@
 ;; RETURNS: true iff the KeyEvent represents a pause instruction
 (define (is-pause-key-event? ke)
   (key=? ke " "))
-
-;; world-paused? : World -> Boolean
-;; GIVEN: a World
-;; RETURNS: true iff the World is paused
-(define (world-paused? w)
-  (world-is-paused? w))
-
-;; world-doodad-star : World -> Doodad
-;; GIVEN: a World
-;; RETURNS: the star-like Doodad of the World
-(define (world-doodad-star w)
-  (world-star w))
-
-;; world-doodad-square : World -> Doodad
-;; GIVEN: a World
-;; RETURNS: the square Doodad of the World
-(define (world-doodad-square w)
-  (world-square w))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
