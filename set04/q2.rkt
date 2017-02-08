@@ -31,7 +31,7 @@ flapjacks-in-skillet)
 (define-struct flapjack (x y radius))
 
 ;; A Flapjack is a
-;;     (make-flapjack Integer Integer Integer)
+;;     (make-flapjack Real Real PosReal)
 
 ;; INTERPRETATION:
 ;; --  A flapjacks is a pancake, usually served at breakfast
@@ -48,10 +48,25 @@ flapjacks-in-skillet)
 ;;  (define (flapjack-fn jack)
 ;;    (... (flapjack-x jack) (flapjack-y jack) (flapjack-radius jack)))
 
+;; ListOfFlapjack
+
+;;  A ListOfFlapjack (LOF) is either
+;;  -- empty
+;;  -- (cons Flapjack LOF)
+;;
+
+;; TEMPLATE:
+;; lof-fn : ListOfFlapjack -> ??
+;; (define (lof-fn lst)
+;;   (cond
+;;     [(empty? lst) ...]
+;;     [else (... (first lst)
+;;                (lof-fn (rest lst)))]))
+
 (define-struct skillet (x y radius))
 
 ;; A Skillet is a
-;;     (make-skillet Integer Integer Integer)
+;;     (make-skillet Real Real PosReal)
 
 ;; INTERPRETATION:
 ;; -- A skillet is a flat-bottomed pan used for frying, searing,
@@ -72,17 +87,23 @@ flapjacks-in-skillet)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; contract : ->
-;; GIVEN:
-;; RETURNS:
-;; EXAMPLES:
-;; STRATEGY:
+;; flapjacks-in-skillet : ListOfFlapjack Skillet -> ListOfFlapjack
+;; GIVEN: a list of flapjacks and a skillet
+;; RETURNS: a list of the given flapjacks that fit entirely within the skillet
+;; EXAMPLE:
+;;   (flapjacks-in-skillet
+;;    (list (make-flapjack -10  2 5)
+;;          (make-flapjack  -3  0 4)
+;;          (make-flapjack   4 -2 4.6)
+;;          (make-flapjack 7.2  6 5)
+;;          (make-flapjack  20  4 4.2))
+;;    (make-skillet 2 3 12))
+;; =>
+;;   (list (make-flapjack  -3  0 4)
+;;         (make-flapjack   4 -2 4.6)
+;;         (make-flapjack 7.2  6 5))
+;;
+;; STRATEGY: Use template for ListOfFlapjack on jack-lst
 
 
-;; Template:
-;; ;; list-fn : ListOfX -> ??
-;; (define (list-fn lst)
-;;   (cond
-;;     [(empty? lst) ...]
-;;     [else (... (first lst)
-;;                (list-fn (rest lst)))]))
+
