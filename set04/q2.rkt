@@ -176,19 +176,21 @@ flapjacks-in-skillet)
 ;; STRATEGY:Use template for ListOfFlapjack on jack-list
 
 (define (overlapping-flapjacks jack-list)
+  (closure jack-list jack-list))
+
+(define (closure jack-list complete-jack-list)
+  (real-work jack-list complete-jack-list))
+
+;; find-overlapping-flapjack-list : ListOfFlapjack ListOfFlapjack -> ListOfListOfFlapjack
+;; GIVEN: two lists of flapjacks
+;; RETURNS: a list of list of flapjacks that overlap each other
+
+(define (find-overlapping-flapjack-list jack-list complete-jack-list)
   (cond
     [(empty? jack-list) empty]
     [else (cons
-           (overlapping-flapjacks-for-flapjack jack-list (first jack-list))
-           (overlapping-flapjacks (rest jack-list))) ]))
-  
-;(define (remove-first-even lst)
-;  (cond
-;    [(empty? lst) '()]
-;    [(even? (first lst)) (rest lst)]
-;    [else (cons (first lst) (remove-first-even (rest lst)))]))
-;
-;(remove-first-even (list 1 2 3 4 5))
+           (overlapping-flapjacks-for-flapjack complete-jack-list (first jack-list))
+           (find-overlapping-flapjack-list (rest jack-list) complete-jack-list)) ]))
 
 ;; overlapping-flapjacks-for-flapjack :
 ;;       ListOfFlapjack Flapjack -> ListOfFlapjack
@@ -214,6 +216,7 @@ flapjacks-in-skillet)
                (flapjack-x jack2)
                (flapjack-y jack2))
               (expt (+ (flapjack-radius jack1) (flapjack-radius jack2)) 2)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                            TESTS                                         ;;
@@ -248,6 +251,7 @@ flapjacks-in-skillet)
                       (make-flapjack 7.2  6 5)))
 
    (check-equal? (distance-sq 0 0 10 10) 200 "should be 200")
+   
    (check-equal? (fits? (make-flapjack 0 0 5) (make-skillet 0 0 10)) true
                  "should fit")
 
