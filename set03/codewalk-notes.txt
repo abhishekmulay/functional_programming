@@ -1,0 +1,35 @@
+TA-1 Name:- Rohit
+TA-2 Name:- Wenjun
+
+
+
+Student1 CCIS ID:- abhishekmulay
+
+Question 1 :-
+
+Design Grade:- AB
+TA Comments on Design:-
+	1. Wrong constructor template for Doodad (should use make-doodad rather than define-struct)
+	2. Redundant type in interpretation for Doodad
+	3. Defined doodad-color as type of String 
+		1) Should have a more secific interpretation and specific where clauses in related functions, otherwise we can pass any string e.g. "abc"
+		2) Or define itemization Data for doodad-color
+		3) Or use the Racket built in data type Corlor 
+	4. Should follow one function one task design recipe (e.g. function: check-x)
+
+
+Presentation Grade:- A
+TA Comments on Presentation:-
+	1. Asked about constructor template, satisfactory answer.
+
+Question 2 :-
+
+Design Grade:-
+TA Comments on Design:- B
+	1. Should have clearer interpretation for doodad-xd, doodad-yd
+	2. When a Doodad was selected, the doodad do not stop and the black dot disappeared after a short appearance.
+	3. Did not acheived proper jerkless dragging.
+
+Presentation Grade:-
+TA Comments on Presentation:- A
+	1. Asked about jerkless dragging, satisfactory answer.
