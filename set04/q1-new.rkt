@@ -351,6 +351,7 @@
     [(is-pause-key-event? kev) (world-with-paused-toggled w)]
     [(is-q-key-event? kev) (world-with-q-pressed w)]
     [(is-t-key-event? kev) (world-with-t-pressed w)]
+    [(is-dot-key-event? kev) (world-with-dot-pressed w)]
     [else w]))
 
 (define (is-pause-key-event? ke)
@@ -361,6 +362,39 @@
 
 (define (is-t-key-event? ke)
   (key=? ke "t"))
+
+(define (is-dot-key-event? ke)
+  (key=? ke "."))
+
+(define (world-with-dot-pressed w)
+  (make-world
+   (remove-oldest-doodad (world-doodads-star w))
+   (remove-oldest-doodad (world-doodads-square w))
+   (world-paused? w)
+   (world-dotx w)
+   (world-doty w)
+   (doodad-vx (new-star w))
+   (doodad-vy (new-star w))
+   (world-previous-square-vx w)
+   (world-previous-square-vy w)))
+
+;; oldest doodad is always at the start of the list
+(define (remove-oldest-doodad doods)
+  (cond
+    [(empty? doods) empty]
+    [else (rest doods)]))
+
+(define (get-max lst)
+  (cond
+    [(empty? lst) empty]
+    [else (get-max-helper lst (first lst))]))
+
+(define (get-max-helper lst max)
+  (cond
+    [(empty? lst) empty]
+    [(= (length lst) 1) max]
+    [( > (first lst) max) (get-max-helper (rest lst) (first lst))]
+    [else (get-max-helper (rest lst) max)]))
 
 (define (world-with-paused-toggled w)
   (make-world-with-paused w (not (world-paused? w))))
@@ -390,14 +424,16 @@
    (world-previous-square-vy w)))
 
 (define (add-new-square squares w)
-  (cons (new-square w) squares))
+  (append squares (list (new-square w)) ))
 
+;; add the new square doodad at end of list
 (define (new-square w)
   (make-doodad TYPE-SQUARE 460 350  (* -1 (world-previous-square-vy w))
                (world-previous-square-vx w) GRAY false 0 0 0)) 
 
+;; add the new star doodad at end of list
 (define (add-new-star stars w)
-  (cons (new-star w) stars))
+  (append stars (list (new-star w))))
 
 (define (new-star w)
   (make-doodad TYPE-STAR 125 120 (* -1 (world-previous-star-vy w))
