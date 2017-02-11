@@ -70,9 +70,6 @@
    (world-previous-square-vx w)
    (world-previous-square-vy w)))
 
-
-
-
 ;; CONSTANTS:
 (define CANVAS-WIDTH 601)
 (define CANVAS-HEIGHT 449)
@@ -320,7 +317,7 @@
 (define (add-y-vy dood)
   (+ (doodad-y dood) (doodad-vy dood)))
 
-;; next-color: String -> String 
+;; next-color: Doodad -> String 
 ;; GIVEN: Current color of Doodad as a string
 ;; RETURNS: Next color that should follow color c
 ;; EXAMPLE:
@@ -350,6 +347,7 @@
     [(is-pause-key-event? kev) (world-with-paused-toggled w)]
     [(is-q-key-event? kev) (world-with-q-pressed w)]
     [(is-t-key-event? kev) (world-with-t-pressed w)]
+    [(is-c-key-event? kev) (world-with-c-pressed w)]
     [(is-dot-key-event? kev) (world-with-dot-pressed w)]
     [else w]))
 
@@ -364,6 +362,9 @@
 
 (define (is-dot-key-event? ke)
   (key=? ke "."))
+
+(define (is-c-key-event? ke)
+  (key=? ke "c"))
 
 (define (world-with-dot-pressed w)
   (make-world
@@ -438,15 +439,45 @@
   (make-doodad TYPE-STAR 125 120 (* -1 (world-previous-star-vy w))
                (world-previous-star-vx w) GOLD false 0 0 0))
 
+
+(define (world-with-c-pressed w)  
+  (make-world
+   (find-selected-doodads (world-doodads-star w))
+   (find-selected-doodads (world-doodads-square w))
+   (world-paused? w)
+   (world-dotx w)
+   (world-doty w)
+   (doodad-vx (new-star w))
+   (doodad-vy (new-star w))
+   (world-previous-square-vx w)
+   (world-previous-square-vy w)))
+
+(define (doodad-with-next-color dood)
+  (make-doodad
+      (doodad-type dood)
+      (doodad-x dood)
+      (doodad-y dood)
+      (doodad-vx dood)
+      (doodad-vy dood)
+      (next-color dood)
+      (doodad-selected? dood)
+      (doodad-x-offset dood)
+      (doodad-y-offset dood)
+      (doodad-age dood)))
+
+(define (find-selected-doodads doods)
+  (cond
+    [(empty? doods) empty]
+    [(doodad-selected? (first doods))
+     (cons (doodad-with-next-color(first doods)) (find-selected-doodads (rest doods)))]
+    [(not (doodad-selected? (first doods)))
+     (cons (first doods) (find-selected-doodads (rest doods)))]
+    [else (find-selected-doodads (rest doods))]))
+ 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                        Mouse event handling                              ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-;world
- ; (doodads-star doodads-square paused? dotx doty
-  ;              previous-star-vx previous-star-vy
-   ;             previous-square-vx previous-square-vy))
 
 ;; world-after-mouse-event : World Integer Integer MouseEvent -> World
 ;; GIVEN: a world and a description of a mouse event
