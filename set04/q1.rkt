@@ -40,7 +40,7 @@
 ;;                       DATA DEFINITIONS                                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define-struct world (stars squares is-paused? dotx doty))
+(define-struct world (stars squares is-paused? dotx doty q-count t-count))
 
 ;; A World is a (make-world Doodad Doodad Boolean Integer Integer)
 ;; stars is a list of Doodads shaped like a radial star
@@ -142,9 +142,8 @@
   (big-bang (initial-world speed)
             (on-tick world-after-tick speed)
             (on-draw world-to-scene)
-            ;(on-key world-after-key-event)
-            ;(on-mouse world-after-mouse-event)
-            ))
+            (on-key world-after-key-event)
+            (on-mouse world-after-mouse-event)))
 
 ;; initial-world : Any -> World
 ;; GIVEN: any value (ignored)
@@ -218,118 +217,126 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;                     MOUSE EVENT HANDLING                                  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;;; world-after-mouse-event : World Integer Integer MouseEvent -> World
-;;; GIVEN: a world and a description of a mouse event
-;;; RETURNS: the world that should follow the given mouse event
-;;; (define UNPAUSED-WORLD (make-world
-;;;   (make-doodad "radial-star" 500 80 -10 12 "Green" #false 0 0)
-;;;   (make-doodad "square" 500 80 -10 12 "Khaki" #false 0 0) #false 0 0))
-;;;
-;;; (world-after-mouse-event UNPAUSED-WORLD 100 100 "drag")
-;;;                 (make-world (make-doodad "radial-star" 500 80 -10 12 "Green"
-;;;                                          #f 0 0)
-;;;                             (make-doodad "square" 500 80 -10 12 "Khaki"
-;;;                                          #f 0 0) #f 100 100) "")
-;;; STRATEGY: use template for World on w
-;;(define (world-after-mouse-event w mx my mev)
-;;  (make-world
-;;    (cons (doodad-after-mouse-event (world-star w) mx my mev))
-;;    (cons (doodad-after-mouse-event (world-square w) mx my mev))
-;;    (world-paused? w)
-;;    mx my))
-;
-;;; doodad-after-mouse-event : Doodad Integer Integer MouseEvent -> Doodad
-;;; GIVEN: Doodad, current co-ordinates of mouse and description of mouse event
-;;; RETURNS: The Doodad that should follow the current Doodad
-;;; EXAMPLE:
-;;;  (doodad-after-mouse-event (make-doodad "radial-star" 500 80 -10 12
-;;;                            "Green" #false 0 0) 100 100 "enter") =
-;;;  (make-doodad "radial-star" 500 80 -10 12 "Green" #false 0 0)
-;;;
-;;; STRATEGY:Divide into cases based on mouse event
-;(define (doodad-after-mouse-event dood mx my mev)
-;  (cond
-;    [(mouse=? mev "button-down") (doodad-after-button-down dood mx my)]
-;    [(mouse=? mev "drag") (doodad-after-drag dood mx my)]
-;    [(mouse=? mev "button-up") (doodad-after-button-up dood mx my)]
-;    [else dood]))
-;
-;;; doodad-after-button-down : Doodad Integer Integer -> Doodad
-;;; GIVEN: Doodad, curren mouse co-ordinates 
-;;; RETURNS: The Doodad that should follow the current Doodad after mouse
-;;;          button down event
-;;; EXAMPLES: Available in comments
-;;; STRATEGY:Use template for Doodad on dood
-;(define (doodad-after-button-down dood mx my)
-;  (if (in-doodad? dood mx my)
-;      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
-;                   (doodad-vx dood) (doodad-vy dood) (doodad-color dood) true
-;                   (get-xd (doodad-x dood) mx)
-;                   (get-yd (doodad-y dood) my) 0) dood))
-;
-;;; doodad-after-drag : Doodad Integer Integer -> Doodad
-;;; GIVEN: a Doodad, current co-ordinates of mouse
-;;; RETURNS: the Doodad following a drag at the given location
-;;; EXAMPLES: Available in comments
-;;; STRATEGY: Use template for Doodad on dood
-;(define (doodad-after-drag dood mx my)
-;  (if (doodad-selected? dood)
-;      (make-doodad (doodad-type dood) (- mx (doodad-xd dood))
-;                   (- my (doodad-yd dood)) (doodad-vx dood) (doodad-vy dood)
-;                   (doodad-color dood) true (doodad-xd dood) (doodad-yd dood) 0)
-;      dood))
-;
-;;; doodad-after-button-up : Doodad Integer Integer -> Doodad
-;;; RETURNS: the Doodad following a button-up at the given location
-;;; STRATEGY: Use template for Doodad on dood
-;(define (doodad-after-button-up dood mx my)
-;  (if (doodad-selected? dood)
-;      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
-;                   (doodad-vx dood) (doodad-vy dood) (doodad-color dood) false
-;                   (doodad-xd dood) (doodad-yd dood) 0)
-;      dood))
-;
-;;; in-doodad? : Doodad Integer Integer -> Doodad
-;;; GIVEN: a Doodad and co-ordinates of a point
-;;; RETURNS true iff the given coordinate is inside the bounding box of
-;;; the given Doodad.
-;;; EXAMPLES: see tests below
-;;; STRATEGY: Use template for Doodad on dood
-;(define (in-doodad? dood x y)
-;  (and
-;    (<= 
-;      (- (doodad-x dood) HALF-DOODAD-WIDTH)
-;      x
-;      (+ (doodad-x dood) HALF-DOODAD-WIDTH))
-;    (<= 
-;      (- (doodad-y dood) HALF-DOODAD-HEIGHT)
-;      y
-;      (+ (doodad-y dood) HALF-DOODAD-HEIGHT))))
-;
-;
-;;; get-xd: Integer Integer -> Integer
-;;; GIVEN: current x co-ordinate of Doodad center and x-coordinate of
-;;;        mouse pointer
-;;; RETURNS: Distance between x-cordinate of center of Doodad and
-;;;        clicked location
-;;; STRATEGY: Combine simpler functions
-;(define (get-xd x mx)
-;  (- mx x)
-;)
-;
-;;; get-xd: Integer Integer -> Integer
-;;; GIVEN: current y co-ordinate of Doodad center and x-coordinate of
-;;;        mouse pointer
-;;; RETURNS: Distance between y-cordinate of center of Doodad and
-;;;        clicked location
-;;; STRATEGY: Combine simpler functions
-;(define (get-yd y my)
-;  (- my y)
-;)
-;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; world-after-mouse-event : World Integer Integer MouseEvent -> World
+;; GIVEN: a world and a description of a mouse event
+;; RETURNS: the world that should follow the given mouse event
+;; (define UNPAUSED-WORLD (make-world
+;;   (make-doodad "radial-star" 500 80 -10 12 "Green" #false 0 0)
+;;   (make-doodad "square" 500 80 -10 12 "Khaki" #false 0 0) #false 0 0))
+;;
+;; (world-after-mouse-event UNPAUSED-WORLD 100 100 "drag")
+;;                 (make-world (make-doodad "radial-star" 500 80 -10 12 "Green"
+;;                                          #f 0 0)
+;;                             (make-doodad "square" 500 80 -10 12 "Khaki"
+;;                                          #f 0 0) #f 100 100) "")
+;; STRATEGY: use template for World on w
+(define (world-after-mouse-event w mx my mev)
+  (make-world
+    (doodads-after-mouse-event (world-stars w) mx my mev)
+    (doodads-after-mouse-event (world-squares w) mx my mev)
+    (world-paused? w)
+    mx my))
+
+
+(define (doodads-after-mouse-event doods mx my mev)
+  (cond
+    [(empty? doods) empty]
+    [else (cons
+           (doodad-after-mouse-event (first doods) mx my mev)
+           (doodads-after-mouse-event (rest doods) mx my mev) )]))
+
+;; doodad-after-mouse-event : Doodad Integer Integer MouseEvent -> Doodad
+;; GIVEN: Doodad, current co-ordinates of mouse and description of mouse event
+;; RETURNS: The Doodad that should follow the current Doodad
+;; EXAMPLE:
+;;  (doodad-after-mouse-event (make-doodad "radial-star" 500 80 -10 12
+;;                            "Green" #false 0 0) 100 100 "enter") =
+;;  (make-doodad "radial-star" 500 80 -10 12 "Green" #false 0 0)
+;;
+;; STRATEGY:Divide into cases based on mouse event
+(define (doodad-after-mouse-event dood mx my mev)
+  (cond
+    [(mouse=? mev "button-down") (doodad-after-button-down dood mx my)]
+    [(mouse=? mev "drag") (doodad-after-drag dood mx my)]
+    [(mouse=? mev "button-up") (doodad-after-button-up dood mx my)]
+    [else dood]))
+
+;; doodad-after-button-down : Doodad Integer Integer -> Doodad
+;; GIVEN: Doodad, curren mouse co-ordinates 
+;; RETURNS: The Doodad that should follow the current Doodad after mouse
+;;          button down event
+;; EXAMPLES: Available in comments
+;; STRATEGY:Use template for Doodad on dood
+(define (doodad-after-button-down dood mx my)
+  (if (in-doodad? dood mx my)
+      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
+                   (doodad-vx dood) (doodad-vy dood) (doodad-color dood) true
+                   (get-xd (doodad-x dood) mx)
+                   (get-yd (doodad-y dood) my) 0) dood))
+
+;; doodad-after-drag : Doodad Integer Integer -> Doodad
+;; GIVEN: a Doodad, current co-ordinates of mouse
+;; RETURNS: the Doodad following a drag at the given location
+;; EXAMPLES: Available in comments
+;; STRATEGY: Use template for Doodad on dood
+(define (doodad-after-drag dood mx my)
+  (if (doodad-selected? dood)
+      (make-doodad (doodad-type dood) (- mx (doodad-xd dood))
+                   (- my (doodad-yd dood)) (doodad-vx dood) (doodad-vy dood)
+                   (doodad-color dood) true (doodad-xd dood) (doodad-yd dood) 0)
+      dood))
+
+;; doodad-after-button-up : Doodad Integer Integer -> Doodad
+;; RETURNS: the Doodad following a button-up at the given location
+;; STRATEGY: Use template for Doodad on dood
+(define (doodad-after-button-up dood mx my)
+  (if (doodad-selected? dood)
+      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
+                   (doodad-vx dood) (doodad-vy dood) (doodad-color dood) false
+                   (doodad-xd dood) (doodad-yd dood) 0)
+      dood))
+
+;; in-doodad? : Doodad Integer Integer -> Doodad
+;; GIVEN: a Doodad and co-ordinates of a point
+;; RETURNS true iff the given coordinate is inside the bounding box of
+;; the given Doodad.
+;; EXAMPLES: see tests below
+;; STRATEGY: Use template for Doodad on dood
+(define (in-doodad? dood x y)
+  (and
+    (<= 
+      (- (doodad-x dood) HALF-DOODAD-WIDTH)
+      x
+      (+ (doodad-x dood) HALF-DOODAD-WIDTH))
+    (<= 
+      (- (doodad-y dood) HALF-DOODAD-HEIGHT)
+      y
+      (+ (doodad-y dood) HALF-DOODAD-HEIGHT))))
+
+
+;; get-xd: Integer Integer -> Integer
+;; GIVEN: current x co-ordinate of Doodad center and x-coordinate of
+;;        mouse pointer
+;; RETURNS: Distance between x-cordinate of center of Doodad and
+;;        clicked location
+;; STRATEGY: Combine simpler functions
+(define (get-xd x mx)
+  (- mx x)
+)
+
+;; get-xd: Integer Integer -> Integer
+;; GIVEN: current y co-ordinate of Doodad center and x-coordinate of
+;;        mouse pointer
+;; RETURNS: Distance between y-cordinate of center of Doodad and
+;;        clicked location
+;; STRATEGY: Combine simpler functions
+(define (get-yd y my)
+  (- my y)
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                        Drawing functions                                  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -434,97 +441,142 @@
     (doodad-x sq) (doodad-y sq)
     scene))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;                        Key event handlers                                 ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-;;; world-after-key-event : World KeyEvent -> World
-;;; GIVEN: a world w
-;;; RETURNS: the world that should follow the given world after the given key
-;;; event. on space, toggle paused?-- ignore all others
-;;; EXAMPLES: Available in the tests
-;;; STRATEGY: Cases on whether the kev is a pause event
-;(define (world-after-key-event w kev)
-;  (cond
-;    [(is-pause-key-event? kev) (world-with-paused-toggled w)]
-;    ;[(is-c-key-event? kev) (world-with-next-color-for w)]
-;    ;[(is-q-key-event? kev) (world-with-q-pressed w)]
-;    ;[(is-t-key-event? kev) (world-with-t-pressed w)]
-;    ;[(is-dot-key-event? kev) (world-with-dot-pressed w)]
-;    [else w]))
-;
-;;; world-with-paused-toggled : World -> World
-;;; GIVEN: a World
-;;; RETURNS: a world just like the given one, but with paused? toggled
-;;; STRATEGY: use template for World on w
-;(define (world-with-paused-toggled w)
-;  (make-world
-;   (cons (world-stars w))
-;   (cons (world-squares w))
-;   (not (world-paused? w)) 0 0))
-;
-;;; is-pause-key-event? : KeyEvent -> Boolean
-;;; GIVEN: a KeyEvent
-;;; RETURNS: true iff the KeyEvent represents a pause instruction
-;(define (is-pause-key-event? ke)
-;  (key=? ke " "))
-;
-;;; world-with-next-color-for: World -> Color
-;;; GIVEN: a World
-;;; RETURNS: next Color as String for Doodad of the given world
-;;; STRATEGY: Use template for Doodad on dood and use teamplte for World on w
-;;(define (world-with-next-color-for w)
-;;  (make-world
-;;   (make-doodad (doodad-type (world-star w)) (doodad-x (world-star w))
-;;                (doodad-y (world-star w)) (doodad-vx (world-star w))
-;;                (doodad-vy (world-star w))
-;;                (next-color-if-selected (world-star w))
-;;                (doodad-selected? (world-star w)) 0 0 0)
-;;   (make-doodad (doodad-type (world-square w)) (doodad-x (world-square w))
-;;                (doodad-y (world-square w))  (doodad-vx (world-square w))
-;;                (doodad-vy (world-square w))
-;;                (next-color-if-selected (world-square w))
-;;                (doodad-selected? (world-square w)) 0 0 0)
-;;   (world-paused? w) 0 0))
-;
-;
-;;; next-color-if-selected : Doodad -> Color
-;;; GIVEN: a Doodad
-;;; RETURNS: next Color as String for the given Doodad 
-;;; STRATEGY: Use template for Doodad on dood
-;(define (next-color-if-selected dood)
-;  (cond
-;    [(doodad-selected? dood) (next-color (doodad-color dood))]
-;    [else (doodad-color dood)]))
-;
-;;; is-pause-key-event? : KeyEvent -> Boolean
-;;; GIVEN: a KeyEvent
-;;; RETURNS: true iff the KeyEvent represents a pause instruction
-;;; STRATEGY: Combine simpler functions
-;(define (is-c-key-event? ke)
-;  (key=? ke "c"))
-;
-;
-;;; world-with-q-pressed: World -> World
-;;; GIVEN: a World
-;;; RETURNS: world that follows the given world
-;;; STRATEGY: Use template for Doodad on dood and use teamplte for World on w
-;(define (world-with-q-pressed w)
-;  w
-;;  ((make-world
-;;   (cons (make-doodad (doodad-type (world-star w)) (doodad-x (world-star w))
-;;                (doodad-y (world-star w)) (doodad-vx (world-star w))
-;;                (doodad-vy (world-star w))
-;;                (doodad-color (world-star w))
-;;                (doodad-selected? (world-star w)) 0 0 0))
-;;   (cons (make-doodad (doodad-type (world-square w)) (doodad-x (world-square w))
-;;                (doodad-y (world-square w))  (doodad-vx (world-square w))
-;;                (doodad-vy (world-square w))
-;;                (doodad-color (world-square w))
-;;                (doodad-selected? (world-square w)) 0 0 0))
-;;   (world-paused? w) 0 0))
-;  )
-;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                        Key event handlers                                 ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; world-after-key-event : World KeyEvent -> World
+;; GIVEN: a world w
+;; RETURNS: the world that should follow the given world after the given key
+;; event. on space, toggle paused?-- ignore all others
+;; EXAMPLES: Available in the tests
+;; STRATEGY: Cases on whether the kev is a pause event
+(define (world-after-key-event w kev)
+  (cond
+    [(is-pause-key-event? kev) (world-with-paused-toggled w)]
+    [(is-c-key-event? kev) (world-with-next-color-for w)]
+    ;[(is-q-key-event? kev) (world-with-q-pressed w)]
+    ;[(is-t-key-event? kev) (world-with-t-pressed w)]
+    ;[(is-dot-key-event? kev) (world-with-dot-pressed w)]
+    [else w]))
+
+;; world-with-paused-toggled : World -> World
+;; GIVEN: a World
+;; RETURNS: a world just like the given one, but with paused? toggled
+;; STRATEGY: use template for World on w
+(define (world-with-paused-toggled w)
+  (make-world
+   (world-stars w)
+   (world-squares w)
+   (not (world-paused? w)) 0 0))
+
+;; is-pause-key-event? : KeyEvent -> Boolean
+;; GIVEN: a KeyEvent
+;; RETURNS: true iff the KeyEvent represents a pause instruction
+(define (is-pause-key-event? ke)
+  (key=? ke " "))
+
+;; world-with-next-color-for: World -> Color
+;; GIVEN: a World
+;; RETURNS: next Color as String for Doodad of the given world
+;; STRATEGY: Use template for Doodad on dood and use teamplte for World on w
+(define (world-with-next-color-for w)
+  (make-world
+   (get-next-colored-doodads (find-selected-doodads (world-stars w)))
+   (get-next-colored-doodads (find-selected-doodads (world-squares w)))
+   (world-paused? w)
+   0 0))
+
+(define (get-next-colored-doodads doods)
+  (cond
+    [(empty? doods) empty]
+    [else (cons (doodad-with-color (first doods))
+                (get-next-colored-doodads (rest doods)))]))
+
+(define (doodad-with-color dood)
+  (make-doodad
+      (doodad-type dood)
+      (check-x dood)
+      (check-y dood)
+      (check-vx dood)
+      (check-vy dood)
+      (next-color (doodad-color dood))
+      (doodad-selected? dood)
+      (doodad-xd dood)
+      (doodad-yd dood)
+      (doodad-age dood)))
+
+(define (next-color-for-doodad dood)
+  (next-color (doodad-color dood)))
+
+(define (foreach lst fn)
+  (cond
+    [(empty? lst) lst]
+    [(= (length lst) 1)  (cons (fn (first lst)) '()) ]
+    [else (cons (fn (first lst)) (foreach (rest lst) fn))]))
+
+;;find-selected-doodads
+;;EXAMPLES:
+(define TEST-DOODADS
+  (list
+   (make-doodad "radial-star" 23 162 -10 12 "Gold" #false 0 0 0)
+   (make-doodad "radial-star" 48 142 -10 12 "Gold" #true 0 0 0)
+   (make-doodad "radial-star" 48 142 -10 12 "Blue" #false 0 0 0)
+   (make-doodad "radial-star" 48 142 -10 12 "Red" #true 0 0 0)
+   (make-doodad "radial-star" 48 142 -10 12 "Pink" #false 0 0 0)))
+;;
+;; (find-selected-doodads TEST-DOODADS) =>
+;;(list
+;; (make-doodad "radial-star" 48 142 -10 12 "Gold" #true 0 0 0)
+;; (make-doodad "radial-star" 48 142 -10 12 "Red" #true 0 0 0))
+
+(define (find-selected-doodads doods)
+  (cond
+    [(empty? doods) empty]
+    [(doodad-selected? (first doods))
+     (cons (first doods) (find-selected-doodads (rest doods)))]
+    [else (find-selected-doodads (rest doods))]))
+ 
+;; next-color-if-selected : Doodad -> Color
+;; GIVEN: a Doodad
+;; RETURNS: next Color as String for the given Doodad 
+;; STRATEGY: Use template for Doodad on dood
+(define (next-color-if-selected dood)
+  (cond
+    [(doodad-selected? dood) (next-color (doodad-color dood))]
+    [else (doodad-color dood)]))
+
+;; is-pause-key-event? : KeyEvent -> Boolean
+;; GIVEN: a KeyEvent
+;; RETURNS: true iff the KeyEvent represents a pause instruction
+;; STRATEGY: Combine simpler functions
+(define (is-c-key-event? ke)
+  (key=? ke "c"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; world-with-q-pressed: World -> World
+;; GIVEN: a World
+;; RETURNS: world that follows the given world
+;; STRATEGY: Use template for Doodad on dood and use teamplte for World on w
+(define (world-with-q-pressed w)
+  (make-world
+   (add-new-star-doodad (world-stars w) (+1 (world-q-count)))
+   (world-squares w)
+   (world-paused? w)
+   (world-dotx w)
+   (world-doty w)
+   (+1 (world-q-count))))
+
+;(define (add-new-square-doodad squares)
+;  (cons
+;   squares
+;   make-doodad-with-vx))
+
+(define (add-new-star-doodad doods q-count)
+  (cons
+   doods
+   ))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                       Tick handlers                                       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
