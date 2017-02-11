@@ -147,8 +147,7 @@
             (on-tick world-after-tick speed)
             (on-draw world-to-scene)
             (on-key world-after-key-event)
-  ;          (on-mouse world-after-mouse-event)
-            ))
+            (on-mouse world-after-mouse-event)))
 
 (define DEFAULT-WORLD
   (make-world
@@ -439,9 +438,135 @@
   (make-doodad TYPE-STAR 125 120 (* -1 (world-previous-star-vy w))
                (world-previous-star-vx w) GOLD false 0 0 0))
 
-;(doodads-star doodads-square paused? dotx doty
-;previous-star-vx previous-star-vy
-;previous-square-vx previous-square-vy))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                        Mouse event handling                              ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;world
+ ; (doodads-star doodads-square paused? dotx doty
+  ;              previous-star-vx previous-star-vy
+   ;             previous-square-vx previous-square-vy))
+
+;; world-after-mouse-event : World Integer Integer MouseEvent -> World
+;; GIVEN: a world and a description of a mouse event
+;; RETURNS: the world that should follow the given mouse event
+;; (define UNPAUSED-WORLD (make-world
+;;   (make-doodad "radial-star" 500 80 -10 12 "Green" #false 0 0)
+;;   (make-doodad "square" 500 80 -10 12 "Khaki" #false 0 0) #false 0 0))
+;;
+;; (world-after-mouse-event UNPAUSED-WORLD 100 100 "drag")
+;;                 (make-world (make-doodad "radial-star" 500 80 -10 12 "Green"
+;;                                          #f 0 0)
+;;                             (make-doodad "square" 500 80 -10 12 "Khaki"
+;;                                          #f 0 0) #f 100 100) "")
+;; STRATEGY: use template for World on w
+(define (world-after-mouse-event w mx my mev)
+  (make-world
+    (doodads-after-mouse-event (world-doodads-star w) mx my mev)
+    (doodads-after-mouse-event (world-doodads-square w) mx my mev)
+    (world-paused? w)
+    mx my
+    (world-previous-star-vx w) (world-previous-star-vy w)
+    (world-previous-square-vx w) (world-previous-square-vy w)))
+
+(define (doodads-after-mouse-event doods mx my mev)
+  (cond
+    [(empty? doods) empty]
+    [else (cons
+           (doodad-after-mouse-event (first doods) mx my mev)
+           (doodads-after-mouse-event (rest doods) mx my mev) )]))
+
+;; doodad-after-mouse-event : Doodad Integer Integer MouseEvent -> Doodad
+;; GIVEN: Doodad, current co-ordinates of mouse and description of mouse event
+;; RETURNS: The Doodad that should follow the current Doodad
+;; EXAMPLE:
+;;  (doodad-after-mouse-event (make-doodad "radial-star" 500 80 -10 12
+;;                            "Green" #false 0 0) 100 100 "enter") =
+;;  (make-doodad "radial-star" 500 80 -10 12 "Green" #false 0 0)
+;;
+;; STRATEGY:Divide into cases based on mouse event
+(define (doodad-after-mouse-event dood mx my mev)
+  (cond
+    [(mouse=? mev "button-down") (doodad-after-button-down dood mx my)]
+    [(mouse=? mev "drag") (doodad-after-drag dood mx my)]
+    [(mouse=? mev "button-up") (doodad-after-button-up dood mx my)]
+    [else dood]))
+
+;; doodad-after-button-down : Doodad Integer Integer -> Doodad
+;; GIVEN: Doodad, curren mouse co-ordinates 
+;; RETURNS: The Doodad that should follow the current Doodad after mouse
+;;          button down event
+;; EXAMPLES: Available in comments
+;; STRATEGY:Use template for Doodad on dood
+(define (doodad-after-button-down dood mx my)
+  (if (in-doodad? dood mx my)
+      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
+                   (doodad-vx dood) (doodad-vy dood) (doodad-color dood) true
+                   (get-x-offset (doodad-x dood) mx)
+                   (get-y-offset (doodad-y dood) my) 0) dood))
+
+;; doodad-after-drag : Doodad Integer Integer -> Doodad
+;; GIVEN: a Doodad, current co-ordinates of mouse
+;; RETURNS: the Doodad following a drag at the given location
+;; EXAMPLES: Available in comments
+;; STRATEGY: Use template for Doodad on dood
+(define (doodad-after-drag dood mx my)
+  (if (doodad-selected? dood)
+      (make-doodad (doodad-type dood) (- mx (doodad-x-offset dood))
+                   (- my (doodad-y-offset dood)) (doodad-vx dood) (doodad-vy dood)
+                   (doodad-color dood) true (doodad-x-offset dood) (doodad-y-offset dood) 0)
+      dood))
+
+;; doodad-after-button-up : Doodad Integer Integer -> Doodad
+;; RETURNS: the Doodad following a button-up at the given location
+;; STRATEGY: Use template for Doodad on dood
+(define (doodad-after-button-up dood mx my)
+  (if (doodad-selected? dood)
+      (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
+                   (doodad-vx dood) (doodad-vy dood) (doodad-color dood) false
+                   (doodad-x-offset dood) (doodad-y-offset dood) 0)
+      dood))
+
+;; in-doodad? : Doodad Integer Integer -> Doodad
+;; GIVEN: a Doodad and co-ordinates of a point
+;; RETURNS true iff the given coordinate is inside the bounding box of
+;; the given Doodad.
+;; EXAMPLES: see tests below
+;; STRATEGY: Use template for Doodad on dood
+(define (in-doodad? dood x y)
+  (and
+    (<= 
+      (- (doodad-x dood) HALF-DOODAD-WIDTH)
+      x
+      (+ (doodad-x dood) HALF-DOODAD-WIDTH))
+    (<= 
+      (- (doodad-y dood) HALF-DOODAD-HEIGHT)
+      y
+      (+ (doodad-y dood) HALF-DOODAD-HEIGHT))))
+
+
+;; get-x-offset: Integer Integer -> Integer
+;; GIVEN: current x co-ordinate of Doodad center and x-coordinate of
+;;        mouse pointer
+;; RETURNS: Distance between x-cordinate of center of Doodad and
+;;        clicked location
+;; STRATEGY: Combine simpler functions
+(define (get-x-offset x mx)
+  (- mx x)
+)
+
+;; get-x-offset: Integer Integer -> Integer
+;; GIVEN: current y co-ordinate of Doodad center and x-coordinate of
+;;        mouse pointer
+;; RETURNS: Distance between y-cordinate of center of Doodad and
+;;        clicked location
+;; STRATEGY: Combine simpler functions
+(define (get-y-offset y my)
+  (- my y)
+)
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                        Drawing functions                                 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
