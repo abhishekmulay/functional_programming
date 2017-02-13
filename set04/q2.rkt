@@ -34,7 +34,7 @@ flapjacks-in-skillet)
 ;;     (make-flapjack Real Real PosReal)
 
 ;; INTERPRETATION:
-;; --  A flapjacks is a pancake, usually served at breakfast
+;; -- A flapjacks is a pancake, usually served at breakfast
 ;; -- x : x cooordinate of the center of flapjack
 ;; -- y : y cooordinate of the center of flapjack
 ;; -- radius: radius of the flapjack

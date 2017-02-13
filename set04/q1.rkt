@@ -33,10 +33,14 @@
 ;; is-paused?: describes whether or not the world is paused
 ;; dotx: x co-ordinate for center of black dot
 ;; doty: y co-ordinate for center of black dot
-;; previous-star-vx: 
-;; previous-star-vy: 
-;; previous-square-vx: 
-;; previous-square-vy: 
+;; previous-star-vx: number of pixels the previously created star Doodad
+;;                     moves on each tick in the x direction 
+;; previous-star-vy: number of pixels the previously created star Doodad
+;;                     moves on each tick in the y direction 
+;; previous-square-vx: number of pixels the previously created square Doodad
+;;                     moves on each tick in the x direction 
+;; previous-square-vy: number of pixels the previously created square Doodad
+;;                     moves on each tick in the y direction 
 
 ;; TEMPLATE:
 ;; world-fn : World -> ??
@@ -45,6 +49,7 @@
 ;;       (world-doty w)(previous-star-vx w) previous-star-vy w)
 ;;       (previous-square-vx w) (previous-square-vy w))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-struct doodad (type x y vx vy color selected? x-offset y-offset age))
 
@@ -80,7 +85,7 @@
 ;;             from center of Doodad
 ;;   y-offset: Difference of y co-cordinate of previously clicked mouse position
 ;;             from center of Doodad
-;;   age: 
+;;   age: age of this Doodad 
 
 ;; EXAMPLE:
 ;;  (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0 5) =
@@ -95,6 +100,27 @@
 ;;  (... (doodad-type dood) (doodad-x dood) (doodad-y dood) (doodad-vx dood)
 ;;       (doodad-vy dood) (doodad-color dood) (doodad-selected? dood)
 ;;       (doodad-xd dood) (doodad-yd dood) (doodad-age dood)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Data Definition for List of Doodads:
+;;
+;; A ListOfDoodad is either
+;; -- empty  
+;; -- (cons Doodad ListOfDoodad)   
+;; INTERPRETATION:
+;; empty                       represents the sequence with no Doodads
+;; (cons Doodad Doodads)       represents the sequence whose first element
+;;                             is Doodad and the rest of the sequence is
+;;                             represented by Doodads
+
+;; TEMPLATE:
+;; lod-fn : ListOfDoodad -> ?
+;; (define (lox-fn lod)
+;;   (cond
+;;     [(empty? lod) ...]
+;;     [else (...
+;;             (first lod)
+;;             (lod-fn (rest lod)))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -133,22 +159,16 @@
 
 (define HALF-SQUARE-HEIGHT 71/2)
 (define HALF-SQUARE-WIDTH  71/2)
-(define X-MAX 661)
+(define X-MAX 601)
 (define Y-MAX 449)
 
 (define DEFAULT-SQUARE
-         (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y SQUARE-VX SQUARE-VY
-                      GRAY false 0 0 0))
+         (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y SQUARE-VX
+                      SQUARE-VY GRAY false 0 0 0))
 
 (define DEFAULT-STAR
          (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
                  GOLD false 0 0 0))
-
-(define FIRST-ADDED-STAR
-  (make-doodad TYPE-STAR 125 120 -1 -1 GOLD false 0 0 0))
-
-(define FIRST-ADDED-SQUARE
-  (make-doodad TYPE-SQUARE 460 350 -1 -1 GRAY false 0 0 0))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -254,7 +274,7 @@
     (make-world
       (doodads-after-tick (world-doodads-star w))
       (doodads-after-tick (world-doodads-square w))
-      (world-paused? w) 0 0 (world-previous-star-vx w) (world-previous-star-vy w)
+      (world-paused? w) 0 0 (world-previous-star-vx w)(world-previous-star-vy w)
       (world-previous-square-vx w) (world-previous-square-vy w))))
 
 ;; doodads-after-tick : ListOfDooodads -> ListOfDooodads
@@ -367,8 +387,7 @@
 ;; (core-bounce-x? (make-doodad "radial-star" 400 80 -10 12 "Green" #f 0 0))=\f
 ;; STRATEGY: Use template for Doodad on dood
 (define (core-bounce-x? dood)
-     (or (< (add-x-vx dood) 0) 
-     (>= (add-x-vx dood) X-MAX)))
+     (or (x-below-range? dood) (x-above-range? dood)))
 
 ;; core-bounce-y?: Doodad -> Boolean
 ;; GIVEN: a Doodad dood
@@ -378,8 +397,7 @@
 ;; (core-bounce-y? (make-doodad "radial-star" 400 -80 -10 12 "Green" #f 0 0))=\t
 ;; STRATEGY: Use template for Doodad on dood
 (define (core-bounce-y? dood)
-     (or (< (add-y-vy dood) 0) 
-     (>= (+ (add-y-vy dood)) Y-MAX)))
+     (or (y-below-range? dood) (y-above-range? dood)))
 
 ;; core-bounce? : Doodad -> Boolean
 ;; GIVEN: a Doodad
@@ -430,7 +448,7 @@
 
 ;; y-below-range? : Doodad -> Boolean
 ;; GIVEN: a Doodad
-;; RETURNS: weather the sum of y and vy component of given Doodad is below limit
+;; RETURNS:weather the sum of y and vy component of given Doodad is below limit
 ;; EXAMPLE:
 ;; STRATEGY: combine simpler functions
 (define (y-below-range? dood)
@@ -438,7 +456,7 @@
 
 ;; y-above-range? : Doodad -> Boolean
 ;; GIVEN: a Doodad
-;; RETURNS: weather the sum of y and vy component of given Doodad is above limit
+;; RETURNS:weather the sum of y and vy component of given Doodad is above limit
 ;; EXAMPLE:
 ;; STRATEGY: combine simpler functions
 (define (y-above-range? dood)
@@ -580,8 +598,10 @@
 (define (remove-oldest-doodads-helper doods age)
   (cond
     [(empty? doods) empty]
-    [(= age  (doodad-age (first doods)))  (remove-oldest-doodads-helper (rest doods) age) ]
-    [else (cons (first doods) (remove-oldest-doodads-helper (rest doods) age))]))
+    [(= age  (doodad-age (first doods)))
+     (remove-oldest-doodads-helper (rest doods) age) ]
+    [else (cons (first doods)
+                (remove-oldest-doodads-helper (rest doods) age))]))
 
 ;; get-oldest-doodad-age: ListOfDoodads -> Integer
 ;; GIVEN: a ListOfDoodad 
@@ -592,28 +612,6 @@
   (cond
     [(empty? doods) empty]
     [else (doodad-age (first doods))]))
-
-;;; contract
-;;; GIVEN:
-;;; RETURNS:
-;;; EXAMPLE:
-;;; STRATEGY: 
-;(define (get-max lst)
-;  (cond
-;    [(empty? lst) empty]
-;    [else (get-max-helper lst (first lst))]))
-;
-;;; contract
-;;; GIVEN:
-;;; RETURNS:
-;;; EXAMPLE:
-;;; STRATEGY: 
-;(define (get-max-helper lst max)
-;  (cond
-;    [(empty? lst) empty]
-;    [(= (length lst) 1) max]
-;    [( > (first lst) max) (get-max-helper (rest lst) (first lst))]
-;    [else (get-max-helper (rest lst) max)]))
 
 ;; world-with-paused-toggled
 ;; GIVEN:a World
@@ -740,7 +738,8 @@
   (cond
     [(empty? doods) empty]
     [(doodad-selected? (first doods))
-     (cons (doodad-with-next-color(first doods)) (find-selected-doodads (rest doods)) )]
+     (cons (doodad-with-next-color(first doods))
+           (find-selected-doodads (rest doods)) )]
     [(not (doodad-selected? (first doods)))
      (cons (first doods) (find-selected-doodads (rest doods)) )]
     [else (find-selected-doodads (rest doods))]))
@@ -823,8 +822,9 @@
 (define (doodad-after-drag dood mx my)
   (if (doodad-selected? dood)
       (make-doodad (doodad-type dood) (- mx (doodad-x-offset dood))
-                   (- my (doodad-y-offset dood)) (doodad-vx dood) (doodad-vy dood)
-                   (doodad-color dood) true (doodad-x-offset dood) (doodad-y-offset dood) 0)
+                   (- my (doodad-y-offset dood)) (doodad-vx dood)
+                   (doodad-vy dood) (doodad-color dood) true
+                   (doodad-x-offset dood) (doodad-y-offset dood) 0)
       dood))
 
 ;; doodad-after-button-up : Doodad -> Doodad
@@ -952,7 +952,8 @@
     [else (draw-star-helper star scene)]))
 
 ;; place-squares: ListOfDoodad Scene Integer Integer -> Scene
-;; GIVEN: a ListOfDoodad, a Scene to draw on and coordinates for x, y of black dot
+;; GIVEN: a ListOfDoodad, a Scene to draw on and coordinates for x, y of black
+;;        dot
 ;; RETURNS: a Scene like original with given squares Doodad printed on it
 ;; EXAMPLE: 
 ;; STRATEGY: Use template for ListOfDoodad on squares 
@@ -1007,4 +1008,177 @@
     (square 71 "solid" (doodad-color sq))
     (doodad-x sq) (doodad-y sq)
     scene))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                              TESTS                                        ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+                         ;; CONSTANTS FOR TEST
+
+(define RADIAL-STAR-IMAGE (radial-star 8 10 50 "solid" "gold"))
+(define SQUARE-IMAGE (square 71 "solid" "gray"))
+
+(define world-scene-at-beginning
+  (place-image RADIAL-STAR-IMAGE 125 120
+               (place-image SQUARE-IMAGE 460 350 EMPTY-CANVAS)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(define UNSELECTED-STAR
+  (make-doodad TYPE-STAR 500 80 -10 12 "Green" false 0 0 0))
+(define SELECTED-STAR
+  (make-doodad TYPE-STAR 500 80 -10 12 "Green" true 0 0 0))
+(define UNSELECTED-SQUARE
+  (make-doodad TYPE-SQUARE 500 80 -10 12 "Khaki" false 0 0 0))
+(define SELECTED-SQUARE
+  (make-doodad TYPE-SQUARE 500 80 -10 12 "Khaki" true 0 0 0))
+
+(define DOODS-STAR (cons UNSELECTED-STAR (cons SELECTED-STAR '())))
+(define DOODS-SQUARE (cons UNSELECTED-SQUARE (cons SELECTED-SQUARE '())))
+
+(define UNPAUSED-WORLD
+  (make-world DOODS-STAR DOODS-SQUARE false 0 0 0 0 0 0))
+
+(define PAUSED-WORLD
+  (make-world DOODS-STAR DOODS-SQUARE true 0 0 0 0 0 0))
+
+(define UNPAUSED-WORLD-WITH-SELECTED-STAR
+  (make-world DOODS-STAR DOODS-SQUARE false 500 80 0 0 0 0))
+
+(define UNPAUSED-WORLD-WITH-SELECTED-SQUARE
+  (make-world DOODS-STAR DOODS-SQUARE false 500 80 0 0 0 0))
+
+;(define UNPAUSED-WORLD-WITH-NEXT-COLOR-FOR-STAR
+;  (make-world (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0 0 0)
+;              (make-doodad "square" 500 80 -10 12 "Khaki" #f 0 0 0 0) #f 0 0 0 0 0))
+;
+;(define UNPAUSED-WORLD-WITH-NEXT-COLOR-FOR-SQUARE
+;  (make-world (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0 0)
+;              (make-doodad "square" 500 80 -10 12 "Khaki" #f 0 0) #f 0 0 0))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define STAR-X-MAX (make-doodad "radial-star" 800 80 -10 12 "Green" #f 0 0 0))
+(define STAR-X-MAX-AFTER
+  (make-doodad "radial-star" 410 92 10 12 "Blue" #false 0 0 1))
+
+(define STAR-X-MIN (make-doodad "radial-star" -10 80 -10 12 "Green" #f 0 0 0))
+(define STAR-X-MIN-AFTER
+  (make-doodad "radial-star" 20 92 10 12 "Blue" #false 0 0 1))
+
+(define STAR-Y-MAX
+  (make-doodad "radial-star" 500 500 -10 12 "Green" #f 0 0 0))
+(define STAR-Y-MAX-AFTER
+  (make-doodad "radial-star" 490 384 -10 -12 "Blue" #f 0 0 1))
+
+(define STAR-Y-MIN
+  (make-doodad "radial-star" 500 -10 -10 12 "Green" #f 0 0 0))
+(define STAR-Y-MIN-AFTER
+  (make-doodad "radial-star" 490 2 -10 12 "Green" #f 0 0 1))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define SQUARE-X-MAX (make-doodad "square" 800 80 -10 12 "Khaki" #f 0 0 0))
+(define SQUARE-X-MAX-AFTER
+  (make-doodad "square" 530 92 10 12 "Orange" #f 0 0 0))
+
+(define UNPAUSED-WORLD-BEFORE-TICK
+  (make-world STAR-X-MAX SQUARE-X-MAX false 0 0 0 0 0 0))
+
+(define UNPAUSED-WORLD-AFTER-TICK
+(make-world STAR-X-MAX-AFTER SQUARE-X-MAX-AFTER false 0 0 0 0 0 0))
+
+(define STAR-UI (place-image
+                 (radial-star 8 10 50 "solid" "green") 500 80 EMPTY-CANVAS))
+(define DOT-WITH-STAR (place-image (circle 3 "solid" "black") 500 80 STAR-UI))
+
+(define SQUARE-UI (place-image (square 71 "solid" "Khaki") 500 80 EMPTY-CANVAS))
+(define DOT-WITH-SQUARE (place-image
+                         (circle 3 "solid" "black") 500 80 SQUARE-UI))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define STAR-DOODADS (cons UNSELECTED-STAR (cons SELECTED-STAR '())))
+
+(define SQUARE-DOODADS (cons UNSELECTED-SQUARE (cons SELECTED-SQUARE '())))
+(define SELECTED-SQUARE-DOODADS
+  (list (make-doodad "square" 500 80 -10 12 "Khaki" #false 0 0 0)
+        (make-doodad "square" 500 80 -10 12 "Orange" #true 0 0 0)))
+
+
+(define WORLD-BEFORE-TICK
+  (make-world STAR-DOODADS SQUARE-DOODADS false 0 0 0 0 0 0))
+(define WORLD-AFTER-TICK
+  (make-world
+   (list
+    (make-doodad "radial-star" 490 92 -10 12 "Green" #false 0 0 1)
+    (make-doodad "radial-star" 500 80 -10 12 "Green" #true 0 0 0))
+   (list (make-doodad "square" 490 92 -10 12 "Khaki" #false 0 0 1)
+         (make-doodad "square" 500 80 -10 12 "Khaki" #true 0 0 0))
+   #false 0 0 0 0 0 0))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(begin-for-test
+
+  (check-equal? (find-selected-doodads SQUARE-DOODADS) SELECTED-SQUARE-DOODADS
+                "should get selected Doodads" )
+  
+  ;; world tests
+  (check-equal? (world-after-tick WORLD-BEFORE-TICK) WORLD-AFTER-TICK
+                "should match")
+  
+  ;; Doodad tick tests
+   (check-equal? (doodad-after-tick STAR-X-MAX) STAR-X-MAX-AFTER
+                 "Star should bounce after tick")
+   (check-equal? (doodad-after-tick STAR-X-MIN) STAR-X-MIN-AFTER
+                 "Star should bounce after tick")
+   (check-equal? (doodad-after-tick STAR-Y-MAX) STAR-Y-MAX-AFTER
+                 "Star should bounce after tick")
+   (check-equal? (doodad-after-tick STAR-Y-MIN) STAR-Y-MIN-AFTER
+                 "Star should bounce after tick")
+
+  ;; mouse events:
+  (check-equal? (world-after-mouse-event UNPAUSED-WORLD 100 100 "drag")
+                (make-world
+                 (list
+                  (make-doodad "radial-star" 500 80 -10 12 "Green" #false 0 0 0)
+                  (make-doodad "radial-star" 100 100 -10 12 "Green" #true 0 0 0))
+                 (list (make-doodad "square" 500 80 -10 12 "Khaki" #false 0 0 0)
+                       (make-doodad "square" 100 100 -10 12 "Khaki" #true 0 0 0))
+                 #false 100 100 0 0 0 0) "")
+   
+   (check-equal? (doodad-after-button-up SELECTED-STAR)
+                 UNSELECTED-STAR "Should return SELECTED-STAR")
+   
+   (check-equal? (doodad-after-button-up UNSELECTED-STAR )
+                 UNSELECTED-STAR "Should return SELECTED-STAR")
+   
+   (check-equal? (doodad-after-button-down UNSELECTED-STAR 500 80)
+                 (make-doodad "radial-star" 500 80 -10 12 "Green" #t 0 0 0)
+                 "should grab this Doodad")
+   (check-equal? (doodad-after-drag SELECTED-STAR 100 100)
+                 (make-doodad "radial-star" 100 100 -10 12 "Green" #t 0 0 0)
+                 "Should drag to new position")
+   (check-equal? (doodad-after-drag UNSELECTED-STAR 100 100)
+                 (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0 0)
+                 "Should drag to new position")
+   (check-equal? (doodad-after-mouse-event UNSELECTED-STAR 100 100 "button-up")
+                 UNSELECTED-STAR "Should return same doodad")
+   (check-equal? (doodad-after-mouse-event UNSELECTED-STAR 100 100
+                                           "button-down")
+                 UNSELECTED-STAR "Should return same doodad")
+   (check-equal? (doodad-after-mouse-event UNSELECTED-STAR 100 100 "enter")
+                 UNSELECTED-STAR "Should return same doodad")
+
+
+   ;; tests for next-color
+   (check-equal? (next-color-for-color GOLD) GREEN)
+   (check-equal? (next-color-for-color GREEN) BLUE)
+   (check-equal? (next-color-for-color BLUE) GOLD)
+   (check-equal? (next-color-for-color GRAY) OLIVE-DRAB)
+   (check-equal? (next-color-for-color OLIVE-DRAB) KHAKI)
+   (check-equal? (next-color-for-color KHAKI) ORANGE)
+   (check-equal? (next-color-for-color ORANGE) CRIMSON)
+   (check-equal? (next-color-for-color CRIMSON) GRAY)
+)
