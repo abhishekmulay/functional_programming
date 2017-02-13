@@ -47,7 +47,7 @@ flapjacks-in-skillet)
 ;;  (make-flapjack 0 0 10) = (make-flapjack 0 0 10)
 ;;  (make-flapjack -5 5 10) = (make-flapjack -5 5 10)
 
-;; TEMPLATE:
+;; OBSERVER TEMPLATE:
 ;; flapjack-fn : Flapjack -> ??
 ;;  (define (flapjack-fn jack)
 ;;    (... (flapjack-x jack) (flapjack-y jack) (flapjack-radius jack)))
