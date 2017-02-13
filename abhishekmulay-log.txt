@@ -1,5 +1,5 @@
 9 hours 45 minutes spent this session
-2017-02-06
+2017-02-13
 
 After each work session, please update and commit this file with the amount of
 time you spent working, the date when you stopped, and any notes you wish to
