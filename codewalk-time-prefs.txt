@@ -14,7 +14,7 @@ your preferences.  To ensure that we can find a time that works for you, use
 a 0 score *only* if you absolutely cannot come to a code walk at that time.
 
 
-A) Tuesday 10:00-11:00 - 10
+A) Tuesday 10:00-11:00 - 0
 B) Tuesday 11:00-12:00 - 0
 C) Tuesday 12:00-13:00 - 0
 D) Tuesday 13:00-14:00 - 0
@@ -32,7 +32,7 @@ L) Wednesday 15:00-16:00 - 5
 M) Wednesday 18:00-19:00 - 0
 
 N) Thursday 10:00-11:00 - 5
-O) Thursday 11:00-12:00 - 5
+O) Thursday 11:00-12:00 - 10
 P) Thursday 12:00-13:00 - 0
 Q) Thursday 13:00-14:00 - 0
 R) Thursday 14:00-15:00 - 0
