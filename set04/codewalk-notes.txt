@@ -1,0 +1,33 @@
+TA-1 Name:- Rohit
+TA-2 Name:- Wenjun
+
+
+
+Student1 CCIS ID:- abhishekmulay
+
+Question 1 :-
+
+Design Grade:- B
+TA Comments on Design:-
+	1. Black circle did not appear whent world is unpaused and doodad is selected by button-down event.
+	2. Could improve the interpretation for doodad-age
+	3. Observer template should be consistant with the filed names chosen when defining struct
+	4. Missing examples for many functions
+	5. Did not have 100% test coverage
+	6. Should try to avoid using magic numbers (e.g. function new-square)
+
+Presentation Grade:- A
+TA Comments on Presentation:-
+	1. Asked about changes for data definitions, satisfactory answer.
+	2. Asked about how to handle "q" key event, satisfactory answer.
+
+Question 2 :-
+
+Design Grade:- A
+TA Comments on Design:-
+	1. Should clarify when given two ListOfFlapjacks as inputs, which ListOfFlapjack was used for halting measure.
+
+
+Presentation Grade:- A
+TA Comments on Presentation:-
+	1. Asked about how student handled finding overlapping flapjacks, satisfactory answer.
