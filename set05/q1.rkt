@@ -117,14 +117,15 @@
 ;;             from center of Doodad
 ;;   y-offset: Difference of y co-cordinate of previously clicked mouse position
 ;;             from center of Doodad
-;;   age: age of this Doodad since first tick 
+;;   age: age of this Doodad is number of ticks passed in the world
+;;        since this Doodad was created
 
 ;; EXAMPLE:
-;;  (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0 5) =>
-;;  (make-doodad "radial-star" 500 80 -10 12 "Green" #f 0 0 5)
+;;  (make-doodad "radial-star" 500 80 -10 12 "Green" false 0 0 5) =>
+;;  (make-doodad "radial-star" 500 80 -10 12 "Green" false 0 0 5)
 ;;
-;;  (make-doodad "square" 500 80 -10 12 "Khaki" #f 0 0 2) =>
-;;  (make-doodad "square" 500 80 -10 12 "Khaki" #f 0 0 2)
+;;  (make-doodad "square" 500 80 -10 12 "Khaki" false 0 0 2) =>
+;;  (make-doodad "square" 500 80 -10 12 "Khaki" false 0 0 2)
 ;;
 ;; TEMPLATE:
 ;; doodad-fn : Doodad -> ??
@@ -196,13 +197,70 @@
 (define X-MAX 601)
 (define Y-MAX 449)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   STAR   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define DEFAULT-STAR
+         (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
+                 GOLD false 0 0 0))
+(define SELECTED-STAR
+  (make-doodad TYPE-STAR 500 80 -10 12 "Green" true 0 0 0))
+(define SELECTED-STAR-AFTER-PAUSED-TICK
+  (make-doodad TYPE-STAR 500 80 -10 12 "Green" true 0 0 1))
+
+(define UNSELECTED-STAR
+  (make-doodad TYPE-STAR 500 80 -10 12 "Green" false 0 0 0))
+(define UNSELECTED-STAR-AFTER-PAUSED-TICK
+  (make-doodad TYPE-STAR 500 80 -10 12 "Green" false 0 0 1))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;   SQUARE   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define DEFAULT-SQUARE
          (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y SQUARE-VX
                       SQUARE-VY GRAY false 0 0 0))
 
-(define DEFAULT-STAR
-         (make-doodad TYPE-STAR STAR-START-X STAR-START-Y STAR-VX STAR-VY
-                 GOLD false 0 0 0))
+(define SELECTED-SQUARE
+  (make-doodad TYPE-SQUARE 500 80 -10 12 "Khaki" true 0 0 0))
+
+(define SELECTED-SQUARE-AFTER-PAUSED-TICK
+  (make-doodad TYPE-SQUARE 500 80 -10 12 "Khaki" true 0 0 1))
+
+(define SELECTED-SQUARE-AFTER-Q-1
+  (make-doodad TYPE-SQUARE SQUARE-START-X SQUARE-START-Y 9 -13
+               GRAY true 0 0 0))
+
+(define UNSELECTED-SQUARE
+  (make-doodad TYPE-SQUARE 500 80 -10 12 "Khaki" false 0 0 0))
+
+(define UNSELECTED-SQUARE-AFTER-PAUSED-TICK
+  (make-doodad TYPE-SQUARE 500 80 -10 12 "Khaki" false 0 0 1))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  LIST STAR ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define DOODS-STAR (list UNSELECTED-STAR SELECTED-STAR ))
+
+(define DOODS-STAR-AFTER-PAUSED-TICK
+  (list UNSELECTED-STAR-AFTER-PAUSED-TICK SELECTED-STAR-AFTER-PAUSED-TICK))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  LIST SQUARE  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define DOODS-SQUARE (list UNSELECTED-SQUARE SELECTED-SQUARE ))
+
+(define DOODS-SQUARE-AFTER-PAUSED-TICK
+  (list UNSELECTED-SQUARE-AFTER-PAUSED-TICK  SELECTED-SQUARE-AFTER-PAUSED-TICK))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; WORLD ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define DEFAULT-WORLD
+  (make-world (list DEFAULT-STAR) (list DEFAULT-SQUARE) false 0 0
+              STAR-VX STAR-VY SQUARE-VX SQUARE-VY))
+
+(define UNPAUSED-WORLD
+  (make-world DOODS-STAR DOODS-SQUARE false 0 0 0 0 0 0))
+
+(define PAUSED-WORLD
+  (make-world DOODS-STAR DOODS-SQUARE true 0 0 0 0 0 0))
+
+(define PAUSED-WORLD-AFTER-TICK
+  (make-world DOODS-STAR-AFTER-PAUSED-TICK  DOODS-SQUARE-AFTER-PAUSED-TICK
+              true 0 0 0 0 0 0))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -318,13 +376,6 @@
             (on-key world-after-key-event)
             (on-mouse world-after-mouse-event)))
 
-(define DEFAULT-WORLD
-  (make-world
-   (list DEFAULT-STAR DEFAULT-STAR)
-   (list DEFAULT-SQUARE DEFAULT-SQUARE)
-   false 0 0
-   -12 10
-   9 -13))
 
 ;; initial-world : Any -> World
 ;; GIVEN: any value (ignored)
@@ -345,12 +396,50 @@
 ;; STRATEGY: Use template for world on w
 (define (world-after-tick w)
   (if (world-paused? w)
-    w
+    (get-paused-world w)
     (make-world
       (doodads-after-tick (world-doodads-star w))
       (doodads-after-tick (world-doodads-square w))
       (world-paused? w) 0 0 (world-previous-star-vx w)(world-previous-star-vy w)
       (world-previous-square-vx w) (world-previous-square-vy w))))
+
+;; get-paused-world: World -> World
+;; given a paused world, returns world  with age of Doodads increased by 1
+(define (get-paused-world w)
+  (make-world
+   (increse-doodad-age (world-doodads-star w))
+   (increse-doodad-age (world-doodads-square w))
+   true
+   (world-dotx w)
+   (world-doty w)
+   (world-previous-star-vx w)
+   (world-previous-star-vy w)
+   (world-previous-square-vx w)
+   (world-previous-square-vy w)))
+
+;; increse-doodad-age: ListOfDoodad -> ListOfDoodad
+(define (increse-doodad-age doods)
+  (map make-doodad-with-age-plus-1 doods))
+
+;; make-doodad-with-age: Doodad age -> Doodad
+(define (make-doodad-with-age-plus-1 dood)
+  (make-doodad
+      (doodad-type dood)
+      (doodad-x dood)
+      (doodad-y dood)
+      (doodad-vx dood)
+      (doodad-vy dood)
+      (doodad-color dood)
+      (doodad-selected? dood)
+      (doodad-x-offset dood)
+      (doodad-y-offset dood)
+      (+ (doodad-age dood) 1)))
+
+
+(begin-for-test
+  (check-equal? (world-after-tick PAUSED-WORLD) PAUSED-WORLD-AFTER-TICK
+                "Doodad age should increase by 1 even if the world is paused.")
+  )
 
 ;; doodads-after-tick : ListOfDooodads -> ListOfDooodads
 ;; GIVEN: a ListOfDoodads
@@ -682,8 +771,8 @@
    (world-paused? w)
    (world-dotx w)
    (world-doty w)
-   (doodad-vx (new-star w))
-   (doodad-vy (new-star w))
+   (world-previous-star-vx w)
+   (world-previous-star-vy w)
    (world-previous-square-vx w)
    (world-previous-square-vy w)))
 
@@ -747,7 +836,44 @@
    (world-previous-star-vx w)
    (world-previous-star-vy w)
    (doodad-vx (new-square w))
-   (doodad-vx (new-square w))))
+   (doodad-vy (new-square w))))
+
+(define WORLD-AFTER-Q-1 -1)
+
+(define WORLD-AFTER-Q-2 -1)
+
+(define WORLD-AFTER-Q-3 -1)
+
+(define WORLD-AFTER-Q-4 -1)
+
+#|(begin-for-test
+  (check-equal?
+   (world-with-q-pressed
+    (initial-world 0)) WORLD-AFTER-Q-1
+   "Pressing q should add new square Doodad with its center at position
+   (460,350) and vx = 9 and vy = -13"                
+  )
+
+  (check-equal? (world-with-q-pressed (world-with-q-pressed (initial-world 0)))
+                WORLD-AFTER-Q-2
+                "second added square should have center (460,350)
+                and vx = 13 and vy = 9")
+  
+  (check-equal? (world-with-q-pressed
+                 (world-with-q-pressed
+                  (world-with-q-pressed (initial-world 0)))) WORLD-AFTER-Q-3
+                "second added square should have center (460,350)
+                and vx = 9 and vy = -13")
+  
+  (check-equal? (world-with-q-pressed
+                 (world-with-q-pressed
+                  (world-with-q-pressed
+                   (world-with-q-pressed
+                    (initial-world 0))))) WORLD-AFTER-Q-4
+                "second added square should have center (460,350)
+                and vx = 9 and vy = -13")  
+  )
+|#
 
 ;; world-with-t-pressed : World -> World
 ;; GIVEN: a World 
@@ -1084,8 +1210,9 @@
   (cond
     [(doodad-selected? sq)
      (draw-doodad-with-dot sq (draw-square-helper sq scene) dotx doty)]
-    [else (draw-square-helper sq scene)])
-  )
+    [else (draw-doodad-with-dot sq (draw-square-helper sq scene) dotx doty)]
+    ;[else (draw-square-helper sq scene)])
+  ))
 
 ;; draw-doodad-with-dot: Doodad Scene Integer Integer
 ;; GIVEN: A Doodad, a Scene to paint on, coordinates of black dot
@@ -1134,23 +1261,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(define UNSELECTED-STAR
-  (make-doodad TYPE-STAR 500 80 -10 12 "Green" false 0 0 0))
-(define SELECTED-STAR
-  (make-doodad TYPE-STAR 500 80 -10 12 "Green" true 0 0 0))
-(define UNSELECTED-SQUARE
-  (make-doodad TYPE-SQUARE 500 80 -10 12 "Khaki" false 0 0 0))
-(define SELECTED-SQUARE
-  (make-doodad TYPE-SQUARE 500 80 -10 12 "Khaki" true 0 0 0))
-
-(define DOODS-STAR (cons UNSELECTED-STAR (cons SELECTED-STAR '())))
-(define DOODS-SQUARE (cons UNSELECTED-SQUARE (cons SELECTED-SQUARE '())))
-
-(define UNPAUSED-WORLD
-  (make-world DOODS-STAR DOODS-SQUARE false 0 0 0 0 0 0))
-
-(define PAUSED-WORLD
-  (make-world DOODS-STAR DOODS-SQUARE true 0 0 0 0 0 0))
 
 (define UNPAUSED-WORLD-WITH-SELECTED-STAR
   (make-world DOODS-STAR DOODS-SQUARE false 500 80 0 0 0 0))
