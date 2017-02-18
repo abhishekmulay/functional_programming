@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-reader.ss" "lang")((modname q1) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname q1) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (require rackunit)
 (require 2htdp/image)
 (require 2htdp/universe)
@@ -304,8 +304,8 @@
 
 (define DEFAULT-WORLD
   (make-world
-   (list DEFAULT-STAR DEFAULT-STAR)
-   (list DEFAULT-SQUARE DEFAULT-SQUARE)
+   (list DEFAULT-STAR)
+   (list DEFAULT-SQUARE)
    false 0 0
    -12 10
    9 -13))
