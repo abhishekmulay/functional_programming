@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-reader.ss" "lang")((modname q2) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname q2) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (require rackunit)
 (require "extras.rkt")
 (check-location "05" "q2.rkt")
@@ -110,12 +110,19 @@ flapjacks-in-skillet)
 ;;         (make-flapjack 7.2  6 5))
 ;;
 ;; STRATEGY: Use template for ListOfFlapjack on jack-list
+;(define (flapjacks-in-skillet jack-list skill)
+;  (cond
+;    [(empty? jack-list) empty]
+;    [(fits? (first jack-list) skill)
+;     (cons (first jack-list) (flapjacks-in-skillet (rest jack-list) skill))]
+;    [else (flapjacks-in-skillet (rest jack-list) skill)]))
+
 (define (flapjacks-in-skillet jack-list skill)
   (cond
     [(empty? jack-list) empty]
-    [(fits? (first jack-list) skill)
-     (cons (first jack-list) (flapjacks-in-skillet (rest jack-list) skill))]
-    [else (flapjacks-in-skillet (rest jack-list) skill)]))
+    [else (filter
+           (lambda (fj)
+             (fits? fj skill)) jack-list)]))
 
 ;; fits? : Flapjack Skillet -> Boolean
 ;; GIVEN: a Flapjack and a Skillet
@@ -147,8 +154,6 @@ flapjacks-in-skillet)
   (sqrt
    ( + (expt (- x2 x1) 2) (expt (- y2 y1) 2))))
 
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; overlapping-flapjacks : ListOfFlapjack -> ListOfListOfFlapjack
@@ -179,8 +184,15 @@ flapjacks-in-skillet)
 ;;         (list (make-flapjack  20  4 4.2)))
 ;;
 ;; STRATEGY:Use template for ListOfFlapjack on jack-list
+;; (define (overlapping-flapjacks jack-list)
+;;  (find-overlapping-flapjack-list jack-list jack-list))
+
 (define (overlapping-flapjacks jack-list)
-  (find-overlapping-flapjack-list jack-list jack-list))
+  (cond
+    [(empty? jack-list) empty]
+    [else (map
+           (lambda (fj)
+             (overlapping-flapjacks-for-flapjack jack-list fj)) jack-list)]))
 
 ;; find-overlapping-flapjack-list : ListOfFlapjack ListOfFlapjack ->
 ;;       ListOfListOfFlapjack
@@ -211,15 +223,22 @@ flapjacks-in-skillet)
 ;;
 ;; STRATEGY: Use template for ListOfFlapjacks on jack-list
 ;; HALTING-MEASURE: length(ListOfFlapjack)
-(define (find-overlapping-flapjack-list jack-list complete-jack-list)
-  (cond
-    [(empty? jack-list) empty]
-    [else (cons
-           (overlapping-flapjacks-for-flapjack complete-jack-list
-                                               (first jack-list))
-           (find-overlapping-flapjack-list
-            (rest jack-list)
-            complete-jack-list)) ]))
+;(define (find-overlapping-flapjack-list jack-list complete-jack-list)
+;  (cond
+;    [(empty? jack-list) empty]
+;    [else (cons
+;           (overlapping-flapjacks-for-flapjack complete-jack-list
+;              (first jack-list))
+;           (find-overlapping-flapjack-list
+;              (rest jack-list) complete-jack-list)) ]))
+
+;(define (find-overlapping-flapjack-list jack-list complete-jack-list)
+;  (cond
+;    [(empty? jack-list) empty]
+;    [else (map
+;           (lambda (fj)
+;             (overlapping-flapjacks-for-flapjack jack-list fj)) jack-list)]))
+
 
 ;; overlapping-flapjacks-for-flapjack :
 ;;       ListOfFlapjack Flapjack -> ListOfFlapjack
@@ -243,13 +262,21 @@ flapjacks-in-skillet)
 ;; STRATEGY: Use template for Flapjack on jack and
 ;;           use template for ListOfFlapjack on jack-list
 ;; HALTING-MEASURE: length(ListOfFlapjack)
+;(define (overlapping-flapjacks-for-flapjack jack-list jack)
+;  (cond
+;    [(empty? jack-list) empty]
+;    [(overlap? jack (first jack-list))
+;     (cons (first jack-list)
+;           (overlapping-flapjacks-for-flapjack (rest jack-list) jack))]
+;    [else (overlapping-flapjacks-for-flapjack (rest jack-list) jack)]))
+
+
 (define (overlapping-flapjacks-for-flapjack jack-list jack)
   (cond
     [(empty? jack-list) empty]
-    [(overlap? jack (first jack-list))
-     (cons (first jack-list)
-           (overlapping-flapjacks-for-flapjack (rest jack-list) jack))]
-    [else (overlapping-flapjacks-for-flapjack (rest jack-list) jack)]))
+    [else (filter
+           (lambda (fj)
+             (overlap? fj jack)) jack-list)]))
 
 ;; overlap? : Flapjack Flapjack -> Boolean
 ;; GIVEN: Two flapjacks
@@ -288,7 +315,11 @@ flapjacks-in-skillet)
 ;;   =>
 ;;   (list (make-flapjack  20  4 4.2))
 (define (non-overlapping-flapjacks jack-list)
-  (find-non-overlapping-flapjacks jack-list jack-list))
+  (cond
+    [(empty? jack-list) empty]
+    [else (filter
+           (lambda (fj)
+             (not (has-overlapping-flapjacks? fj jack-list))) jack-list)]))
 
 ;;helper function
 ;; find-non-overlapping-flapjacks :
@@ -309,16 +340,24 @@ flapjacks-in-skillet)
 ;;
 ;; STRATEGY: Use template for ListOfFlapjacks on jack-list
 ;; HALTING-MEASURE: length(ListOfFlapjack)
-(define (find-non-overlapping-flapjacks jack-list complete-jack-list)
-  (cond
-    [(empty? jack-list) empty]
-    [(has-overlapping-flapjacks? (first jack-list) complete-jack-list)
-     (find-non-overlapping-flapjacks (rest jack-list) complete-jack-list)]
-    [else (cons
-           (first jack-list)
-           (find-non-overlapping-flapjacks
-            (rest jack-list)
-            complete-jack-list))]))
+;(define (find-non-overlapping-flapjacks jack-list complete-jack-list)
+;  (cond
+;    [(empty? jack-list) empty]
+;    [(has-overlapping-flapjacks? (first jack-list) complete-jack-list)
+;     (find-non-overlapping-flapjacks (rest jack-list) complete-jack-list)]
+;    [else (cons
+;           (first jack-list)
+;           (find-non-overlapping-flapjacks
+;            (rest jack-list)
+;            complete-jack-list))]))
+
+;(define (find-non-overlapping-flapjacks jack-list complete-jack-list)
+;  (cond
+;    [(empty? jack-list) empty]
+;    [else (filter
+;           (lambda (fj)
+;             (not (has-overlapping-flapjacks? fj complete-jack-list)))
+;           jack-list)]))
 
 ;; has-overlapping-flapjacks? : Flapjack ListOfFlapjack -> Boolean
 ;; GIVEN: a Flapjack and a list of Flapjacks
@@ -362,8 +401,23 @@ flapjacks-in-skillet)
 
 (define NON-OVERLAPPING-FLAPJACKS (list (make-flapjack  20  4 4.2)))
 
+(define EMPTY-JACK-LIST '())
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (begin-for-test
+
+  (check-equal? (overlapping-flapjacks-for-flapjack EMPTY-JACK-LIST JACK) '()
+                "should handle empty list")
+
+  (check-equal? (non-overlapping-flapjacks EMPTY-JACK-LIST)'()
+                "should handle empty list")
+
+  (check-equal? (overlapping-flapjacks EMPTY-JACK-LIST)'()
+                "should handle empty list")
+
+  (check-equal? (flapjacks-in-skillet EMPTY-JACK-LIST "") '()
+                "should handle empty list")
+                 
   (check-equal? (flapjacks-in-skillet
                  (list (make-flapjack -10  2 5)
                        (make-flapjack  -3  0 4)
@@ -392,11 +446,7 @@ flapjacks-in-skillet)
                       (make-flapjack 17 30 5))
                 "flapjacks-in-skillet fails on a similar example") 
 
-   ;(check-equal? (distance-sq 0 0 10 10) 200 "should be 200")
-   
-   
-
-   (check-equal? (overlapping-flapjacks-for-flapjack JACK-LIST JACK)
+  (check-equal? (overlapping-flapjacks-for-flapjack JACK-LIST JACK)
                  OVERLAPPING-FLAPJACKS-FOR-JACK
                  "Should return list of Flapjacks that overlap given Flapjack")
    
@@ -435,7 +485,6 @@ flapjacks-in-skillet)
    
    (check-equal? (fits? (make-flapjack 0 0 5) (make-skillet 0 0 10)) true
                  "should fit")
-   
    
    (check-equal? (has-overlapping-flapjacks? JACK JACK-LIST) true)
   )
