@@ -435,7 +435,6 @@
       (doodad-y-offset dood)
       (+ (doodad-age dood) 1)))
 
-
 (begin-for-test
   (check-equal? (world-after-tick PAUSED-WORLD) PAUSED-WORLD-AFTER-TICK
                 "Doodad age should increase by 1 even if the world is paused.")
@@ -447,12 +446,15 @@
 ;; EXAMPLE:
 ;; STRATEGY: Use template for ListOfDoodad on doods
 ;; HALTING-MEASURE: length(ListOfDoodad)
+;(define (doodads-after-tick doods)
+;  (cond
+;    [(empty? doods) empty]
+;    [else (cons
+;           (doodad-after-tick (first doods))
+;           (doodads-after-tick (rest doods)))]))
+
 (define (doodads-after-tick doods)
-  (cond
-    [(empty? doods) empty]
-    [else (cons
-           (doodad-after-tick (first doods))
-           (doodads-after-tick (rest doods)))]))
+  (map doodad-after-tick doods))
 
 ;; doodad-after-tick : Doodad -> Doodad
 ;; GIVEN: a Doodad 
@@ -786,7 +788,9 @@
 (define (remove-oldest-doodad doods)
   (cond
     [(empty? doods) empty]
-    [else (remove-oldest-doodads-helper doods (get-oldest-doodad-age doods))]))
+    [else (filter
+           (lambda (dood)
+             ( < (doodad-age dood) (get-oldest-doodad-age doods))) doods)]))
 
 ;; remove-oldest-doodads-helper: ListOfDoodad Integer -> ListOfDoodad
 ;; GIVEN: a ListOfDoodad and age of oldest Doodad
@@ -794,13 +798,18 @@
 ;; EXAMPLE:
 ;; STRATEGY: Use template for ListOfDoodad on doods
 ;; HALTING-MEASURE: length(ListOfDoodad)
-(define (remove-oldest-doodads-helper doods age)
-  (cond
-    [(empty? doods) empty]
-    [(= age  (doodad-age (first doods)))
-     (remove-oldest-doodads-helper (rest doods) age) ]
-    [else (cons (first doods)
-                (remove-oldest-doodads-helper (rest doods) age))]))
+;(define (remove-oldest-doodads-helper doods age)
+;  (cond
+;    [(empty? doods) empty]
+;    [(= age  (doodad-age (first doods)))
+;     (remove-oldest-doodads-helper (rest doods) age) ]
+;    [else (cons (first doods)
+;                (remove-oldest-doodads-helper (rest doods) age))]))
+
+;(define (remove-oldest-doodads-helper doods age)
+;(cond
+;  [(empty? doods) empty]
+;  [else (map remove-oldest-doodad-helper doods)]))
 
 ;; get-oldest-doodad-age: ListOfDoodads -> Integer
 ;; GIVEN: a ListOfDoodad 
@@ -811,7 +820,17 @@
 (define (get-oldest-doodad-age doods)
   (cond
     [(empty? doods) empty]
-    [else (doodad-age (first doods))]))
+    [else (doodad-age (first (insertion-sort > doods)))]))
+
+(define (insertion-sort > xs)
+  (cond
+    [(empty? xs) xs]
+    [else (insert > (first xs) (insertion-sort > (rest xs)))]))
+
+(define (insert > x xs)
+  (cond [(empty? xs) (list x)]
+        [(> (doodad-age x) (doodad-age (first xs))) (cons x xs)]
+        [else (cons (first xs) (insert > x (rest xs)))]))
 
 ;; world-with-paused-toggled
 ;; GIVEN:a World
@@ -838,42 +857,6 @@
    (doodad-vx (new-square w))
    (doodad-vy (new-square w))))
 
-(define WORLD-AFTER-Q-1 -1)
-
-(define WORLD-AFTER-Q-2 -1)
-
-(define WORLD-AFTER-Q-3 -1)
-
-(define WORLD-AFTER-Q-4 -1)
-
-#|(begin-for-test
-  (check-equal?
-   (world-with-q-pressed
-    (initial-world 0)) WORLD-AFTER-Q-1
-   "Pressing q should add new square Doodad with its center at position
-   (460,350) and vx = 9 and vy = -13"                
-  )
-
-  (check-equal? (world-with-q-pressed (world-with-q-pressed (initial-world 0)))
-                WORLD-AFTER-Q-2
-                "second added square should have center (460,350)
-                and vx = 13 and vy = 9")
-  
-  (check-equal? (world-with-q-pressed
-                 (world-with-q-pressed
-                  (world-with-q-pressed (initial-world 0)))) WORLD-AFTER-Q-3
-                "second added square should have center (460,350)
-                and vx = 9 and vy = -13")
-  
-  (check-equal? (world-with-q-pressed
-                 (world-with-q-pressed
-                  (world-with-q-pressed
-                   (world-with-q-pressed
-                    (initial-world 0))))) WORLD-AFTER-Q-4
-                "second added square should have center (460,350)
-                and vx = 9 and vy = -13")  
-  )
-|#
 
 ;; world-with-t-pressed : World -> World
 ;; GIVEN: a World 
@@ -901,7 +884,6 @@
 (define (add-new-square squares w)
   (append squares (list (new-square w)) ))
 
-
 ;; new-square : World -> Doodad
 ;; GIVEN: a World
 ;; RETURNS: a new square like Doodad 
@@ -910,7 +892,6 @@
 (define (new-square w)
   (make-doodad TYPE-SQUARE 460 350  (* -1 (world-previous-square-vy w))
                (world-previous-square-vx w) GRAY false 0 0 0)) 
-
 
 ;; add-new-star : ListOfDoodad World -> ListOfDoodad
 ;; GIVEN: a ListOfDoodad of star like Doodads and a World
@@ -972,16 +953,24 @@
 ;; EXAMPLE:
 ;; STRATEGY: Use template for ListOfDood on doods
 ;; HALTING-MEASURE: length(ListOfDoodad)
+;(define (find-selected-doodads doods)
+;  (cond
+;    [(empty? doods) empty]
+;    [(doodad-selected? (first doods))
+;     (cons (doodad-with-next-color(first doods))
+;           (find-selected-doodads (rest doods)) )]
+;    [(not (doodad-selected? (first doods)))
+;     (cons (first doods) (find-selected-doodads (rest doods)) )]
+;    [else (find-selected-doodads (rest doods))]))
+
 (define (find-selected-doodads doods)
   (cond
     [(empty? doods) empty]
-    [(doodad-selected? (first doods))
-     (cons (doodad-with-next-color(first doods))
-           (find-selected-doodads (rest doods)) )]
-    [(not (doodad-selected? (first doods)))
-     (cons (first doods) (find-selected-doodads (rest doods)) )]
-    [else (find-selected-doodads (rest doods))]))
- 
+    [else (map (lambda (dood)
+                 (if
+                  (doodad-selected? dood)
+                  (doodad-with-next-color dood) dood))  doods)]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                        Mouse event handling                              ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1020,9 +1009,9 @@
 (define (doodads-after-mouse-event doods mx my mev)
   (cond
     [(empty? doods) empty]
-    [else (cons
-           (doodad-after-mouse-event (first doods) mx my mev)
-           (doodads-after-mouse-event (rest doods) mx my mev))]))
+    [else (map
+           (lambda (dood)
+             (doodad-after-mouse-event dood mx my mev))doods) ]))
 
 ;; doodad-after-mouse-event : Doodad Integer Integer MouseEvent -> Doodad
 ;; GIVEN: Doodad, current co-ordinates of mouse and description of mouse event
@@ -1210,9 +1199,8 @@
   (cond
     [(doodad-selected? sq)
      (draw-doodad-with-dot sq (draw-square-helper sq scene) dotx doty)]
-    [else (draw-doodad-with-dot sq (draw-square-helper sq scene) dotx doty)]
-    ;[else (draw-square-helper sq scene)])
-  ))
+    [else (draw-square-helper sq scene)])
+  )
 
 ;; draw-doodad-with-dot: Doodad Scene Integer Integer
 ;; GIVEN: A Doodad, a Scene to paint on, coordinates of black dot
@@ -1512,8 +1500,8 @@
    (check-equal? (initial-world 123) DEFAULT-WORLD "should match")
 
    (check-equal? (remove-oldest-doodad SQUARE-DOODADS-WITH-DIFFERENT-AGE)
-                 (list (make-doodad "square" 500 80 -10 12 "khaki" #true 0 0 1))
-                 "should remove")
+                 (list (make-doodad "square" 500 80 -10 12 "khaki" #f 0 0 0))
+                 "should remove older doodad")
    
    ;; tests for next-color
    (check-equal? (next-color-for-color GOLD) GREEN)
