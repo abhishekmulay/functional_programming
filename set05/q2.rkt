@@ -69,6 +69,27 @@ flapjacks-in-skillet)
 ;;     [else (... (first lst)
 ;;                (lof-fn (rest lst)))]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ListOfFlapjack
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;  A ListOfListOfFlapjack (LOLOF) is either:
+;;
+;;  -- empty                         represents the sequence with no
+;;                                   ListOfFlapjacks
+;;  -- (cons ListOfFlapjack LOLOF)   represents the sequence whose first element
+;;                                   is ListOfFlapjack and the rest of the
+;;                                   sequence is represented by LOLOF
+;;
+
+;; TEMPLATE:
+;; lolof-fn : ListOfListOfFlapjack -> ??
+;; (define (lolof-fn lst)
+;;   (cond
+;;     [(empty? lst) ...]
+;;     [else (... (first lst)
+;;                (lolof-fn (rest lst)))]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-struct skillet (x y radius))
@@ -269,7 +290,6 @@ flapjacks-in-skillet)
 ;     (cons (first jack-list)
 ;           (overlapping-flapjacks-for-flapjack (rest jack-list) jack))]
 ;    [else (overlapping-flapjacks-for-flapjack (rest jack-list) jack)]))
-
 
 (define (overlapping-flapjacks-for-flapjack jack-list jack)
   (cond
