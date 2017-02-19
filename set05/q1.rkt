@@ -1040,7 +1040,7 @@
       (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
                    (doodad-vx dood) (doodad-vy dood) (doodad-color dood) true
                    (get-x-offset (doodad-x dood) mx)
-                   (get-y-offset (doodad-y dood) my) 0) dood))
+                   (get-y-offset (doodad-y dood) my) (doodad-age dood)) dood))
 
 ;; doodad-after-drag : Doodad Integer Integer -> Doodad
 ;; GIVEN: a Doodad, current co-ordinates of mouse
@@ -1052,7 +1052,8 @@
       (make-doodad (doodad-type dood) (- mx (doodad-x-offset dood))
                    (- my (doodad-y-offset dood)) (doodad-vx dood)
                    (doodad-vy dood) (doodad-color dood) true
-                   (doodad-x-offset dood) (doodad-y-offset dood) 0)
+                   (doodad-x-offset dood) (doodad-y-offset dood)
+                   (doodad-age dood))
       dood))
 
 ;; doodad-after-button-up : Doodad -> Doodad
@@ -1063,7 +1064,8 @@
   (if (doodad-selected? dood)
       (make-doodad (doodad-type dood) (doodad-x dood) (doodad-y dood)
                    (doodad-vx dood) (doodad-vy dood) (doodad-color dood) false
-                   (doodad-x-offset dood) (doodad-y-offset dood) 0)
+                   (doodad-x-offset dood) (doodad-y-offset dood)
+                   (doodad-age dood))
       dood))
 
 ;; in-doodad? : Doodad Integer Integer -> Doodad
