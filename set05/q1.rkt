@@ -848,15 +848,13 @@
 ;;
 ;; STRATEGY: Use HOF filter on doods
 (define (remove-oldest-doodad doods)
-  (cond
-    [(empty? doods) empty]
-    [else (filter
+  (filter
            ;; Doodad -> Boolean
            ;; GIVEN: a Doodad
            ;; RETURNS: the given Doodad if its age is lesser than age of oldest
            ;;          Doodad
            (lambda (dood)
-             ( < (doodad-age dood) (get-oldest-doodad-age doods))) doods)]))
+             ( < (doodad-age dood) (get-oldest-doodad-age doods))) doods))
 
 ;; remove-oldest-doodads-helper: ListOfDoodad Integer -> ListOfDoodad
 ;; GIVEN: a ListOfDoodad and age of oldest Doodad
@@ -887,7 +885,7 @@
     [(empty? doods) empty]
     [else (first(sort
                  (map
-                  ;; lambda : Doodad -> Integer
+                  ;; Doodad -> Integer
                   ;; GIVEN: a Doodad
                   ;; RETURNS: the age of Doodad
                   (lambda (dood) (doodad-age dood)) doods) >))]))
@@ -1081,16 +1079,14 @@
 ;;      (make-doodad "radial-star" 500 80 -10 12 "Blue" #true 0 0 0))
 ;; STRATEGY: Use HOF map on doods
 (define (find-selected-doodads doods)
-  (cond
-    [(empty? doods) empty]
-    [else (map
-           ;; lambda : Doodad -> Doodad
+  (map
+           ;; Doodad -> Doodad
            ;; GIVEN: a Doodad
            ;; RETURNS: the given Doodad if it is selected
            (lambda (dood)
                  (if
                   (doodad-selected? dood)
-                  (doodad-with-next-color dood) dood))  doods)]))
+                  (doodad-with-next-color dood) dood))  doods))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                        Mouse event handling                              ;;
@@ -1132,15 +1128,13 @@
 ;; (make-doodad "radial-star" 500 80 -10 12 "Green" #true 0 0 0))
 ;; STRATEGY: Use HOF map on doods
 (define (doodads-after-mouse-event doods mx my mev)
-  (cond
-    [(empty? doods) empty]
-    [else (map
-           ;; lambda : Doodad -> Integer
-           ;; GIVEN: a Doodad
-           ;; RETURNS: the Doodad that should follow given Doodad after
-           ;; mouse event
-           (lambda (dood)
-             (doodad-after-mouse-event dood mx my mev))doods) ]))
+  (map
+   ;; Doodad -> Integer
+   ;; GIVEN: a Doodad
+   ;; RETURNS: the Doodad that should follow given Doodad after
+   ;; mouse event
+   (lambda (dood)
+     (doodad-after-mouse-event dood mx my mev))doods))
 
 ;; doodad-after-mouse-event : Doodad Integer Integer MouseEvent -> Doodad
 ;; GIVEN: Doodad, current co-ordinates of mouse and description of mouse event
@@ -1320,7 +1314,7 @@
 ;;           i.e. (all-doodads-in-world w)
 (define (world-to-scene w)
   (foldr
-   ;; lambda : Doodad Scene -> Scene
+   ;; Doodad Scene -> Scene
    ;; GIVEN: a Doodad and a Scene to draw on
    ;; RETURNS: a Scene like original, with given Doodad printed on it
    (lambda (dood scene)
