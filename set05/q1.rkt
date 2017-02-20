@@ -1244,6 +1244,23 @@
 ;;                        Drawing functions                                 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; world-to-scene : World -> Scene
+;; GIVEN: a World
+;; RETURNS: a Scene that portrays the given world.
+;; EXAMPLE:
+;; (world-to-scene WORLD-WITH-ONE-SQUARE) =>
+;; (place-image (square 71 "solid" "khaki") 470 40 EMPTY-CANVAS)
+;; STRATEGY: Use template for World on w and combine simpler functions
+(define (world-to-scene w)
+  (foldr
+   ;; lambda : Doodad Scene -> Scene
+   ;; GIVEN: a Doodad and a Scene to draw on
+   ;; RETURNS: a Scene like original, with given Doodad printed on it
+   (lambda (dood scene)
+     (draw-doodad dood scene (world-dotx w) (world-doty w)))
+   EMPTY-CANVAS
+   (all-doodads-in-world w)))
+
 ;; draw-doodad : Doodad Scene Integer Integer -> Scene
 ;; GIVEN: ListOfDoodad Scene Integer Integer
 ;; RETURNS: A Scene with all Doodads from given ListOfDoodad printed on it
@@ -1261,22 +1278,6 @@
     [(string=? (doodad-type dood) TYPE-SQUARE)
      (place-square dood scene dotx doty)]))
 
-;; world-to-scene : World -> Scene
-;; GIVEN: a World
-;; RETURNS: a Scene that portrays the given world.
-;; EXAMPLE:
-;; (world-to-scene WORLD-WITH-ONE-SQUARE) =>
-;; (place-image (square 71 "solid" "khaki") 470 40 EMPTY-CANVAS)
-;; STRATEGY: Use template for World on w and combine simpler functions
-(define (world-to-scene w)
-  (foldr
-   ;; lambda : Doodad Scene -> Scene
-   ;; GIVEN: a Doodad and a Scene to draw on
-   ;; RETURNS: a Scene like original, with given Doodad printed on it
-   (lambda (dood scene)
-     (draw-doodad dood scene (world-dotx w) (world-doty w)))
-   EMPTY-CANVAS
-   (all-doodads-in-world w)))
 
 ;; all-doodads-in-world : World -> ListOfDoodad
 ;; GIVEN: a World
@@ -1383,7 +1384,11 @@
 ;; Draws a circle at given coordinate 
 ;; STRATEGY: Combine simpler functions
 (define (draw-doodad-with-dot dood scene dotx doty)
-  (place-image (circle 3 "solid" "black") dotx doty scene))
+  (place-image
+   (circle 3 "solid" "black")
+   (+ (doodad-x dood) (doodad-x-offset dood))
+   (+ (doodad-y dood) (doodad-y-offset dood))
+   scene))
 
 ;; draw-star-helper: Doodad Scene -> Scene
 ;; GIVEN: a star like Doodad and a Scene
