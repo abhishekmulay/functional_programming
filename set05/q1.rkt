@@ -865,7 +865,7 @@
   (cond
     [(empty? doods) empty]
     [else (filter
-           ;; lambda : Doodad -> Doodad
+           ;; Doodad -> Boolean
            ;; GIVEN: a Doodad
            ;; RETURNS: the given Doodad if its age is lesser than age of oldest
            ;;          Doodad
