@@ -843,6 +843,10 @@
   (cond
     [(empty? doods) empty]
     [else (filter
+           ;; lambda : Doodad -> Doodad
+           ;; GIVEN: a Doodad
+           ;; RETURNS: the given Doodad if its age is lesser than age of oldest
+           ;;          Doodad
            (lambda (dood)
              ( < (doodad-age dood) (get-oldest-doodad-age doods))) doods)]))
 
@@ -869,18 +873,32 @@
 ;; GIVEN: a ListOfDoodad 
 ;; RETURNS: age of oldest Doodad
 ;; EXAMPLE:
+;;(get-oldest-doodad-age
+;; (list
+;;  (make-doodad "square" 460 350 -13 -9 "Gray" #false 0 0 0)
+;;  (make-doodad "square" 460 350 9 -13 "Gray" #false 0 0 5))) => 5
+;;
 ;; STRATEGY: Use template for ListOfDoodad on doods
 ;; HALTING-MEASURE: length(ListOfDoodad)
 (define (get-oldest-doodad-age doods)
   (cond
     [(empty? doods) empty]
-    [else (first (sort (map (lambda (dood) (doodad-age dood)) doods) >))]))
-
+    [else (first(sort
+                 (map
+                  ;; lambda : Doodad -> Integer
+                  ;; GIVEN: a Doodad
+                  ;; RETURNS: the age of Doodad
+                  (lambda (dood) (doodad-age dood)) doods) >))]))
 
 ;; world-with-paused-toggled
 ;; GIVEN:a World
 ;; RETURNS: a World just like the given with paused? toggled
 ;; EXAMPLE:
+;;(world-with-paused-toggled DEFAULT-WORLD) =>
+;;(make-world
+;; (list (make-doodad "radial-star" 125 120 10 12 "Gold" #false 0 0 0))
+;; (list (make-doodad "square" 460 350 -13 -9 "Gray" #false 0 0 0))
+;; #true 0 0 10 12 -13 -9)
 ;; STRATEGY: Use template for World on w
 (define (world-with-paused-toggled w)
   (make-world-with-paused w (not (world-paused? w))))
@@ -889,6 +907,12 @@
 ;; GIVEN: a World 
 ;; RETURNS:a World that should follow the given World after a "q" key press
 ;; EXAMPLE:
+;;(world-with-q-pressed DEFAULT-WORLD)=>
+;;(make-world
+;; (list (make-doodad "radial-star" 125 120 10 12 "Gold" #false 0 0 0))
+;; (list (make-doodad "square" 460 350 -13 -9 "Gray" #false 0 0 0)
+;;       (make-doodad "square" 460 350 9 -13 "Gray" #false 0 0 0))
+;; #false 0 0 10 12 9 -13)
 ;; STRATEGY: Use template for World on w
 (define (world-with-q-pressed w)
   (make-world
@@ -907,6 +931,13 @@
 ;; GIVEN: a World 
 ;; RETURNS:a World that should follow the given World after a "t" key press
 ;; EXAMPLE:
+;;(world-with-t-pressed DEFAULT-WORLD) =>
+;;(make-world
+;; (list
+;;  (make-doodad "radial-star" 125 120 10 12 "Gold" #false 0 0 0)
+;;  (make-doodad "radial-star" 125 120 -12 10 "Gold" #false 0 0 0))
+;; (list (make-doodad "square" 460 350 -13 -9 "Gray" #false 0 0 0))
+;; #false 0 0 -12 10 -13 -9)
 ;; STRATEGY: Use template for World on w
 (define (world-with-t-pressed w)
   (make-world
@@ -924,6 +955,16 @@
 ;; GIVEN: a ListOfDoodad of square Doodads and a World
 ;; RETURNS: a World with new square like Doodad added 
 ;; EXAMPLE:
+;;(add-new-square (list
+;; (make-doodad "square" 125 120 10 12 "khaki" #false 0 0 0)
+;; (make-doodad "square" 125 120 -12 10 "khaki" #false 0 0 0))
+;; DEFAULT-WORLD)  =>
+;;
+;;(list
+;; (make-doodad "square" 125 120 10 12 "khaki" #false 0 0 0)
+;; (make-doodad "square" 125 120 -12 10 "khaki" #false 0 0 0)
+;; (make-doodad "square" 460 350 9 -13 "Gray" #false 0 0 0))
+;;                 
 ;; STRATEGY: combine simpler functions
 ;; add the new square doodad at end of list
 (define (add-new-square squares w)
@@ -933,6 +974,8 @@
 ;; GIVEN: a World
 ;; RETURNS: a new square like Doodad 
 ;; EXAMPLE:
+;; (new-square DEFAULT-WORLD) =>
+;; (make-doodad "square" 460 350 9 -13 "Gray" #false 0 0 0)
 ;; STRATEGY: use tempalte for World on w
 (define (new-square w)
   (make-doodad TYPE-SQUARE 460 350  (* -1 (world-previous-square-vy w))
@@ -942,6 +985,13 @@
 ;; GIVEN: a ListOfDoodad of star like Doodads and a World
 ;; RETURNS: a World with new star like Doodad added 
 ;; EXAMPLE:
+;;(add-new-star
+;; (list
+;; (make-doodad "radial-star" 125 120 10 12 "Gold" #false 0 0 0)) DEFAULT-WORLD)
+;; => 
+;;(list
+;; (make-doodad "radial-star" 125 120 10 12 "Gold" #false 0 0 0)
+;; (make-doodad "radial-star" 125 120 -12 10 "Gold" #false 0 0 0))
 ;; STRATEGY: combine simpler functions
 ;; add the new star doodad at end of list
 (define (add-new-star stars w)
@@ -951,6 +1001,8 @@
 ;; GIVEN: a World
 ;; RETURNS: a new star like Doodad 
 ;; EXAMPLE:
+;; (new-star DEFAULT-WORLD) =>
+;; (make-doodad "radial-star" 125 120 -12 10 "Gold" #false 0 0 0)
 ;; STRATEGY: use tempalte for World on w
 (define (new-star w)
   (make-doodad TYPE-STAR 125 120 (* -1 (world-previous-star-vy w))
@@ -960,6 +1012,11 @@
 ;; GIVEN: a World 
 ;; RETURNS: a World that should follow given World after "c" key press
 ;; EXAMPLE:
+;; (world-with-c-pressed DEFAULT-WORLD)  
+;; (make-world
+;;  (list (make-doodad "radial-star" 125 120 10 12 "Gold" #false 0 0 0))
+;;  (list (make-doodad "square" 460 350 -13 -9 "Gray" #false 0 0 0))
+;;  #false 0 0 -12 10 -13 -9)
 ;; STRATEGY: Use template for World on w
 (define (world-with-c-pressed w)  
   (make-world
@@ -977,6 +1034,8 @@
 ;; GIVEN: a Doodad
 ;; RETURNS: next color for given Doodad
 ;; EXAMPLE:
+;; (doodad-with-next-color DEFAULT-STAR) =>
+;; (make-doodad "radial-star" 125 120 10 12 "Green" #false 0 0 0)
 ;; STRATEGY:  Use template for Doodad on dood
 (define (doodad-with-next-color dood)
   (make-doodad
@@ -1011,7 +1070,11 @@
 (define (find-selected-doodads doods)
   (cond
     [(empty? doods) empty]
-    [else (map (lambda (dood)
+    [else (map
+           ;; lambda : Doodad -> Doodad
+           ;; GIVEN: a Doodad
+           ;; RETURNS: the given Doodad if it is selected
+           (lambda (dood)
                  (if
                   (doodad-selected? dood)
                   (doodad-with-next-color dood) dood))  doods)]))
@@ -1054,6 +1117,10 @@
   (cond
     [(empty? doods) empty]
     [else (map
+           ;; lambda : Doodad -> Integer
+           ;; GIVEN: a Doodad
+           ;; RETURNS: the Doodad that should follow given Doodad after
+           ;; mouse event
            (lambda (dood)
              (doodad-after-mouse-event dood mx my mev))doods) ]))
 
@@ -1203,6 +1270,9 @@
 ;; STRATEGY: Use template for World on w and combine simpler functions
 (define (world-to-scene w)
   (foldr
+   ;; lambda : Doodad Scene -> Scene
+   ;; GIVEN: a Doodad and a Scene to draw on
+   ;; RETURNS: a Scene like original, with given Doodad printed on it
    (lambda (dood scene)
      (draw-doodad dood scene (world-dotx w) (world-doty w)))
    EMPTY-CANVAS
@@ -1300,8 +1370,7 @@
   (cond
     [(doodad-selected? sq)
      (draw-doodad-with-dot sq (draw-square-helper sq scene) dotx doty)]
-    [else (draw-square-helper sq scene)])
-  )
+    [else (draw-square-helper sq scene)]))
 
 ;; draw-doodad-with-dot: Doodad Scene Integer Integer
 ;; GIVEN: A Doodad, a Scene to paint on, coordinates of black dot
