@@ -119,9 +119,9 @@ flapjacks-in-skillet)
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;
-;;   OLD  ;;
-;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;
+;;     OLD      ;;
+;;;;;;;;;;;;;;;;;;
 
 ;; flapjacks-in-skillet : ListOfFlapjack Skillet -> ListOfFlapjack
 ;; GIVEN: a list of Flapjacks and a skillet
@@ -147,9 +147,9 @@ flapjacks-in-skillet)
 ;     (cons (first jack-list) (flapjacks-in-skillet (rest jack-list) skill))]
 ;    [else (flapjacks-in-skillet (rest jack-list) skill)]))
 
-;;;;;;;;;;;;
-;;   NEW  ;;
-;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;
+;;     NEW      ;;
+;;;;;;;;;;;;;;;;;;
 
 ;; flapjacks-in-skillet : ListOfFlapjack Skillet -> ListOfFlapjack
 ;; GIVEN: a list of Flapjacks and a skillet
@@ -179,9 +179,9 @@ flapjacks-in-skillet)
              (fits? fj skill)) jack-list)]))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;
-;;   OLD  ;;
-;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;
+;;     OLD      ;;
+;;;;;;;;;;;;;;;;;;
 
 ;; find-overlapping-flapjack-list : ListOfFlapjack ListOfFlapjack ->
 ;;       ListOfListOfFlapjack
@@ -222,9 +222,9 @@ flapjacks-in-skillet)
 ;              (rest jack-list) complete-jack-list)) ]))
 
 
-;;;;;;;;;;;;
-;;   NEW  ;;
-;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;
+;;     NEW      ;;
+;;;;;;;;;;;;;;;;;;
 
 ;; overlapping-flapjacks : ListOfFlapjack -> ListOfListOfFlapjack
 ;; GIVEN: a list of Flapjacks
@@ -338,9 +338,10 @@ flapjacks-in-skillet)
              (overlap? fj jack)) jack-list)]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;
-;;   OLD   ;;
-;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;
+;;     OLD      ;;
+;;;;;;;;;;;;;;;;;;
 
 ;; find-non-overlapping-flapjacks :
 ;;     ListOfFlapjack ListOfFlapjack -> ListOfFlapjack
@@ -379,9 +380,9 @@ flapjacks-in-skillet)
 ;             (not (has-overlapping-flapjacks? fj complete-jack-list)))
 ;           jack-list)]))
 
-;;;;;;;;;;;;;
-;;   NEW   ;;
-;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;
+;;     NEW      ;;
+;;;;;;;;;;;;;;;;;;
 
 ;; non-overlapping-flapjacks : ListOfFlapjack -> ListOfFlapjack
 ;; GIVEN: a list of Flapjacks
