@@ -714,8 +714,8 @@
    -12 "should change velocity")
 
   (check-equal?
-   (next-y (make-doodad TYPE-STAR 500 -80 10 12 "Green" true 0 0 0)))
-  68 "should change velocity"
+   (next-y (make-doodad TYPE-STAR 500 -80 10 12 "Green" true 0 0 0))
+  68 "should change velocity")
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -836,18 +836,8 @@
 (define (get-oldest-doodad-age doods)
   (cond
     [(empty? doods) empty]
-    [else (doodad-age (first (insertion-sort > doods)))]))
+    [else (first (sort (map (lambda (dood) (doodad-age dood)) doods) >))]))
 
-;; 
-(define (insertion-sort > xs)
-  (cond
-    [(empty? xs) xs]
-    [else (insert > (first xs) (insertion-sort > (rest xs)))]))
-
-(define (insert > x xs)
-  (cond [(empty? xs) (list x)]
-        [(> (doodad-age x) (doodad-age (first xs))) (cons x xs)]
-        [else (cons (first xs) (insert > x (rest xs)))]))
 
 ;; world-with-paused-toggled
 ;; GIVEN:a World
@@ -989,7 +979,8 @@
                   (doodad-with-next-color dood) dood))  doods)]))
 (begin-for-test
   (check-equal? (find-selected-doodads '()) '() "should handle empty")
-  (check-equal? (remove-oldest-doodad '()) '() "should handle empty"))
+  (check-equal? (remove-oldest-doodad '()) '() "should handle empty")
+  (check-equal? (get-oldest-doodad-age '()) '() "should handle empty"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                        Mouse event handling                              ;;
