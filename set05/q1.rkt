@@ -404,6 +404,7 @@
 ;;	 (list (make-doodad "radial-star" 125 120 10 12 "Gold" #false 0 0 1))
 ;;	 (list (make-doodad "square" 460 350 -13 -9 "Gray" #false 0 0 1))
 ;;	 #true 0 0 10 12 -13 -9)
+;; STRATEGY : Use template for World on w
 (define (get-paused-world w)
   (make-world
    (increse-doodad-age (world-doodads-star w))
@@ -437,6 +438,7 @@
 ;; (make-doodad-with-age-plus-1
 ;;     (make-doodad "radial-star" 500 80 -10 12 "Green" #false 0 0 1)) =>
 ;; (make-doodad "radial-star" 500 80 -10 12 "Green" #false 0 0 2)
+;; STRATEGY :Use template for Doodad on dood
 (define (make-doodad-with-age-plus-1 dood)
   (make-doodad
       (doodad-type dood)
@@ -448,7 +450,7 @@
       (doodad-selected? dood)
       (doodad-x-offset dood)
       (doodad-y-offset dood)
-      (+ (doodad-age dood) 1)))
+      (+ (doodad-age dood) 1))) 
 
 ;; doodads-after-tick : ListOfDooodads -> ListOfDooodads
 ;; GIVEN: a ListOfDoodads
@@ -849,12 +851,12 @@
 ;; STRATEGY: Use HOF filter on doods
 (define (remove-oldest-doodad doods)
   (filter
-           ;; Doodad -> Boolean
-           ;; GIVEN: a Doodad
-           ;; RETURNS: the given Doodad if its age is lesser than age of oldest
-           ;;          Doodad
-           (lambda (dood)
-             ( < (doodad-age dood) (get-oldest-doodad-age doods))) doods))
+   ;; Doodad -> Boolean
+   ;; GIVEN: a Doodad
+   ;; RETURNS: the given Doodad if its age is lesser than age of oldest
+   ;;          Doodad
+   (lambda (dood)
+     ( < (doodad-age dood) (get-oldest-doodad-age doods))) doods))
 
 ;; remove-oldest-doodads-helper: ListOfDoodad Integer -> ListOfDoodad
 ;; GIVEN: a ListOfDoodad and age of oldest Doodad
@@ -1033,7 +1035,7 @@
 ;; EXAMPLE:
 ;; (doodad-with-next-color DEFAULT-STAR) =>
 ;; (make-doodad "radial-star" 125 120 10 12 "Green" #false 0 0 0)
-;; STRATEGY:  Use template for Doodad on dood
+;; STRATEGY: Use template for Doodad on dood
 (define (doodad-with-next-color dood)
   (make-doodad
       (doodad-type dood)
@@ -1080,13 +1082,13 @@
 ;; STRATEGY: Use HOF map on doods
 (define (find-selected-doodads doods)
   (map
-           ;; Doodad -> Doodad
-           ;; GIVEN: a Doodad
-           ;; RETURNS: the given Doodad if it is selected
-           (lambda (dood)
-                 (if
-                  (doodad-selected? dood)
-                  (doodad-with-next-color dood) dood))  doods))
+   ;; Doodad -> Doodad
+   ;; GIVEN: a Doodad
+   ;; RETURNS: the given Doodad if it is selected
+   (lambda (dood)
+     (if
+      (doodad-selected? dood)
+      (doodad-with-next-color dood) dood))  doods))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                        Mouse event handling                              ;;
@@ -1393,6 +1395,8 @@
 ;           dotx doty) ]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;             HELPER FUNCTIONS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; place-star : Doodad Scene Integer Integer -> Scene
 ;; GIVEN: a Doodad and Scene on which this Doodad is to be drawn and
 ;;        x,y coordinates of dot to be displayed on Doodad 
@@ -1456,9 +1460,10 @@
 ;; STRATEGY: Use template for Doodad on star
 (define (draw-star-helper star scene)
   (place-image
-    (radial-star 8 10 50 MODE (doodad-color star))
-    (doodad-x star) (doodad-y star)
-    scene))
+   (radial-star STAR-POINT STAR-INNER-RADIUS STAR-OUTTER-RADIUS MODE
+                (doodad-color star))
+   (doodad-x star) (doodad-y star)
+   scene))
 
 ;; draw-square-helper: Doodad Scene -> Scene
 ;; GIVEN: A square Doodad and a Scene
@@ -1471,7 +1476,7 @@
 ;; STRATEGY: Use template for Doodad on sq
 (define (draw-square-helper sq scene)
   (place-image
-    (square 71 MODE (doodad-color sq))
+    (square SQUARE-SIDE MODE (doodad-color sq))
     (doodad-x sq) (doodad-y sq)
     scene))
 
