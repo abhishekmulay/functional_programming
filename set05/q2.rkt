@@ -10,6 +10,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Design a system for checking if Flapjacks fit inside Skillets
+;; Refactor using generalization and use Higher Order Functions
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                      Flapjacks and Skillets                              ;; 
@@ -70,7 +71,7 @@ flapjacks-in-skillet)
 ;;                (lof-fn (rest lst)))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ListOfFlapjack
+;; ListOfListOfFlapjack
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;  A ListOfListOfFlapjack (LOLOF) is either:
@@ -142,9 +143,12 @@ flapjacks-in-skillet)
   (cond
     [(empty? jack-list) empty]
     [else (filter
+           ;; lambda : Flapjack -> Flapjack
+           ;; GIVEN: a Flapjack
+           ;; RETURNS: the given Flapjack if it fits entirely in skill
            (lambda (fj)
              (fits? fj skill)) jack-list)]))
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fits? : Flapjack Skillet -> Boolean
 ;; GIVEN: a Flapjack and a Skillet
 ;; RETURNS: whether the Flapjack fits in the given Skillet
@@ -152,7 +156,7 @@ flapjacks-in-skillet)
 ;; (fits? (make-flapjack 0 0 5)  (make-skillet 0 0 10)) = true
 ;; (fits? (make-flapjack 1 1 5)  (make-skillet 1 1 10)) = true
 ;; (fits? (make-flapjack 1 1 15)  (make-skillet 1 1 10)) = false
-;; STRATEGY: Use template for Flapjack on jack
+;; STRATEGY: Use template for Flapjack on jack and Skillet on skill
 
 ;; If distance between centers of both Flapjack and skillet is less than
 ;; radius of skillet then the Flapjack fits in given skillet
@@ -168,8 +172,8 @@ flapjacks-in-skillet)
 ;; GIVEN: x and y coordinates of two points 
 ;; RETURNS: Sqaure of distance between two points
 ;; EXAMPLES:
-;; (distance-sq 0 0 5 5) = 50
-;; (distance-sq 0 0 1 1) = 2
+;; (distance-sq 0 0 1 1) => #i1.4142135623730951
+;; (distance-sq 0 0 0 0) = 0
 ;; STRATEGY: Combine simpler functions
 (define (distance-sq x1 y1 x2 y2)
   (sqrt
@@ -205,16 +209,16 @@ flapjacks-in-skillet)
 ;;         (list (make-flapjack  20  4 4.2)))
 ;;
 ;; STRATEGY:Use template for ListOfFlapjack on jack-list
-;; (define (overlapping-flapjacks jack-list)
-;;  (find-overlapping-flapjack-list jack-list jack-list))
-
 (define (overlapping-flapjacks jack-list)
   (cond
     [(empty? jack-list) empty]
     [else (map
+           ;; lambda : Flapjack -> Flapjack
+           ;; GIVEN: a Flapjack
+           ;; RETURNS: Flapjacks that overlap with given Flapjack fj
            (lambda (fj)
              (overlapping-flapjacks-for-flapjack jack-list fj)) jack-list)]))
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; find-overlapping-flapjack-list : ListOfFlapjack ListOfFlapjack ->
 ;;       ListOfListOfFlapjack
 ;; GIVEN: two lists of Flapjacks
@@ -295,9 +299,13 @@ flapjacks-in-skillet)
   (cond
     [(empty? jack-list) empty]
     [else (filter
+           ;; lambda : Flapjack -> Flapjack
+           ;; GIVEN: a Flapjack
+           ;; RETURNS: the given Flapjack if it overlaps
+           ;;          with any other Flapjack in jack-list
            (lambda (fj)
              (overlap? fj jack)) jack-list)]))
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; overlap? : Flapjack Flapjack -> Boolean
 ;; GIVEN: Two flapjacks
 ;; RETURNS: weather the flapjacks overlap/intersect each other
@@ -320,28 +328,6 @@ flapjacks-in-skillet)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; non-overlapping-flapjacks : ListOfFlapjack -> ListOfFlapjack
-;; GIVEN: a list of Flapjacks
-;; RETURNS: a list of the Flapjacks in the given list that
-;;     do not overlap with any other Flapjacks in the list
-;; EXAMPLES:
-;;   (non-overlapping-flapjacks empty)  =>  empty
-;;   (non-overlapping-flapjacks
-;;    (list (make-flapjack -10  2 5)
-;;          (make-flapjack  -3  0 4)
-;;          (make-flapjack   4 -2 4.6)
-;;          (make-flapjack 7.2  6 5)
-;;          (make-flapjack  20  4 4.2)))
-;;   =>
-;;   (list (make-flapjack  20  4 4.2))
-(define (non-overlapping-flapjacks jack-list)
-  (cond
-    [(empty? jack-list) empty]
-    [else (filter
-           (lambda (fj)
-             (not (has-overlapping-flapjacks? fj jack-list))) jack-list)]))
-
-;;helper function
 ;; find-non-overlapping-flapjacks :
 ;;     ListOfFlapjack ListOfFlapjack -> ListOfFlapjack
 ;; GIVEN: two lists of Flapjacks
@@ -378,6 +364,32 @@ flapjacks-in-skillet)
 ;           (lambda (fj)
 ;             (not (has-overlapping-flapjacks? fj complete-jack-list)))
 ;           jack-list)]))
+
+;; non-overlapping-flapjacks : ListOfFlapjack -> ListOfFlapjack
+;; GIVEN: a list of Flapjacks
+;; RETURNS: a list of the Flapjacks in the given list that
+;;     do not overlap with any other Flapjacks in the list
+;; EXAMPLES:
+;;   (non-overlapping-flapjacks empty)  =>  empty
+;;   (non-overlapping-flapjacks
+;;    (list (make-flapjack -10  2 5)
+;;          (make-flapjack  -3  0 4)
+;;          (make-flapjack   4 -2 4.6)
+;;          (make-flapjack 7.2  6 5)
+;;          (make-flapjack  20  4 4.2)))
+;;   =>
+;;   (list (make-flapjack  20  4 4.2))
+(define (non-overlapping-flapjacks jack-list)
+  (cond
+    [(empty? jack-list) empty]
+    [else (filter
+           ;; lambda : Flapjack -> Flapjack
+           ;; GIVEN: a Flapjack
+           ;; RETURNS: the given Flapjack if it does not have any
+           ;;          overlapping Flapjacks
+           (lambda (fj)
+             (not (has-overlapping-flapjacks? fj jack-list))) jack-list)]))
+
 
 ;; has-overlapping-flapjacks? : Flapjack ListOfFlapjack -> Boolean
 ;; GIVEN: a Flapjack and a list of Flapjacks
