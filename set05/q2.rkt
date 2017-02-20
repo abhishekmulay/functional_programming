@@ -131,7 +131,7 @@ flapjacks-in-skillet)
 ;;         (make-flapjack   4 -2 4.6)
 ;;         (make-flapjack 7.2  6 5))
 ;;
-;; STRATEGY: Use template for ListOfFlapjack on jack-list
+;; STRATEGY: Use template for ListOfFlapjack on jack-list   <--------------------------------- HOF
 ;(define (flapjacks-in-skillet jack-list skill)
 ;  (cond
 ;    [(empty? jack-list) empty]
@@ -208,7 +208,7 @@ flapjacks-in-skillet)
 ;;               (make-flapjack 7.2  6 5))
 ;;         (list (make-flapjack  20  4 4.2)))
 ;;
-;; STRATEGY:Use template for ListOfFlapjack on jack-list
+;; STRATEGY:Use template for ListOfFlapjack on jack-list   <------------------------------ HOF
 (define (overlapping-flapjacks jack-list)
   (cond
     [(empty? jack-list) empty]
@@ -294,7 +294,7 @@ flapjacks-in-skillet)
 ;     (cons (first jack-list)
 ;           (overlapping-flapjacks-for-flapjack (rest jack-list) jack))]
 ;    [else (overlapping-flapjacks-for-flapjack (rest jack-list) jack)]))
-
+;                               <---------------------------------------------------------- HOF for this
 (define (overlapping-flapjacks-for-flapjack jack-list jack)
   (cond
     [(empty? jack-list) empty]
@@ -344,7 +344,7 @@ flapjacks-in-skillet)
 ;;   =>
 ;;   (list (make-flapjack  20  4 4.2))
 ;;
-;; STRATEGY: Use template for ListOfFlapjacks on jack-list
+;; STRATEGY: Use template for ListOfFlapjacks on jack-list   <---------------------------------  HOF
 ;; HALTING-MEASURE: length(ListOfFlapjack)
 ;(define (find-non-overlapping-flapjacks jack-list complete-jack-list)
 ;  (cond
