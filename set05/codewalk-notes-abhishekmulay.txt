@@ -1,0 +1,33 @@
+TA-1 Name:- Wenjun
+TA-2 Name:- Sankar
+
+
+
+
+Student1 CCIS ID:- abhishekmulay
+
+Question 1 :-
+
+Design Grade:- A 
+TA Comments on Design:-
+> Contract of one functions doesnot match the fn name.
+> could have used a folder than sorting and finding the age.
+> color name can be generalized than naming as GOLD, BLACK etc.
+> two functions have same contract and purpose statement.
+> world-after-paused-fn and helper fns  purpose statement needs to be corrected as discussed.
+
+
+Presentation Grade:- A
+TA Comments on Presentation:-
+> was able to understand the mistakes when asked.
+> answered all questions clearly.
+
+Question 2 :-
+
+Design Grade:- A
+TA Comments on Design:-
+> Good
+
+Presentation Grade:- A
+TA Comments on Presentation:-
+> Good
