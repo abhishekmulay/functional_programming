@@ -1,3 +1,4 @@
 pdp-abhishekmulay
-q1-bb.rkt: 4/44 tests passed -> 1/15 correct
+q1.rkt: -3 manual intervention to fix typo
+q1-bb.rkt: 41/44 tests passed -> 10/15 correct
 q2-bb.rkt: 9/11 tests passed -> 12/15 correct
