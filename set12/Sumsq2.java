@@ -8,7 +8,7 @@
 //
 //     java Sumsq N ITERS
 
-class Sumsq {
+class Sumsq2 {
 
     public static void main (String[] args) {
 	long n = Long.parseLong (args[0]);
@@ -18,16 +18,16 @@ class Sumsq {
 
     // Modify this method to use loop syntax instead of tail recursion.
 
-    static long mainLoop (long n, long iters) {
-	if (iters == 0)
-	    return 0-1;
-	else if (iters == 1)
-	    return sumSquares (n);
-	else {
-	    sumSquares (n);
-	    return mainLoop (n, iters - 1);
+	static long mainLoop(long n, long iters) {
+		if (iters == 0)
+			return 0 - 1;
+		else if (iters == 1)
+			return sumSquares(n);
+		else {
+			sumSquares(n);
+			return mainLoop(n, iters - 1);
+		}
 	}
-    }
 
     // Returns alternating sum of the first n squares.
 
