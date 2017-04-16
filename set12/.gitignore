@@ -18,6 +18,11 @@ compiled
 
 random-work
 
+.out
+.idea
+
+.idea/*
+
 ##################################################
 *.iml
 # Compiled class file
@@ -43,7 +48,6 @@ random-work
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-.idea
 idea	
 
 ## File-based project format:
@@ -70,3 +74,6 @@ crashlytics-build.properties
 fabric.properties
 
 pdp-abhishekmulay-nbreuer.iml
+doc/UserManual/
+examples/
+lib/Standard/originals/
