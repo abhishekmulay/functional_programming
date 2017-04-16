@@ -5,7 +5,7 @@ Manufacturer, model, and year manufactured: Apple Inc., MacBook Pro (Retina, 13-
 
 Processor: 2.7 GHz Intel Core i5
 
-Clock speed: 
+Clock speed: 2.7 GHz
 
 Size of main memory: 8 GB 1867 MHz DDR3
 
@@ -19,28 +19,28 @@ doesn't work, or returns an incorrect result, leave those
 timings blank.
 
     Benchmark:    java Programs fib.ps11 35 1
-    Timing:       
+    Timing:       8.60s
 
     Benchmark:    larceny --r7rs --program fib.ps11.scm -- 35 100
-    Timing:       
+    Timing:       14.51s
 
     Benchmark:    java Fib 35 100
-    Timing:       
+    Timing:       0.04s
 
 For each of the following, write down the largest power of 10
 you can substitute for N without getting a stack overflow:
 
     Benchmark:    java Programs sumsq.ps11 N 1
-    Largest N:    
+    Largest N:    3
 
     Benchmark:    java Sumsq N 1
-    Largest N:    
+    Largest N:    4
 
     Benchmark:    java -Xss100M Programs sumsq.ps11 N 1
-    Largest N:    
+    Largest N:    5
 
     Benchmark:    java -Xss100M Sumsq N 1
-    Largest N:    
+    Largest N:    6
 
 For each of the following, report the elapsed (not cpu) time,
 in seconds, on your benchmark machine.  If a benchmark doesn't
@@ -48,16 +48,16 @@ work, or encounters a stack overflow, or returns a wrong answer,
 leave those timings blank.
 
     Benchmark:    java -Xss100M Programs sumsq.ps11 10000 100000
-    Timing:       
+    Timing:       350.62s
 
     Benchmark:    larceny --r7rs --program sumsq.ps11.scm -- 10000 100000
-    Timing:       
+    Timing:       4.26s
 
     Benchmark:    java -Xss100M Sumsq 10000 100000
-    Timing:       
+    Timing:       1.84s
 
     Benchmark:    java Sumsq2 10000 100000
-    Timing:       
+    Timing:       1.97s
 
 
 Question 2
@@ -67,34 +67,34 @@ For each of the following, report the elapsed (not cpu) time,
 in seconds, as shown in the output on your benchmark machine.
 
     Benchmark:    gcc gcbench.c; ./a.out
-    Timing:       
+    Timing:       2.235s
 
     Benchmark:    java GCBench
-    Timing:       
+    Timing:       0.276s
 
     Benchmark:    java -Xmx64M GCBench
-    Timing:       
+    Timing:       0.282s
 
     Benchmark:    larceny --r7rs --program gcbenchJ.scm
-    Timing:       
+    Timing:       1.0s
 
 For each of the following, report the elapsed (not cpu) time,
 in seconds, as shown in the output on your benchmark machine.
 
     Benchmark:    gcc permNKL.c; ./a.out
-    Timing:       
+    Timing:       44.096
 
-    Benchmark:    java permNKL
-    Timing:       
+    Benchmark:    java PermNKL
+    Timing:       20.798
 
-    Benchmark:    java -Xmx500M permNKL
-    Timing:       
+    Benchmark:    java -Xmx500M PermNKL
+    Timing:       45.951
 
     Benchmark:    larceny --r7rs --program permJ.scm
-    Timing:       
+    Timing:       26.0
 
     Benchmark:    larceny --stopcopy --load 4 --r7rs --program permJ.scm
-    Timing:       
+    Timing:       14.0
 
 To obtain a succinct description of the options used above, type
 

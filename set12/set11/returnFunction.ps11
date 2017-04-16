@@ -1,0 +1,8 @@
+getLambda(k)
+    λ
+
+getFunction(k)
+    doSomething
+
+doSomething(k)
+    2 > 3
