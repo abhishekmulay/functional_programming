@@ -134,6 +134,5 @@ management is not only dependant on running time, following points are also cons
 2) Does the language provide tools for debugging memory leaks or similar problems
 3) Does the application we are building need the maximum speed we can get at a risk of possible memory leaks
    or are we willing to sacrifice and have an application that has (slightly?) more running time but is stable.
-4) What do developers prefer
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
