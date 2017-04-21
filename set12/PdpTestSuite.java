@@ -1,3 +1,8 @@
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -38,6 +43,38 @@ public class PdpTestSuite {
         testCases.add(new TestCase<T>(name, actualFn, expected, equalsFn, timeoutSeconds));
     }
 
+    public void addExternalTestCase(String name, String cmd, String expectedOutput) {
+        addExternalTestCase(name, cmd, expectedOutput, defaultTimeoutSeconds);
+    }
+
+    public void addExternalTestCase(String name, String cmd, String expectedOutput, int timeoutSeconds) {
+        int fakeTimeoutSeconds = timeoutSeconds + 10;
+        testCases.add(new TestCase<String>(name, () -> {
+            ProcessBuilder pb = new ProcessBuilder(
+                    "/usr/bin/timeout", "-k", "1",
+                    Integer.toString(timeoutSeconds),
+                    "/bin/bash", "-c", cmd);
+            pb.redirectErrorStream(true);
+            Process proc = null;
+            try {
+                proc = pb.start();
+                int r = proc.waitFor();
+                if (r == 124 || r == 137) {
+                    throw new RuntimeException("timed out");
+                }
+                BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+                String output = in.readLine();
+                in.close();
+                return output;
+            } catch (IOException | InterruptedException e) {
+                if (proc != null) {
+                    proc.destroyForcibly();
+                }
+                throw new RuntimeException(e);
+            }
+        }, expectedOutput, null, fakeTimeoutSeconds));
+    }
+
     public void runTests() {
         ExecutorService executor = Executors.newCachedThreadPool();
         int passes = 0, failures = 0, errors = 0;
@@ -53,14 +90,13 @@ public class PdpTestSuite {
             }
         }
         executor.shutdownNow();
-        System.out.println("____________________________________________________________");
-        System.out.format("\n%d success(es) %d failure(s) %d error(s) %d test(s) run",
+        System.out.format("%d success(es) %d failure(s) %d error(s) %d test(s) run",
                 passes, failures, errors, testCases.size());
     }
 
     private int defaultTimeoutSeconds;
     private List<TestCase<?>> testCases;
-    
+
     private static enum TestResult { PASS, FAIL, ERROR }
 
     private static class TestCase<T> {
@@ -93,7 +129,7 @@ public class PdpTestSuite {
                 } else if (equalsFn != null) {
                     passed = equalsFn.apply(actual, expected);
                 } else {
-                    passed = actual.equals(expected);
+                    passed = expected.equals(actual);
                 }
                 if (passed) {
                     System.out.println("PASS");
