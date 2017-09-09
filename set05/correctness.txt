@@ -1,3 +1,0 @@
-pdp-abhishekmulay
-q1-bb.rkt: 44/44 tests passed -> 15/15 correct
-q2-bb.rkt: 11/11 tests passed -> 15/15 correct

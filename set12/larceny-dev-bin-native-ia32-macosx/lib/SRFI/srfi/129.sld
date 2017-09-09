@@ -1,5 +1,0 @@
-(define-library (srfi 129)
-  (export char-title-case? char-titlecase string-titlecase)
-  (import (scheme base))
-  (import (rnrs unicode))
-  )
